@@ -40,6 +40,7 @@
                 <div class="font-dancing text-4xl font-bold">my Batik</div>
                 <nav class="hidden md:flex space-x-8">
                     <a href="/" class="font-semibold text-gray-700 hover:text-black transition">Home</a>
+                    <a href="{{ route('gallery.index') }}" class="font-semibold transition {{ request()->is('gallery') ? 'text-black border-b-2 border-black' : 'text-gray-700 hover:text-black' }}">Gallery</a>
                     @auth
                     <a href="/history" class="font-semibold text-gray-700 hover:text-black transition">Orders</a>
                     @else
@@ -56,7 +57,6 @@
                         <button @click="dropdownOpen = !dropdownOpen" class="flex items-center space-x-3">
                             <span class="font-semibold text-gray-700 hover:text-black transition">{{ Auth::user()->name }}</span>
                             <div class="w-8 h-8">
-                                <!-- User Icon SVG -->
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
                                 </svg>
@@ -171,35 +171,7 @@
         </div>
     </footer>
 
-    <script>
-    const logoutLink = document.getElementById('logout-link');
-    const logoutForm = document.getElementById('logout-form');
-    const logoutModal = document.getElementById('logout-modal');
-    const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
-    const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
-
-    if (logoutLink && logoutForm && logoutModal && confirmLogoutBtn && cancelLogoutBtn) {
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            logoutModal.classList.remove('hidden');
-        });
-
-        confirmLogoutBtn.addEventListener('click', () => {
-            logoutForm.submit();
-        });
-
-        cancelLogoutBtn.addEventListener('click', () => {
-            logoutModal.classList.add('hidden');
-        });
-
-        // Also allow closing the modal by clicking the background overlay
-        logoutModal.addEventListener('click', (e) => {
-            if (e.target.id === 'logout-modal') {
-                logoutModal.classList.add('hidden');
-            }
-        });
-    }
-    </script>
-
+    <x-logout-modal />
+    
 </body>
 </html>

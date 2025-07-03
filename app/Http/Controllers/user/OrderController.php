@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\RiwayatPesanan;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class OrderController extends Controller
 {
@@ -15,7 +17,7 @@ class OrderController extends Controller
     {
         $validatedData = $request->validate([
             'size' => 'required|in:XS,S,M,L,XL',
-            'design_file' => 'required|image|mimes:png|max:2048', // 2MB Max
+            'design_file' => 'required|image|mimes:png,jpeg,jpg|max:2048', // 2MB Max
         ]);
 
         $designPath = $request->file('design_file')->store('designs', 'public');
@@ -64,26 +66,34 @@ class OrderController extends Controller
         ]);
 
         $user = Auth::user();
+        $order = null;
 
-        $order = Order::create([
-            'id_user'        => $user->id,
-            'email'          => $user->email,
-            'nama'           => $validatedCheckoutData['first_name'] . ' ' . $validatedCheckoutData['last_name'],
-            'alamat'         => $validatedCheckoutData['street_address'],
-            'no_telepon'     => $validatedCheckoutData['phone'],
-            'ukuran'         => $orderDetails['ukuran'],
-            'desain'         => $orderDetails['desain'],
-            'metode_bayar'   => $validatedCheckoutData['payment_method'],
-            'tanggal_pesan'  => now(),
-            'status'         => 'Pending',
-            'nota'           => $validatedCheckoutData['additional_note'],
-            'total'          => 300000,
-        ]);
+        try {
+            DB::transaction(function () use ($validatedCheckoutData, $orderDetails, $user, &$order) {
+                $order = Order::create([
+                    'id_user'       => $user->id,
+                    'email'         => $user->email,
+                    'nama'          => $validatedCheckoutData['first_name'] . ' ' . $validatedCheckoutData['last_name'],
+                    'alamat'        => $validatedCheckoutData['street_address'],
+                    'no_telepon'    => $validatedCheckoutData['phone'],
+                    'ukuran'        => $orderDetails['ukuran'],
+                    'desain'        => $orderDetails['desain'],
+                    'metode_bayar'  => $validatedCheckoutData['payment_method'],
+                    'tanggal_pesan' => now(),
+                    'status'        => 'Pending',
+                    'nota'          => $validatedCheckoutData['additional_note'],
+                    'total'         => 300000,
+                ]);
 
-        RiwayatPesanan::create([
-                    'user_id' => $user->id,
+                RiwayatPesanan::create([
+                    'user_id'  => $user->id,
                     'order_id' => $order->id_pesanan,
                 ]);
+            });
+
+        } catch (Exception $e) {
+            return back()->with('error', 'An unexpected error occurred. Please try again.')->withInput();
+        }
 
         $request->session()->forget('order_details');
 
