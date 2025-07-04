@@ -23,65 +23,23 @@
         }
     </script>
     <style>
-        .font-dancing {
-            font-family: 'Dancing Script', cursive;
-        }
-        .focus\:ring-cyan-400:focus {
-            --tw-ring-color: #22d3ee;
-        }
-        .text-cyan-600 {
-            color: #0891b2;
-        }
-        .modal-content {
-            transition: all 0.3s ease-out;
-        }
-        .modal-container {
-            transition: opacity 0.3s ease;
-        }
-        body.modal-active {
-            overflow: hidden;
-        }
+        .font-dancing { font-family: 'Dancing Script', cursive; }
+        .focus\:ring-cyan-400:focus { --tw-ring-color: #22d3ee; }
+        .text-cyan-600 { color: #0891b2; }
+        .modal-content { transition: all 0.3s ease-out; }
+        .modal-container { transition: opacity 0.3s ease; }
+        body.modal-active { overflow: hidden; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800 pb-28 style="padding-bottom: 0px;">
+<body class="bg-gray-100 font-sans text-gray-800 pb-28">
 
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
-        
-            <div class="flex items-center gap-x-12">
-                <div class="font-dancing text-4xl font-bold">my Batik</div>
-                <nav class="hidden md:flex space-x-8">
-                    <a href="/home" class="font-semibold text-gray-700 hover:text-black transition">Home</a>
-                    <a href="/history" class="font-semibold text-gray-700 hover:text-black transition">Orders</a>
-                </nav>
-            </div>
-            
-            <div class="flex items-center space-x-3">
-                <div x-data="{ dropdownOpen: false }" class="relative">
-                    <button @click="dropdownOpen = !dropdownOpen" class="flex items-center space-x-3">
-                        <span class="font-semibold text-gray-700 hover:text-black transition">{{ Auth::user()->name }}</span>
-                        <div class="w-8 h-8">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                    </button>
-                    <div x-show="dropdownOpen" @click.away="dropdownOpen = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
-                        <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                        <form method="POST" action="{{ route('logout') }}" id="logout-form">
-                            @csrf
-                            <a href="#" id="logout-link" class="block px-4 py-2 text-sm font-semibold text-red-600 hover:text-red-800 transition">Logout</a>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
+    <x-header />
+    
     <main class="container mx-auto py-8 md:py-12 px-4">
         <form id="checkout-form" method="POST" action="{{ route('checkout.store') }}">
             @csrf 
             <div class="flex flex-col lg:flex-row gap-8 items-start">
+                
                 <div class="w-full lg:w-2/3 bg-white p-6 md:p-8 rounded-xl shadow-md">
                     <h2 class="text-2xl font-semibold mb-6">Contact Information</h2>
                     <div class="space-y-5">
@@ -107,7 +65,7 @@
                             <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                             <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition" required>
                         </div>
-                         <input type="hidden" id="additional-note" name="additional_note">
+                        <input type="hidden" id="additional-note" name="additional_note">
                         <div>
                             <button type="button" id="add-note-btn" class="mt-2 bg-white border-2 border-cyan-500 text-cyan-500 font-semibold py-2 px-5 rounded-lg hover:bg-cyan-500 hover:text-white transition-all duration-300">Add Note</button>
                         </div>
@@ -122,24 +80,52 @@
                             <img src="{{ $uploadedBatikUrl ?? 'https://placehold.co/80x80/e0e0e0/757575?text=No+Image' }}" alt="Custom Batik Design" class="w-20 h-20 rounded-lg border p-1 mr-4 object-cover">
                             <div>
                                 <h3 class="font-semibold text-lg">Custom Batik</h3>
-                                <p class="text-gray-600 text-sm">Size: {{ session('order_details.ukuran')}}</p>
+                                <p class="text-gray-600 text-sm">Size: {{ session('order_details.ukuran') ?? 'N/A' }}</p>
                             </div>
                         </div>
 
                         <div class="space-y-3 text-gray-700">
-                            <div class="flex justify-between">
-                                <span>Product Price</span>
-                                <span class="font-semibold">Rp. 250.000</span>
+                            <div class="flex justify-between text-gray-700">
+                        <span>Product Price</span>
+                        <span class="font-medium">Rp. 250.000</span>
+                    </div>
+                    <div class="flex justify-between text-gray-700">
+                        <span>Customization</span>
+                        <span class="font-medium">Rp. 50.000</span>
+                    </div>
+                            @if($discountAmount > 0)
+                            <div class="flex justify-between text-green-600 font-semibold">
+                                <span>Discount ({{ session('promo.code') }})</span>
+                                <span>- Rp. {{ number_format($discountAmount, 0, ',', '.') }}</span>
                             </div>
-                            <div class="flex justify-between">
-                                <span>Customization</span>
-                                <span class="font-semibold">Rp. 50.000</span>
-                            </div>
+                            @endif
                         </div>
+
                         <div class="border-t my-4"></div>
+
                         <div class="flex justify-between font-bold text-lg mb-6">
                             <span>Total</span>
-                            <span>Rp. 300.000</span>
+                            <span>Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span>
+                        </div>
+
+                        <div class="mb-4">
+                            @if (session()->has('promo'))
+                                <div class="flex justify-between items-center bg-green-100 text-green-800 p-3 rounded-lg">
+                                    <p>Promo applied: <span class="font-bold">{{ session('promo.code') }}</span></p>
+                                    <a href="{{ route('promo.remove') }}" class="font-semibold text-sm hover:underline">Remove</a>
+                                </div>
+                            @else
+                                <div class="flex gap-2">
+                                    <input type="text" id="promo-code-input" placeholder="Enter Promo Code" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 transition">
+                                    <button type="button" id="apply-promo-btn" class="bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-all duration-300">Apply</button>
+                                </div>
+                            @endif
+
+                            @if ($errors->has('promo_code'))
+                                <p class="mt-2 text-sm text-red-600">{{ $errors->first('promo_code') }}</p>
+                            @elseif (session('success'))
+                                <p class="mt-2 text-sm text-green-600">{{ session('success') }}</p>
+                            @endif
                         </div>
 
                         <h3 class="text-lg font-semibold mb-4">Payment Methods</h3>
@@ -157,7 +143,7 @@
                         <button type="submit" class="w-full bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg mt-6 hover:bg-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg">
                             Place Order
                         </button>
-                        <a href="/ukuran" class="block text-center mt-4 text-sm text-cyan-600 hover:underline font-semibold">Back to measurement</a>
+                        <a href="{{ route('ukuran') }}" class="block text-center mt-4 text-sm text-cyan-600 hover:underline font-semibold">Back to measurement</a>
                     </div>
                 </div>
             </div>
@@ -165,7 +151,6 @@
     </main>
 
     <x-logout-modal />
-
     <div id="note-modal" class="modal-container fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-content bg-white w-full max-w-md p-6 rounded-xl shadow-lg transform -translate-y-10 opacity-0">
             <div class="flex justify-between items-center mb-4">
@@ -178,7 +163,6 @@
             </div>
         </div>
     </div>
-
     <div id="bank-transfer-modal" class="modal-container fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none" style="background-color: rgba(0,0,0,0.6);">
         <div class="modal-content bg-white w-full max-w-lg p-8 rounded-2xl shadow-lg transform -translate-y-10 opacity-0">
             <div class="flex justify-between items-start mb-4">
@@ -192,12 +176,11 @@
                 <div class="flex justify-between"><span class="text-gray-500">Account Name:</span><span class="font-semibold">Designer Batik</span></div>
             </div>
             <div class="flex justify-between items-center border-t pt-6">
-                 <p class="text-red-500 font-semibold text-sm">For safety reason, this is the only time you will<br>see this information</p>
-                 <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600">Rp. 300.000</span></p>
+               <p class="text-red-500 font-semibold text-sm">For safety reason, this is the only time you will<br>see this information</p>
+               <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span></p>
             </div>
         </div>
     </div>
-
     <div id="qris-modal" class="modal-container fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none" style="background-color: rgba(0,0,0,0.6);">
         <div class="modal-content bg-white w-full max-w-lg p-8 rounded-2xl shadow-lg transform -translate-y-10 opacity-0">
             <div class="flex justify-between items-start mb-4">
@@ -211,7 +194,7 @@
                 </div>
             </div>
              <div class="flex justify-end items-center border-t pt-6">
-                 <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600">Rp. 300.000</span></p>
+                 <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span></p>
             </div>
         </div>
     </div>
@@ -221,17 +204,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             const addNoteBtn = document.getElementById('add-note-btn');
             const noteModal = document.getElementById('note-modal');
-            const noteModalContent = noteModal.querySelector('.modal-content');
-            const closeNoteModalBtn = document.getElementById('close-note-modal-btn');
-            const saveNoteBtn = document.getElementById('save-note-btn');
-            const noteTextarea = document.getElementById('note-textarea');
-            const additionalNoteInput = document.getElementById('additional-note');
-            
             const bankTransferModal = document.getElementById('bank-transfer-modal');
             const qrisModal = document.getElementById('qris-modal');
             const closeBankModalBtn = document.getElementById('close-bank-modal-btn');
             const closeQrisModalBtn = document.getElementById('close-qris-modal-btn');
-
             const checkoutForm = document.getElementById('checkout-form');
 
             function openModal(modal) {
@@ -248,21 +224,58 @@
                 document.body.classList.remove('modal-active');
             }
 
+            // Note modal logic
             addNoteBtn.addEventListener('click', () => openModal(noteModal));
-            closeNoteModalBtn.addEventListener('click', () => closeModal(noteModal));
-            saveNoteBtn.addEventListener('click', () => {
-                additionalNoteInput.value = noteTextarea.value;
+            document.getElementById('close-note-modal-btn').addEventListener('click', () => closeModal(noteModal));
+            document.getElementById('save-note-btn').addEventListener('click', () => {
+                document.getElementById('additional-note').value = document.getElementById('note-textarea').value;
                 closeModal(noteModal);
             });
             noteModal.addEventListener('click', (event) => {
                 if (event.target === noteModal) closeModal(noteModal);
             });
 
+
+            // --- **NEW SCRIPT TO FIX PROMO SUBMISSION** ---
+            const applyPromoBtn = document.getElementById('apply-promo-btn');
+            if (applyPromoBtn) {
+                applyPromoBtn.addEventListener('click', () => {
+                    const promoCodeInput = document.getElementById('promo-code-input');
+                    if (!promoCodeInput.value) {
+                        alert('Please enter a promo code.');
+                        return;
+                    }
+                    
+                    // Create a new form element in memory
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route("promo.apply") }}';
+                    
+                    // Add CSRF token
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfToken);
+                    
+                    // Add promo code input
+                    const promoInput = document.createElement('input');
+                    promoInput.type = 'hidden';
+                    promoInput.name = 'promo_code';
+                    promoInput.value = promoCodeInput.value;
+                    form.appendChild(promoInput);
+                    
+                    // Append the form to the body, submit it, and then remove it
+                    document.body.appendChild(form);
+                    form.submit();
+                    document.body.removeChild(form);
+                });
+            }
+
+            // Main checkout form submission logic
             checkoutForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-
                 const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-
                 if (paymentMethod === 'bank_transfer') {
                     openModal(bankTransferModal);
                     startPaymentTimer(bankTransferModal);
@@ -277,7 +290,6 @@
                 const closeBtn = modal.querySelector('button[id^="close-"]');
                 closeBtn.disabled = true;
                 closeBtn.innerHTML = countdown;
-
                 const timerInterval = setInterval(() => {
                     countdown--;
                     if (countdown > 0) {
@@ -291,19 +303,23 @@
             }
 
             function finalizeOrder() {
+                // This is the only place where the main form is submitted
                 checkoutForm.submit();
             }
 
             closeBankModalBtn.addEventListener('click', () => {
-                closeModal(bankTransferModal);
-                finalizeOrder();
+                if (!closeBankModalBtn.disabled) {
+                    closeModal(bankTransferModal);
+                    finalizeOrder();
+                }
             });
             
             closeQrisModalBtn.addEventListener('click', () => {
-                closeModal(qrisModal);
-                finalizeOrder();
+                if (!closeQrisModalBtn.disabled) {
+                    closeModal(qrisModal);
+                    finalizeOrder();
+                }
             });
-
         });
     </script>
 

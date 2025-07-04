@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Promo;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -13,7 +14,9 @@ class OrderController extends Controller
     {
         $orders = Order::all();
         $users = User::all();
-        return view('admin.home', compact('orders', 'users'));
+        $promos = Promo::latest()->get();
+
+        return view('admin.home', compact('orders', 'users', 'promos'));
     }
 
     public function update(Request $request, $id)
