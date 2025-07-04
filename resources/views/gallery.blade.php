@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Gallery - myBatik</title>
+    <title>My Batik - Gallery</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,18 +31,18 @@
         .comments-container::-webkit-scrollbar-track { background: #f1f1f1; }
         .comments-container::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
         .comments-container::-webkit-scrollbar-thumb:hover { background: #555; }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
 
-    <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-30">
         <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
             <div class="flex items-center gap-x-12">
                 <div class="font-dancing text-4xl font-bold">my Batik</div>
                 <nav class="hidden md:flex space-x-8">
                     <a href="/" class="font-semibold transition text-gray-700 hover:text-black">Home</a>
-                    <a href="{{ route('gallery.index') }}" class="font-semibold transition text-black border-b-2 border-black">Gallery</a>
+                    <a href="{{ route('gallery.index') }}" class="font-semibold text-black hover:text-black transition">Gallery</a>
                     @auth
                     <a href="/history" class="font-semibold text-gray-700 hover:text-black transition">Orders</a>
                     @endauth
@@ -58,7 +58,7 @@
                             <span class="font-semibold text-gray-700 hover:text-black transition">{{ Auth::user()->name }}</span>
                             <div class="w-8 h-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" /></svg></div>
                         </button>
-                        <div x-show="dropdownOpen" @click.away="dropdownOpen = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                        <div x-show="dropdownOpen" @click.away="dropdownOpen = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50" x-cloak>
                             <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
                             <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                 @csrf
@@ -74,25 +74,24 @@
         </div>
     </header>
 
-    <!-- Main Content: Community Gallery -->
     <main class="container mx-auto px-4 py-8" x-data="galleryPage()">
         @if($designs->isEmpty())
              <div class="text-center py-16"><p class="text-xl text-gray-500">No designs have been shared yet. Be the first!</p></div>
         @else
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-4">
                 @foreach($designs as $design)
-                <!-- Design Card -->
-                <div @click="openDetailModal({{ json_encode($design) }})" class="group relative aspect-square cursor-pointer">
+
+                <div id="design-card-{{ $design->id }}" @click="openDetailModal({{ json_encode($design) }})" class="group relative aspect-square cursor-pointer">
                     <img src="{{ asset('storage/' . $design->image_path) }}" alt="{{ $design->title }}" class="w-full h-full object-cover rounded-md">
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                         <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center space-x-6 text-white">
                             <div class="flex items-center space-x-2">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                <span class="font-bold">{{ $design->likes->count() }}</span>
+                                <span class="font-bold like-count">{{ $design->likes_count ?? $design->likes->count() }}</span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
-                                <span class="font-bold">{{ $design->comments->count() }}</span>
+                                <span class="font-bold">{{ $design->comments_count ?? $design->comments->count() }}</span>
                             </div>
                         </div>
                     </div>
@@ -102,32 +101,63 @@
             <div class="mt-12">{{ $designs->links() }}</div>
         @endif
 
-        <!-- Details Modal -->
         <div x-show="showDetailModal" @keydown.escape.window="showDetailModal = false" x-cloak class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
             <div @click.away="showDetailModal = false" class="bg-white w-full max-w-5xl h-full max-h-[90vh] flex rounded-lg overflow-hidden">
-                <!-- Image Column -->
+
                 <div class="w-1/2 bg-black flex items-center justify-center">
                     <img :src="'/storage/' + currentDesign.image_path" :alt="currentDesign.title" class="max-w-full max-h-full object-contain">
                 </div>
-                <!-- Details Column -->
+
                 <div class="w-1/2 flex flex-col">
                     <div class="p-4 border-b">
-                        <h3 class="font-bold text-xl" x-text="currentDesign.title"></h3>
-                        <p class="text-sm text-gray-600">by <span x-text="currentDesign.user ? currentDesign.user.name : 'Unknown'"></span></p>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-xl" x-show="!editingTitle" x-text="currentDesign.title"></h3>
+                                <div x-show="editingTitle">
+                                    <input type="text" x-model="newTitle" class="border rounded px-2 py-1 w-full">
+                                    <div class="mt-2">
+                                        <button @click="updateTitle" class="text-sm bg-blue-500 text-white py-1 px-2 rounded">Save</button>
+                                        <button @click="cancelEditing" class="text-sm bg-gray-300 py-1 px-2 rounded">Cancel</button>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-600">by <span x-text="currentDesign.user ? currentDesign.user.name : 'Unknown'"></span></p>
+                            </div>
+                            <div x-show="isOwner" class="flex gap-2" x-cloak>
+                                <button @click="startEditing" x-show="!editingTitle" title="Edit Title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                        <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <button @click="deleteDesign" title="Delete Design">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Comments -->
                     <div class="flex-grow p-4 overflow-y-auto comments-container" id="modal-comments-list">
-                        <!-- Comments will be populated by JS -->
                     </div>
-                    <!-- Actions & Comment Form -->
                     <div class="p-4 border-t bg-gray-50">
                         <div class="flex items-center space-x-4 mb-3">
                             <form @submit.prevent="submitLike" class="like-form-modal">
-                                <button type="submit" class="flex items-center space-x-1.5 text-gray-500 hover:text-red-500">
-                                    <svg id="modal-like-icon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
-                                    <span class="font-semibold text-lg" id="modal-like-count" x-text="currentDesign.likes ? currentDesign.likes.length : 0"></span>
+                                <button type="submit" class="flex items-center space-x-1.5 hover:text-red-500 transition-colors" :class="{'text-red-500': currentUserHasLiked, 'text-gray-500': !currentUserHasLiked}">
+                                    <svg class="w-7 h-7"
+                                        :fill="currentUserHasLiked ? 'red' : 'white'"
+                                        :stroke="currentUserHasLiked ? 'red' : 'black'"
+                                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path>
+                                    </svg>
+                                    <span class="font-semibold text-lg" x-text="currentDesign.likes_count"></span>
                                 </button>
                             </form>
+                            <button @click="downloadImage" class="flex items-center space-x-1.5 text-gray-500 hover:text-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="font-semibold text-lg">Download</span>
+                            </button>
                         </div>
                         @auth
                         <form @submit.prevent="submitComment($event)" class="comment-form-modal">
@@ -146,7 +176,6 @@
         </div>
     </main>
 
-    <!-- Floating Upload Button -->
     @auth
     <div x-data="{}" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
         <button @click="$dispatch('open-modal', 'upload-design')" class="bg-black text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-opacity-50 transition-all duration-300 text-lg flex items-center gap-2">
@@ -155,8 +184,6 @@
         </button>
     </div>
     @endauth
-
-    <!-- Upload Modal -->
     <div x-data="{ show: false }" @open-modal.window="if ($event.detail === 'upload-design') show = true" x-show="show" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
         <div @click.away="show = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md modal-body">
             <h3 class="text-2xl font-bold mb-6 text-center">Share Your Design</h3>
@@ -191,42 +218,37 @@
             </form>
         </div>
     </div>
-
-    <!-- FIXED: Logout Modal HTML is now directly in this file -->
-    <div id="logout-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
-            <h3 class="text-xl font-bold mb-4">Confirm Logout</h3>
-            <p class="mb-6">Are you sure you want to log out?</p>
-            <div class="flex justify-center gap-4">
-                <button id="confirm-logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg">Logout</button>
-                <button id="cancel-logout-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
-            </div>
-        </div>
-    </div>
     
-    <footer id="contact" class="bg-gray-800 text-white py-12 mt-20"></footer>
+    <x-logout-modal />
     
     <script>
     function galleryPage() {
         return {
             showDetailModal: false,
             currentDesign: {},
-            likeActionUrl: '',
-            commentActionUrl: '',
             csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             authUserId: {{ auth()->id() ?? 'null' }},
+            currentUserHasLiked: false,
+            isOwner: false,
+            editingTitle: false,
+            newTitle: '',
 
             openDetailModal(design) {
                 this.currentDesign = design;
-                this.likeActionUrl = `/designs/${design.id}/like`;
-                this.commentActionUrl = `/designs/${design.id}/comments`;
+                if (typeof this.currentDesign.likes_count === 'undefined') {
+                    this.currentDesign.likes_count = this.currentDesign.likes.length;
+                }
+                
+                this.currentUserHasLiked = this.isLikedByUser();
+                this.isOwner = this.authUserId && this.currentDesign.user_id == this.authUserId;
+                
+                this.editingTitle = false;
                 this.showDetailModal = true;
                 
                 this.$nextTick(() => {
-                    this.updateLikeButton();
                     const commentsList = document.getElementById('modal-comments-list');
                     commentsList.innerHTML = ''; 
-                    if (this.currentDesign.comments.length > 0) {
+                    if (this.currentDesign.comments && this.currentDesign.comments.length > 0) {
                         this.currentDesign.comments.forEach(comment => {
                             commentsList.innerHTML += this.createCommentHtml(comment);
                         });
@@ -238,22 +260,11 @@
 
             isLikedByUser() {
                 if (!this.currentDesign.likes || !this.authUserId) return false;
-                return this.currentDesign.likes.some(like => like.user_id === this.authUserId);
-            },
-
-            updateLikeButton() {
-                const icon = document.getElementById('modal-like-icon');
-                if (this.isLikedByUser()) {
-                    icon.style.fill = 'currentColor';
-                    icon.classList.add('text-red-500');
-                } else {
-                    icon.style.fill = 'none';
-                    icon.classList.remove('text-red-500');
-                }
+                return this.currentDesign.likes.some(like => like.user_id == this.authUserId);
             },
 
             submitLike() {
-                fetch(this.likeActionUrl, {
+                fetch(`/designs/${this.currentDesign.id}/like`, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' },
                 })
@@ -265,14 +276,87 @@
                     return res.json();
                 })
                 .then(data => {
+                    this.currentUserHasLiked = data.liked;
+                    this.currentDesign.likes_count = data.likes_count;
+
                     if (data.liked) {
-                        this.currentDesign.likes.push({ user_id: this.authUserId });
+                        if (!this.currentDesign.likes.some(like => like.user_id == this.authUserId)) {
+                            this.currentDesign.likes.push({ user_id: this.authUserId });
+                        }
                     } else {
-                        this.currentDesign.likes = this.currentDesign.likes.filter(like => like.user_id !== this.authUserId);
+                        this.currentDesign.likes = this.currentDesign.likes.filter(like => like.user_id != this.authUserId);
                     }
-                    this.updateLikeButton();
+
+                    const gridCardLikeCount = document.querySelector(`#design-card-${this.currentDesign.id} .like-count`);
+                    if (gridCardLikeCount) {
+                        gridCardLikeCount.innerText = data.likes_count;
+                    }
                 })
                 .catch(error => console.error('Error:', error));
+            },
+
+            downloadImage() {
+                fetch('/storage/' + this.currentDesign.image_path)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        // Set the download filename
+                        a.download = 'mybatik-gallery.jpg';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        a.remove();
+                    })
+                    .catch(() => alert('Could not download image.'));
+            },
+
+            startEditing() {
+                this.newTitle = this.currentDesign.title;
+                this.editingTitle = true;
+            },
+            cancelEditing() {
+                this.editingTitle = false;
+            },
+            updateTitle() {
+                fetch(`/designs/${this.currentDesign.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title: this.newTitle })
+                })
+                .then(res => {
+                    if (!res.ok) return Promise.reject(res);
+                    return res.json();
+                })
+                .then(data => {
+                    this.currentDesign.title = data.title;
+                    this.editingTitle = false;
+                })
+                .catch(err => console.error('Update failed:', err));
+            },
+            deleteDesign() {
+                if (!confirm('Are you sure you want to delete this design? This action cannot be undone.')) {
+                    return;
+                }
+                fetch(`/designs/${this.currentDesign.id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' },
+                })
+                .then(res => {
+                    if (!res.ok) return Promise.reject(res);
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById(`design-card-${this.currentDesign.id}`).remove();
+                    this.showDetailModal = false;
+                })
+                .catch(err => console.error('Delete failed:', err));
             },
 
             submitComment(event) {
@@ -280,7 +364,7 @@
                 const formData = new FormData(form);
                 const textarea = form.querySelector('textarea');
 
-                fetch(this.commentActionUrl, {
+                fetch(`/designs/${this.currentDesign.id}/comments`, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' },
                     body: formData
@@ -293,14 +377,10 @@
                     return res.json();
                 })
                 .then(data => {
-                    // Add new comment to the local state
                     this.currentDesign.comments.unshift(data.comment);
-                    
-                    // Re-render comments list
                     const commentsList = document.getElementById('modal-comments-list');
                     const noCommentsPlaceholder = commentsList.querySelector('.no-comments-placeholder');
                     if (noCommentsPlaceholder) noCommentsPlaceholder.remove();
-                    
                     commentsList.insertAdjacentHTML('afterbegin', this.createCommentHtml(data.comment));
                     textarea.value = '';
                 })
@@ -313,7 +393,7 @@
                 const userName = comment.user ? comment.user.name : 'A User';
                 return `
                     <div class="text-sm flex items-start space-x-3 mb-3">
-                        <div class="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full"></div>
+                        <div class="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white font-bold">${userName.charAt(0)}</div>
                         <div>
                             <p><strong class="font-semibold">${userName}:</strong> ${comment.body}</p>
                             <p class="text-xs text-gray-400 mt-1">${formattedDate}</p>
@@ -328,23 +408,6 @@
         Alpine.data('galleryPage', galleryPage);
     });
     
-    // Logout Modal Script
-    document.addEventListener('DOMContentLoaded', function() {
-        const logoutLink = document.getElementById('logout-link');
-        if(logoutLink) {
-            const logoutModal = document.getElementById('logout-modal');
-            const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
-            const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
-            const logoutForm = document.getElementById('logout-form');
-
-            logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                logoutModal.classList.remove('hidden');
-            });
-            cancelLogoutBtn.addEventListener('click', () => logoutModal.classList.add('hidden'));
-            confirmLogoutBtn.addEventListener('click', () => logoutForm.submit());
-        }
-    });
     </script>
 </body>
 </html>

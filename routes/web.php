@@ -60,7 +60,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/receipt/{order}', [OrderController::class, 'showReceipt'])->name('receipt');
     Route::get('/history', [RiwayatPesananController::class, 'index'])->name('history');
 
-    // --- NEW: Gallery Interaction Routes ---
+    Route::patch('/designs/{design}', [DesignController::class, 'update'])->name('designs.update');
+    Route::delete('/designs/{design}', [DesignController::class, 'destroy'])->name('designs.destroy');
     Route::post('/designs', [DesignController::class, 'store'])->name('designs.store');
     Route::post('/designs/{design}/comments', [DesignController::class, 'addComment'])->name('designs.comments.add');
     Route::post('/designs/{design}/like', [DesignController::class, 'toggleLike'])->name('designs.like');

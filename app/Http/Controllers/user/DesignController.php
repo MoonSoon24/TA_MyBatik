@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\user;
 
 use App\Http\Controllers\Controller;
 use App\Models\Design;
@@ -10,66 +10,26 @@ use Illuminate\Support\Facades\Storage;
 
 class DesignController extends Controller
 {
-    /**
-     * Store a newly created design in storage and share it to the gallery.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'image' => 'required|image|mimes:png,jpg,jpeg|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // Store the image in 'public/designs' which links to 'storage/app/public/designs'
         $path = $request->file('image')->store('designs', 'public');
 
-        Auth::user()->designs()->create([
+        $design = new Design([
+            'user_id' => Auth::id(),
             'title' => $request->title,
-            'image_path' => $path, // Store the relative path
+            'image_path' => $path,
             'is_public' => true,
         ]);
+        $design->save();
 
-        return redirect()->route('gallery.index')->with('success', 'Design shared successfully!');
+        return back()->with('success', 'Design uploaded successfully!');
     }
 
-    /**
-     * Add a comment to a specific design.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Design  $design
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function addComment(Request $request, Design $design)
-    {
-        $request->validate([
-            'body' => 'required|string|max:1000',
-        ]);
-
-        // Create the comment
-        $comment = $design->comments()->create([
-            'user_id' => Auth::id(),
-            'body' => $request->body,
-        ]);
-
-        // Eager load the user relationship for the new comment
-        $comment->load('user');
-
-        // FIXED: Return the new comment as a JSON response for AJAX
-        return response()->json([
-            'comment' => $comment,
-            'user' => $comment->user // Include user data for immediate display
-        ]);
-    }
-
-    /**
-     * Toggle a like on a specific design for the current user.
-     *
-     * @param  \App\Models\Design  $design
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function toggleLike(Design $design)
     {
         $user = Auth::user();
@@ -87,5 +47,54 @@ class DesignController extends Controller
             'liked' => $liked,
             'likes_count' => $design->likes()->count(),
         ]);
+    }
+
+    public function addComment(Request $request, Design $design)
+    {
+        $request->validate(['body' => 'required|string']);
+
+        $comment = $design->comments()->create([
+            'user_id' => Auth::id(),
+            'body' => $request->body,
+        ]);
+        
+        $comment->load('user');
+
+        return response()->json(['comment' => $comment]);
+    }
+
+    // NEW: Update method
+    public function update(Request $request, Design $design)
+    {
+        // Authorization: Ensure the logged-in user owns the design
+        if (Auth::id() !== $design->user_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+
+        $design->title = $request->title;
+        $design->save();
+
+        return response()->json(['title' => $design->title]);
+    }
+
+    // NEW: Destroy method
+    public function destroy(Design $design)
+    {
+        // Authorization: Ensure the logged-in user owns the design
+        if (Auth::id() !== $design->user_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Delete the image file from storage
+        Storage::disk('public')->delete($design->image_path);
+
+        // Delete the design record from the database
+        $design->delete();
+
+        return response()->json(['success' => 'Design deleted successfully.']);
     }
 }
