@@ -9,7 +9,7 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $table = 'orders'; // Assuming your table is named 'orders'
+    protected $table = 'orders';
 
     protected $primaryKey = 'id_pesanan';
 
@@ -40,5 +40,10 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class, 'id_pesanan', 'id_pesanan');
     }
 }

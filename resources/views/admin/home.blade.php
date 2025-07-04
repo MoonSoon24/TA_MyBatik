@@ -151,6 +151,7 @@
                     <thead class="bg-white">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Customer ID</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
@@ -161,9 +162,10 @@
                         <template x-for="order in filteredOrders" :key="order.id_pesanan">
                             <tr class="hover:bg-gray-50 cursor-pointer" @click="showOrderModal(order)">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="order.id_pesanan"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="order.id_user"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="order.nama"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(order.total)"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold" :class="{ 'text-yellow-600': order.status === 'Pending', 'text-blue-600': order.status === 'In Progress', 'text-green-600': order.status === 'Ready', 'text-red-600': order.status === 'Cancelled' }" x-text="order.status"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold" :class="{ 'text-yellow-600': order.status === 'Pending', 'text-blue-600': order.status === 'In Progress', 'text-green-600': order.status === 'Ready', 'text-red-600': order.status === 'Cancelled', 'text-grey    -600': order.status === 'Completed' }" x-text="order.status"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="new Date(order.tanggal_pesan).toLocaleDateString('id-ID')"></td>
                             </tr>
                         </template>
@@ -227,7 +229,6 @@
                                                 <p><strong class="font-semibold text-gray-900 block">Email:</strong> <span class="text-gray-600" x-text="selectedOrder.email"></span></p>
                                                 <p><strong class="font-semibold text-gray-900 block">Phone:</strong> <span class="text-gray-600" x-text="selectedOrder.no_telepon"></span></p>
                                                 <p><strong class="font-semibold text-gray-900 block">Address:</strong> <span class="text-gray-600" x-text="selectedOrder.alamat"></span></p>
-                                                <p><strong class="font-semibold text-gray-900 block">Item:</strong> <span class="text-gray-600">Custom Batik</span></p>
                                             </div>
                                             <div class="space-y-3 text-sm">
                                                 <p class="md:text-right text-gray-500">last update: <span x-text="new Date(selectedOrder.updated_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })"></span></p>
@@ -263,8 +264,9 @@
                                 <select x-model="selectedOrder.status" id="status" name="status" class="block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                     <option value="Pending">Pending</option>
                                     <option value="In Progress">In Progress</option>
-                                    <option value="Ready">Ready</option>
                                     <option value="Cancelled">Cancelled</option>
+                                    <option value="Ready">Ready</option>
+                                    <option value="Completed">Completed</option>
                                 </select>
                             </div>
                             <div class="flex gap-x-3">

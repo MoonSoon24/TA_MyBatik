@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RiwayatPesanan extends Model
+
+class Review extends Model
 {
     use HasFactory;
 
-    protected $table = 'riwayat_pesanans';
-
     protected $fillable = [
-        'order_id',
         'user_id',
+        'id_pesanan',
+        'rating',
+        'comment',
     ];
 
     public function user()
@@ -21,8 +22,8 @@ class RiwayatPesanan extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function order()
+    public function orderItem()
     {
-        return $this->belongsTo(Order::class, 'order_id');
+        return $this->belongsTo(Order::class, 'id_pesanan');
     }
 }

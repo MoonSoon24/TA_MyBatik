@@ -9,6 +9,7 @@ use App\Http\Controllers\User\DesignController;
 use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\User\RiwayatPesananController;
+use App\Http\Controllers\User\ReviewController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Admin\PromoController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -21,18 +22,17 @@ use App\Http\Controllers\Admin\PromoController as AdminPromoController;
 |--------------------------------------------------------------------------
 */
 
-// --- Public Routes ---
-
 Route::redirect('/', '/home');
+Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
+Route::get('/home', [ReviewController::class, 'index'])->name('home.reviews');
 
 // home routes
 Route::get('/home', function(){
     return view('home');
 })->name('home');
 
-// gallery
-Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 
+// login & register
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'registerPost']);
 Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -42,6 +42,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 //  user
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/home', [ReviewController::class, 'index'])->name('home');
     
     Route::get('/profile', [UserController::class, 'showProfile'])->name('profile');
     Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
@@ -55,6 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/remove-promo', [OrderController::class, 'removePromo'])->name('promo.remove');
     Route::get('/receipt/{order}', [OrderController::class, 'showReceipt'])->name('receipt');
     Route::get('/history', [RiwayatPesananController::class, 'index'])->name('history');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
     Route::patch('/designs/{design}', [DesignController::class, 'update'])->name('designs.update');
     Route::delete('/designs/{design}', [DesignController::class, 'destroy'])->name('designs.destroy');
@@ -98,5 +100,3 @@ Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-
-Route::resource('users', UserController::class)->middleware('auth');

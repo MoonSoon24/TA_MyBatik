@@ -16,7 +16,7 @@ class RiwayatPesananController extends Controller
         $userId = Auth::id();
 
         $riwayatPesanan = RiwayatPesanan::where('user_id', $userId)
-            ->with('order')
+            ->with('order.review')
             ->latest()
             ->paginate(10);
 
