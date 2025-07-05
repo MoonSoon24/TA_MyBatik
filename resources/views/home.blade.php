@@ -60,15 +60,6 @@
         </div>
     </main>
 
-    <section id="about" class="py-16 md:py-24 bg-white">
-        <div class="container mx-auto px-6 md:px-12 text-center">
-            <h2 class="text-3xl font-bold mb-4">About Us</h2>
-            <p class="max-w-3xl mx-auto text-gray-600">
-                Welcome to myBatik, where ancient tradition meets modern expression. We are passionate about preserving the rich heritage of Indonesian Batik, a UNESCO Intangible Cultural Heritage of Humanity. Our mission is to bring this beautiful art form to the world, allowing you to create personalized apparel that tells a story.
-            </p>
-        </div>
-    </section>
-
     <section id="reviews" class="py-16 md:py-24 bg-gray-100">
         <div class="container mx-auto px-6 md:px-12">
             <h2 class="text-3xl font-bold text-center mb-12">What Our Customers Say</h2>
@@ -100,6 +91,15 @@
                     </div>
                 @endforelse
             </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-6 md:px-12 text-center">
+            <h2 class="text-3xl font-bold mb-4">About Us</h2>
+            <p class="max-w-3xl mx-auto text-gray-600">
+                Welcome to myBatik, where ancient tradition meets modern expression. We are passionate about preserving the rich heritage of Indonesian Batik, a UNESCO Intangible Cultural Heritage of Humanity. Our mission is to bring this beautiful art form to the world, allowing you to create personalized apparel that tells a story.
+            </p>
         </div>
     </section>
 

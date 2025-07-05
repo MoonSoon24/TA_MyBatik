@@ -15,7 +15,6 @@ use Exception;
 
 class OrderController extends Controller
 {
-    // ... other methods like applyPromo, removePromo, store, showCheckout ...
     public function applyPromo(Request $request)
     {
         $request->validate(['promo_code' => 'required|string']);
@@ -81,9 +80,6 @@ class OrderController extends Controller
         ]);
     }
 
-    /**
-     * Store the order in the database.
-     */
     public function storeOrder(Request $request)
     {
         $orderDetails = $request->session()->get('order_details');
@@ -128,7 +124,6 @@ class OrderController extends Controller
 
                 RiwayatPesanan::create([
                     'user_id'  => $user->id,
-                    // **THE FIX**: Use the correct primary key from the Order model
                     'order_id' => $order->id_pesanan, 
                 ]);
                 
@@ -140,15 +135,11 @@ class OrderController extends Controller
                 }
             });
         } catch (Exception $e) {
-            // Now that we found the error, we can log it and redirect back with an error message.
-            Log::error('Order creation failed: ' . $e->getMessage());
             return back()->with('error', 'An unexpected error occurred while placing your order. Please try again.')->withInput();
         }
 
-        // Clear the session data after a successful order
         $request->session()->forget(['order_details', 'promo']);
 
-        // **THE FIX**: Use the correct primary key for the route parameter
         return redirect()->route('receipt', ['order' => $order->id_pesanan])
                          ->with('success', 'Your order has been placed successfully!');
     }

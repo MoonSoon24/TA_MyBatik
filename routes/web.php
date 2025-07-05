@@ -69,15 +69,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // admin
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminUserController::class, 'index'])->name('home');
+    
     Route::get('/profile', function () {
         return view('admin.profile', ['user' => Auth::user()]);
     })->name('profile');
+
     Route::post('/users/{user}/verify', [AdminUserController::class, 'verify'])->name('users.verify');
+    Route::post('/promos', [PromoController::class, 'store'])->name('promos.store');
+    
     Route::resource('users', AdminUserController::class);
     Route::resource('orders', AdminOrderController::class);
     Route::resource('promos', AdminPromoController::class);
-    Route::post('/promos', [PromoController::class, 'store'])->name('promos.store');
-    
+
+    Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('reports.sales');
+    Route::get('/reports/promo-usage', [\App\Http\Controllers\Admin\ReportController::class, 'promoUsage'])->name('reports.promo');
+    Route::get('/reports/user-registrations', [\App\Http\Controllers\Admin\ReportController::class, 'userRegistrations'])->name('reports.users');
+    Route::get('/reports/top-customers', [\App\Http\Controllers\Admin\ReportController::class, 'topCustomers'])->name('reports.customers');
 });
 
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Promo extends Model
 {
@@ -31,4 +32,9 @@ class Promo extends Model
     protected $casts = [
         'expires_at' => 'datetime',
     ];
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'promo_id', 'id');
+    }
 }
