@@ -8,8 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -88,5 +89,24 @@
         </div>
     </main>
 
+    <x-alert />
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // This handles success messages
+            @if (session('success'))
+                window.dispatchEvent(new CustomEvent('alert', {
+                    detail: { type: 'success', message: "{{ session('success') }}" }
+                }));
+            @endif
+
+            // This handles validation errors, just in case
+            @if ($errors->any())
+                window.dispatchEvent(new CustomEvent('alert', {
+                    detail: { type: 'error', message: "{{ $errors->first() }}" }
+                }));
+            @endif
+        });
+    </script>
 </body>
 </html>

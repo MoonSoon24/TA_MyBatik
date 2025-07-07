@@ -30,7 +30,7 @@
 
     <header class="bg-white shadow-sm">
         <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
-            <a href="/home" class="font-dancing text-4xl font-bold">my Batik</a>
+            <a href="/" class="font-dancing text-4xl font-bold">my Batik</a>
         </div>
     </header>
 
@@ -56,7 +56,7 @@
             </form>
 
             <div class="flex items-center justify-center gap-4">
-                <a href="{{ url('/home') }}" class="w-full text-center text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out">
+                <a href="{{ url('/') }}" class="w-full text-center text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out">
                     Home
                 </a>
             </div>

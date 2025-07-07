@@ -39,29 +39,24 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         
-        $message = '';
-
-        if ($user->email_verified_at) {
-            $user->forceFill([
-                'email_verified_at' => null
-            ])->save();
-            $message = 'User has been successfully unverified.';
-        } else {
-            $user->forceFill([
-                'email_verified_at' => Carbon::now()
-            ])->save();
-            $message = 'User has been successfully verified.';
+        try {
+            $user->email_verified_at = $user->email_verified_at ? null : now();
+            $user->save();
+            return response()->json(['message' => 'User verification status changed!']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to change verification status.'], 500);
         }
-
-        return redirect()->route('admin.home')->with('success', $message);
     }
 
 
     public function destroy(string $id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
-
-        return redirect()->route('admin.home')->with('success', 'User has been successfully deleted.');
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+            return response()->json(['message' => 'User deleted successfully!']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to delete user.'], 500);
+        }
     }
 }

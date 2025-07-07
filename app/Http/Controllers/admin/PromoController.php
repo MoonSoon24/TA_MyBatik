@@ -20,9 +20,13 @@ class PromoController extends Controller
         
         $validatedData['current_uses'] = 0;
 
-        Promo::create($validatedData);
-
-        return redirect()->route('admin.home', '#promos')->with('success', 'Promo code created successfully!');
+        
+        try {
+            Promo::create($validatedData);
+            return response()->json(['message' => 'Promo created successfully!']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to create promo.'], 500);
+        }
     }
     public function update(Request $request, Promo $promo)
     {
@@ -40,8 +44,12 @@ class PromoController extends Controller
     }
 
     public function destroy(Promo $promo)
-    {
+{
+    try {
         $promo->delete();
-        return redirect()->route('admin.home', '#promos')->with('success', 'Promo code deleted successfully.');
+        return response()->json(['message' => 'Promo deleted successfully!']);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Failed to delete promo.'], 500);
     }
+}
 }

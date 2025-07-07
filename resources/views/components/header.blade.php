@@ -5,7 +5,7 @@
             <div class="flex items-center gap-x-12">
                 <div class="font-dancing text-4xl font-bold">my Batik</div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="/" class="font-semibold transition text-gray-700 hover:text-black">Home</a>
+                    <a href="{{ route('home') }}" class="font-semibold transition text-gray-700 hover:text-black">Home</a>
                     <a href="{{ route('gallery.index') }}" class="font-semibold text-gray-700 hover:text-black transition">Gallery</a>
                     @auth
                     <a href="/history" class="font-semibold text-gray-700 hover:text-black transition">Orders</a>

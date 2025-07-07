@@ -22,15 +22,11 @@ use App\Http\Controllers\Admin\PromoController as AdminPromoController;
 |--------------------------------------------------------------------------
 */
 
-Route::redirect('/', '/home');
+Route::get('/', [ReviewController::class, 'index'])->name('home');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
-Route::get('/home', [ReviewController::class, 'index'])->name('home.reviews');
-
-// home routes
-Route::get('/home', function(){
-    return view('home');
-})->name('home');
-
+Route::get('/profile', [UserController::class, 'showProfile'])->name('profile');
+Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+Route::get('/create', function () { return view('create'); })->name('create');
 
 // login & register
 Route::get('/register', [AuthController::class, 'register'])->name('register');
@@ -42,12 +38,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 //  user
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/home', [ReviewController::class, 'index'])->name('home');
-    
-    Route::get('/profile', [UserController::class, 'showProfile'])->name('profile');
-    Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
-
-    Route::get('/create', function () { return view('create'); })->name('create');
     Route::get('/ukuran', function () { return view('user.ukuran'); })->name('ukuran');
     Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
     Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('checkout.show');
@@ -68,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // admin
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+
     Route::get('/', [AdminUserController::class, 'index'])->name('home');
     
     Route::get('/profile', function () {

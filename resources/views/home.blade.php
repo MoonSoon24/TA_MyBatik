@@ -145,6 +145,25 @@
     </footer>
 
     <x-logout-modal />
+    <x-alert />
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // This handles success messages
+            @if (session('success'))
+                window.dispatchEvent(new CustomEvent('alert', {
+                    detail: { type: 'success', message: "{{ session('success') }}" }
+                }));
+            @endif
+
+            // This handles validation errors, just in case
+            @if ($errors->any())
+                window.dispatchEvent(new CustomEvent('alert', {
+                    detail: { type: 'error', message: "{{ $errors->first() }}" }
+                }));
+            @endif
+        });
+    </script>
     
 </body>
 </html>

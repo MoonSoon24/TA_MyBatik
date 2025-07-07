@@ -31,7 +31,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/home');
+        return redirect('/login')->with('success', 'Registration successful! Welcome to MyBatik.');
     }
 
     public function login()
@@ -53,7 +53,7 @@ class AuthController extends Controller
             return redirect()->intended('/admin');
         }
 
-        return redirect()->intended('/home');
+        return redirect('/')->with('success', 'Login successful! Welcome to MyBatik.');
     }
 
     return back()->withErrors([
@@ -66,6 +66,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
+        return redirect('/login')->with('success', 'You have been logged out successfully.');
     }
 }

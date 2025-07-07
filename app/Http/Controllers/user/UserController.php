@@ -67,6 +67,6 @@ class UserController extends Controller
                     return redirect()->route('profile')->with('success', $notification);
                 }
             }
-        return redirect()->route('user.profile');
+        return redirect()->route('profile');
     }
 }

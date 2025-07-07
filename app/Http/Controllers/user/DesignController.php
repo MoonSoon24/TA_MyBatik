@@ -27,7 +27,7 @@ class DesignController extends Controller
         ]);
         $design->save();
 
-        return back()->with('success', 'Design uploaded successfully!');
+        return redirect()->route('gallery.index')->with('success', 'Your design has been shared successfully!');
     }
 
     public function toggleLike(Design $design)
@@ -63,10 +63,8 @@ class DesignController extends Controller
         return response()->json(['comment' => $comment]);
     }
 
-    // NEW: Update method
     public function update(Request $request, Design $design)
     {
-        // Authorization: Ensure the logged-in user owns the design
         if (Auth::id() !== $design->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -81,20 +79,16 @@ class DesignController extends Controller
         return response()->json(['title' => $design->title]);
     }
 
-    // NEW: Destroy method
     public function destroy(Design $design)
     {
-        // Authorization: Ensure the logged-in user owns the design
         if (Auth::id() !== $design->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Delete the image file from storage
         Storage::disk('public')->delete($design->image_path);
 
-        // Delete the design record from the database
         $design->delete();
 
-        return response()->json(['success' => 'Design deleted successfully.']);
+        return redirect()->route('gallery.index')->with('success', 'Your design has been deleted successfully!');
     }
 }

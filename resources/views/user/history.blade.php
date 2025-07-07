@@ -216,6 +216,7 @@
     </main>
 
     <x-logout-modal />
+    <x-alert />
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -224,6 +225,18 @@
         const ordersContainer = document.getElementById('orders-container');
         const orderCards = Array.from(document.querySelectorAll('.order-card'));
         const noResultsMessage = document.getElementById('no-results-message');
+
+        @if (session('success'))
+            window.dispatchEvent(new CustomEvent('alert', { 
+                detail: { type: 'success', message: "{{ session('success') }}" }
+            }));
+        @endif
+
+        @if ($errors->any())
+            window.dispatchEvent(new CustomEvent('alert', {
+                 detail: { type: 'error', message: "{{ $errors->first() }}" }
+            }));
+        @endif
 
         function updateOrdersDisplay() {
             const searchTerm = searchInput.value.toLowerCase();

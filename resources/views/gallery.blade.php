@@ -68,7 +68,7 @@
         <div x-show="showDetailModal" @keydown.escape.window="showDetailModal = false" x-cloak class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
             <div @click.away="showDetailModal = false" class="bg-white w-full max-w-5xl h-full max-h-[90vh] flex rounded-lg overflow-hidden">
 
-                <div class="w-1/2 bg-black flex items-center justify-center">
+                <div class="w-1/2 bg-white flex items-center justify-center">
                     <img :src="'/storage/' + currentDesign.image_path" :alt="currentDesign.title" class="max-w-full max-h-full object-contain">
                 </div>
 
@@ -184,8 +184,23 @@
     </div>
     
     <x-logout-modal />
+    <x-alert />
     
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        @if (session('success'))
+            window.dispatchEvent(new CustomEvent('alert', { 
+                detail: { type: 'success', message: "{{ session('success') }}" }
+            }));
+        @endif
+
+        @if ($errors->any())
+            window.dispatchEvent(new CustomEvent('alert', {
+                 detail: { type: 'error', message: "{{ $errors->first() }}" }
+            }));
+        @endif
+    });
+    
     function galleryPage() {
         return {
             showDetailModal: false,
@@ -267,7 +282,6 @@
                         const a = document.createElement('a');
                         a.style.display = 'none';
                         a.href = url;
-                        // Set the download filename
                         a.download = 'mybatik-gallery.jpg';
                         document.body.appendChild(a);
                         a.click();
@@ -308,11 +322,13 @@
                 if (!confirm('Are you sure you want to delete this design? This action cannot be undone.')) {
                     return;
                 }
+                
                 fetch(`/designs/${this.currentDesign.id}`, {
                     method: 'DELETE',
                     headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' },
                 })
                 .then(res => {
+                    window.location.reload();
                     if (!res.ok) return Promise.reject(res);
                     return res.json();
                 })
@@ -367,10 +383,6 @@
             }
         }
     }
-
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('galleryPage', galleryPage);
-    });
     
     </script>
 </body>
