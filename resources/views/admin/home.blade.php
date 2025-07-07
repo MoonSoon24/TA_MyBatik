@@ -176,11 +176,15 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="`${promo.current_uses || 0} / ${promo.max_uses || '∞'}`"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="promo.expires_at ? new Date(promo.expires_at).toLocaleDateString('id-ID') : 'Never'"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <form :id="`delete-promo-form-${promo.id}`" :action="`/admin/promos/${promo.id}`" method="POST" class="inline-block">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" @click="openDeleteModal(promo.id, 'promo')" class="px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-md hover:bg-red-700 transition-colors">Delete</button>
-                                    </form>
+                                    <div class="flex items-center space-x-2">
+                                        <button @click="openEditModal(promo)" class="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-md hover:bg-blue-700 transition-colors">Edit</button>
+                                        
+                                        <form :id="`delete-promo-form-${promo.id}`" :action="`/admin/promos/${promo.id}`" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" @click="openDeleteModal(promo.id, 'promo')" class="px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-md hover:bg-red-700 transition-colors">Delete</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         </template>
@@ -284,6 +288,46 @@
             </form>
         </div>
     </div>
+    
+    <div x-show="editPromoModalOpen" @keydown.escape.window="editPromoModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
+        <div @click.away="editPromoModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-6">Edit Promo Code</h3>
+            <form x-if="editingPromo" :action="`/admin/promos/${editingPromo.id}`" method="POST" @submit.prevent="handleFormSubmit($event, 'Promo updated successfully!', 'Failed to update promo.')">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit_code" class="block text-sm font-medium text-gray-700">Promo Code</label>
+                        <input type="text" name="code" id="edit_code" x-model="editingPromo.code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
+                    </div>
+                    <div>
+                        <label for="edit_type" class="block text-sm font-medium text-gray-700">Type</label>
+                        <select name="type" id="edit_type" x-model="editingPromo.type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit_value" class="block text-sm font-medium text-gray-700">Value</label>
+                        <input type="number" name="value" id="edit_value" x-model="editingPromo.value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required step="any">
+                    </div>
+                    <div>
+                        <label for="edit_max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label>
+                        <input type="number" name="max_uses" id="edit_max_uses" x-model="editingPromo.max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                    </div>
+                    <div>
+                        <label for="edit_expires_at" class="block text-sm font-medium text-gray-700">Expires At (optional)</label>
+                        <input type="date" name="expires_at" id="edit_expires_at" :value="editingPromo.expires_at ? editingPromo.expires_at.split(' ')[0] : ''" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end gap-4">
+                    <button type="button" @click="editPromoModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <x-alert />
     <x-logout-modal />
@@ -308,6 +352,9 @@
 
                 createPromoModalOpen: false,
 
+                editPromoModalOpen: false,
+                editingPromo: null,
+
                 init() {
                     const hash = window.location.hash.substring(1);
                     if (['promos', 'orders', 'users'].includes(hash)) { this.activeTable = hash; }
@@ -316,13 +363,17 @@
                         if (['promos', 'orders', 'users'].includes(newHash)) { this.activeTable = newHash; }
                     });
 
-                    // Listen for session flashes to show alerts on page reload
                     @if (session('success'))
                         window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: '{{ session('success') }}' }}));
                     @endif
                     @if (session('error'))
                         window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: '{{ session('error') }}' }}));
                     @endif
+                },
+                
+                openEditModal(promo) {
+                    this.editingPromo = JSON.parse(JSON.stringify(promo));
+                    this.editPromoModalOpen = true;
                 },
 
                 openDeleteModal(id, type) {
@@ -385,12 +436,10 @@
                                 pdf.addImage(imageData, 'PNG', x, y, imgWidth, imgHeight);
                                 pdf.save(`order_${this.selectedOrder.id_pesanan}_details.pdf`);
                                 this.isExporting = false;
-                                // Fire success alert
                                 window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: 'Order exported to PDF successfully!' }}));
                             }).catch(error => {
                                 console.error('Error during PDF export:', error);
                                 this.isExporting = false;
-                                // Fire error alert
                                 window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Could not export to PDF.' }}));
                             });
                         });
@@ -398,7 +447,6 @@
                 },
 
                 async updateOrderStatus() {
-                    // This function remains the same as the previous step
                     if (!this.selectedOrder) return;
                     try {
                         const response = await fetch(`/admin/orders/${this.selectedOrder.id_pesanan}`, {
@@ -426,7 +474,10 @@
                         const response = await fetch(form.action, {
                             method: 'POST',
                             body: formData,
-                            headers: { 'Accept': 'application/json' }
+                            headers: { 
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
                         });
 
                         const data = await response.json();
@@ -434,12 +485,12 @@
                         if (!response.ok) {
                             let message = data.message || errorMessage;
                             if(data.errors) {
-                                message = Object.values(data.errors).join(' ');
+                                message = Object.values(data.errors).flat().join(' ');
                             }
                             throw new Error(message);
                         }
                         
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: successMessage }}));
+                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message || successMessage }}));
                         setTimeout(() => window.location.reload(), 1500);
 
                     } catch (error) {

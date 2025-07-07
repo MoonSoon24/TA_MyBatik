@@ -40,7 +40,7 @@ class PromoController extends Controller
 
         $promo->update($validatedData);
 
-        return redirect()->route('admin.home', '#promos')->with('success', 'Promo code updated successfully!');
+        return response()->json(['message' => 'Promo updated successfully!']);
     }
 
     public function destroy(Promo $promo)
