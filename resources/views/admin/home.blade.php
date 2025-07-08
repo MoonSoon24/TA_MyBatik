@@ -39,7 +39,7 @@
                 <div class="font-dancing text-4xl font-bold">my Batik</div>
                 <nav class="hidden md:flex space-x-8">
                     <a href="/admin" class="font-semibold text-gray-700 hover:text-black transition">Home</a>
-                    <a href="{{ route('admin.reports.sales') }}" class="font-semibold text-gray-700 hover:text-black transition">Reports</a>
+                    <a href="{{ route('admin.reports.index') }}" class="font-semibold text-gray-700 hover:text-black transition">Reports</a>
                 </nav>
             </div>
             

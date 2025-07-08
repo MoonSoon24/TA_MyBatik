@@ -72,7 +72,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('orders', AdminOrderController::class);
     Route::resource('promos', AdminPromoController::class);
 
-    Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('reports.sales');
+    Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/promo-usage', [\App\Http\Controllers\Admin\ReportController::class, 'promoUsage'])->name('reports.promo');
     Route::get('/reports/user-registrations', [\App\Http\Controllers\Admin\ReportController::class, 'userRegistrations'])->name('reports.users');
     Route::get('/reports/top-customers', [\App\Http\Controllers\Admin\ReportController::class, 'topCustomers'])->name('reports.customers');
