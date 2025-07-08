@@ -204,13 +204,18 @@
 <body class="bg-gray-100 font-sans text-gray-800 pb-28" style="padding-bottom: 0px;">
 
     <x-header />
-    <!-- main section -->
     <main class="w-full max-w-screen-2xl mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-8 flex flex-col lg:flex-row gap-8 mt-8">
 
         <div class="flex-grow lg:w-2/3 bg-gray-50 rounded-xl p-6 flex flex-col">
-            <div class="flex items-center bg-gray-200 rounded-full p-1 w-max mb-6">
-                <button id="shirtBtn" class="px-6 py-2 rounded-full text-lg font-semibold active-garment-btn">Shirt</button>
-                <button id="dressBtn" class="px-6 py-2 rounded-full text-lg font-semibold inactive-garment-btn">Dress</button>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="flex items-center bg-gray-200 rounded-full p-1 w-max">
+                    <button id="shirtBtn" class="px-6 py-2 rounded-full text-lg font-semibold active-garment-btn">Shirt</button>
+                    <button id="dressBtn" class="px-6 py-2 rounded-full text-lg font-semibold inactive-garment-btn">Dress</button>
+                </div>
+                <div class="flex items-center bg-gray-200 rounded-full p-1 w-max">
+                    <button id="longSleeveBtn" class="px-6 py-2 rounded-full text-lg font-semibold active-garment-btn">Long</button>
+                    <button id="shortSleeveBtn" class="px-6 py-2 rounded-full text-lg font-semibold inactive-garment-btn">Short</button>
+                </div>
             </div>
 
             <div id="canvas-container">
@@ -310,6 +315,9 @@
 
         const shirtBtn = document.getElementById('shirtBtn');
         const dressBtn = document.getElementById('dressBtn');
+        const longSleeveBtn = document.getElementById('longSleeveBtn');
+        const shortSleeveBtn = document.getElementById('shortSleeveBtn');
+
         const shirtContainer = document.getElementById('shirt-container');
         const dressContainer = document.getElementById('dress-container');
         const clothColorInput = document.getElementById('clothColor');
@@ -327,6 +335,8 @@
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
 
+        let activeGarment = 'shirt';
+        let activeSleeve = 'long';
         let activeMotifCanvas = null;
         let selectedElement = null;
         let currentAction = null;
@@ -335,6 +345,30 @@
         let undoStack = [];
         let redoStack = [];
         let lastSavedState = '';
+
+        const imagePaths = {
+            shirt: {
+                long: {
+                    mask: 'images/custom_shirt_design.png',
+                    outline: 'images/shirt_outline.png',
+                },
+                short: {
+                    mask: 'images/short_sleeve_shirt.png',
+                    outline: 'images/short_sleeve_shirt_outline.png',
+                }
+            },
+            dress: {
+                long: {
+                    mask: 'images/custom_dress_design.png',
+                    outline: 'images/dress_outline.png',
+                },
+                short: {
+                    mask: 'images/short_sleeve_dress.png',
+                    outline: 'images/short_sleeve_dress_outline.png',
+                }
+            }
+        };
+
 
         // undo/redo
         function saveState() {
@@ -574,27 +608,59 @@
             }
         });
 
-        // choose cloth template
-        function setActiveGarment(garment) {
-            if (garment === 'shirt') {
-                shirtBtn.classList.replace('inactive-garment-btn', 'active-garment-btn');
-                dressBtn.classList.replace('active-garment-btn', 'inactive-garment-btn');
-                shirtContainer.style.display = 'block';
-                dressContainer.style.display = 'none';
-                activeMotifCanvas = document.getElementById('motif-canvas-shirt');
+        function updateGarmentView() {
+            const paths = imagePaths[activeGarment][activeSleeve];
+            
+            shirtContainer.style.display = (activeGarment === 'shirt') ? 'block' : 'none';
+            dressContainer.style.display = (activeGarment === 'dress') ? 'block' : 'none';
+
+            activeMotifCanvas = document.getElementById(`motif-canvas-${activeGarment}`);
+            
+            const activeContainer = document.getElementById(`${activeGarment}-container`);
+            const activeOutline = document.getElementById(`garment-outline-${activeGarment}`);
+            
+            activeContainer.style.webkitMaskImage = `url('${paths.mask}')`;
+            activeContainer.style.maskImage = `url('${paths.mask}')`;
+            activeOutline.style.backgroundImage = `url('${paths.outline}')`;
+
+            if (activeGarment === 'dress' && activeSleeve === 'short') {
+                activeOutline.style.backgroundPosition = '-1px -1px';
             } else {
-                dressBtn.classList.replace('inactive-garment-btn', 'active-garment-btn');
-                shirtBtn.classList.replace('active-garment-btn', 'inactive-garment-btn');
-                dressContainer.style.display = 'block';
-                shirtContainer.style.display = 'none';
-                activeMotifCanvas = document.getElementById('motif-canvas-dress');
+                activeOutline.style.backgroundPosition = 'center';
             }
+            
             resetDesign(false);
             saveState();
         }
 
-        shirtBtn.addEventListener('click', () => setActiveGarment('shirt'));
-        dressBtn.addEventListener('click', () => setActiveGarment('dress'));
+        shirtBtn.addEventListener('click', () => {
+            activeGarment = 'shirt';
+            shirtBtn.classList.replace('inactive-garment-btn', 'active-garment-btn');
+            dressBtn.classList.replace('active-garment-btn', 'inactive-garment-btn');
+            updateGarmentView();
+        });
+
+        dressBtn.addEventListener('click', () => {
+            activeGarment = 'dress';
+            dressBtn.classList.replace('inactive-garment-btn', 'active-garment-btn');
+            shirtBtn.classList.replace('active-garment-btn', 'inactive-garment-btn');
+            updateGarmentView();
+        });
+
+        longSleeveBtn.addEventListener('click', () => {
+            activeSleeve = 'long';
+            longSleeveBtn.classList.replace('inactive-garment-btn', 'active-garment-btn');
+            shortSleeveBtn.classList.replace('active-garment-btn', 'inactive-garment-btn');
+            updateGarmentView();
+        });
+
+        shortSleeveBtn.addEventListener('click', () => {
+            activeSleeve = 'short';
+            shortSleeveBtn.classList.replace('inactive-garment-btn', 'active-garment-btn');
+            longSleeveBtn.classList.replace('active-garment-btn', 'inactive-garment-btn');
+            updateGarmentView();
+        });
+
 
         // color picker
         clothColorInput.addEventListener('input', (e) => {
@@ -658,11 +724,8 @@
             deselectElement(); 
             
             setTimeout(() => {
-                const activeContainer = shirtContainer.style.display === 'block' ? shirtContainer : dressContainer;
-                const activeOutline = shirtContainer.style.display === 'block' ? document.getElementById('garment-outline-shirt') : document.getElementById('garment-outline-dress');
-                
-                const maskUrl = getComputedStyle(activeContainer).getPropertyValue('-webkit-mask-image').replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(', ')[0];
-                const outlineUrl = getComputedStyle(activeOutline).getPropertyValue('background-image').replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(', ')[0];
+                const activeContainer = (activeGarment === 'shirt') ? shirtContainer : dressContainer;
+                const paths = imagePaths[activeGarment][activeSleeve];
 
                 const loadImage = (src) => new Promise((resolve, reject) => {
                     const img = new Image();
@@ -678,8 +741,8 @@
                         allowTaint: true,
                         useCORS: true 
                     }),
-                    loadImage(maskUrl),
-                    loadImage(outlineUrl)
+                    loadImage(paths.mask),
+                    loadImage(paths.outline)
                 ]).then(([designCanvas, maskImage, outlineImage]) => {
                     const finalCanvas = document.createElement('canvas');
                     const ctx = finalCanvas.getContext('2d');
@@ -742,8 +805,7 @@
 
             return "#" + r + g + b;
         }
-
-        setActiveGarment('shirt');
+        updateGarmentView();
     });
     </script>
 </body>
