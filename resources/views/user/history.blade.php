@@ -42,7 +42,7 @@
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Your Order History</h1>
 
             <div class="flex flex-col md:flex-row gap-4 mb-8">
-                {{-- Search and Sort UI --}}
+
                 <div class="relative flex-grow">
                     <input type="search" id="search-input" placeholder="Search by Order ID, Name, Status..." class="w-full pl-4 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <svg class="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -63,7 +63,7 @@
                              data-date="{{ optional($riwayat->order->tanggal_pesan)->timestamp }}"
                              data-status="{{ strtolower($riwayat->order->status) }}"
                              data-search-content="{{ strtolower($riwayat->order->id_pesanan . ' ' . $riwayat->order->nama . ' ' . $riwayat->order->email . ' ' . $riwayat->order->status) }}">
-                            {{-- Order Header --}}
+
                             <div class="bg-gray-50 p-4 border-b border-gray-200 flex flex-wrap justify-between items-center gap-4">
                                 <div><p class="text-sm text-gray-600">Order Placed</p><p class="font-semibold text-gray-800">{{ optional($riwayat->order->tanggal_pesan)->format('M d, Y') }}</p></div>
                                 <div><p class="text-sm text-gray-600">Total</p><p class="font-semibold text-gray-800">Rp {{ number_format($riwayat->order->total, 0, ',', '.') }}</p></div>
@@ -241,13 +241,11 @@
         function updateOrdersDisplay() {
             const searchTerm = searchInput.value.toLowerCase();
             
-            // Step 1: Filter the original list of cards
             let visibleCards = orderCards.filter(card => {
                 const content = card.dataset.searchContent || '';
                 return content.includes(searchTerm);
             });
 
-            // Handle visibility of all cards based on the search term
             orderCards.forEach(card => {
                 const content = card.dataset.searchContent || '';
                 const isVisible = content.includes(searchTerm);
@@ -261,7 +259,6 @@
                 noResultsMessage.classList.toggle('hidden', hasVisibleCards || searchTerm === '');
             }
 
-            // Step 2: Sort the filtered list
             const sortValue = sortSelect.value;
             visibleCards.sort((a, b) => {
                 const dateA = parseInt(a.dataset.date, 10);
@@ -271,7 +268,7 @@
 
                 if (sortValue === 'oldest') {
                     return (dateA - dateB) || (idA - idB);
-                } else { // 'newest'
+                } else {
                     return (dateB - dateA) || (idB - idA);
                 }
             });

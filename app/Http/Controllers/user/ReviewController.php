@@ -10,13 +10,11 @@ class ReviewController extends Controller
 {
     public function index()
     {
-        // Load the reviews directly in this controller.
         $reviews = Review::with('user')
                          ->latest()
                          ->limit(3)
                          ->get();
 
-        // Pass the $reviews variable to the 'home' view.
         return view('home', ['reviews' => $reviews]);
     }
 

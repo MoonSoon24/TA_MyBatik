@@ -226,7 +226,6 @@
                 document.body.classList.remove('modal-active');
             }
 
-            // Note modal logic
             addNoteBtn.addEventListener('click', () => openModal(noteModal));
             document.getElementById('close-note-modal-btn').addEventListener('click', () => closeModal(noteModal));
             document.getElementById('save-note-btn').addEventListener('click', () => {
@@ -237,8 +236,6 @@
                 if (event.target === noteModal) closeModal(noteModal);
             });
 
-
-            // --- **NEW SCRIPT TO FIX PROMO SUBMISSION** ---
             const applyPromoBtn = document.getElementById('apply-promo-btn');
             if (applyPromoBtn) {
                 applyPromoBtn.addEventListener('click', () => {
@@ -248,33 +245,28 @@
                         return;
                     }
                     
-                    // Create a new form element in memory
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = '{{ route("promo.apply") }}';
                     
-                    // Add CSRF token
                     const csrfToken = document.createElement('input');
                     csrfToken.type = 'hidden';
                     csrfToken.name = '_token';
                     csrfToken.value = '{{ csrf_token() }}';
                     form.appendChild(csrfToken);
                     
-                    // Add promo code input
                     const promoInput = document.createElement('input');
                     promoInput.type = 'hidden';
                     promoInput.name = 'promo_code';
                     promoInput.value = promoCodeInput.value;
                     form.appendChild(promoInput);
                     
-                    // Append the form to the body, submit it, and then remove it
                     document.body.appendChild(form);
                     form.submit();
                     document.body.removeChild(form);
                 });
             }
 
-            // Main checkout form submission logic
             checkoutForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
@@ -305,7 +297,6 @@
             }
 
             function finalizeOrder() {
-                // This is the only place where the main form is submitted
                 checkoutForm.submit();
             }
 
