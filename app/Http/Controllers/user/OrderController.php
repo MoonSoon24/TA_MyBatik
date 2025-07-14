@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
 use Exception;
 
 class OrderController extends Controller
@@ -47,16 +48,98 @@ class OrderController extends Controller
     
     public function store(Request $request)
     {
+        Log::info('OrderController@store called with request data: ', $request->all());
+        // --- 1. Validation (remains the same) ---
         $validatedData = $request->validate([
-            'size' => 'required|in:XS,S,M,L,XL',
-            'design_file' => 'required|image|mimes:png,jpeg,jpg|max:2048',
-        ]);
+        'size' => 'required|in:XS,S,M,L,XL,custom',
+        'design_file' => 'required|image|mimes:png,jpeg,jpg|max:2048',
+        'garment_type' => 'required|in:shirt,dress',
 
+        // --- Corrected Shirt Custom Measurements ---
+        'custom_body_length' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'shirt'),
+            'nullable', 'numeric', 'min:1'
+        ],
+        'custom_sleeve_length' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'shirt'),
+            'nullable', 'numeric', 'min:1'
+        ],
+        'custom_shoulder_width' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'shirt'),
+            'nullable', 'numeric', 'min:1'
+        ],
+        'custom_body_width' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'shirt'),
+            'nullable', 'numeric', 'min:1'
+        ],
+        'custom_neck_size' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'shirt'),
+            'nullable', 'numeric', 'min:1'
+        ],
+
+        // --- Corrected Dress Custom Measurements ---
+        'custom_dress_body_length' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'dress'),
+            'nullable', 'numeric', 'min:1'
+        ],
+        'custom_dress_sleeve_length' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'dress'),
+            'nullable', 'numeric', 'min:1'
+        ],
+        'custom_dress_shoulder_width' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'dress'),
+            'nullable', 'numeric', 'min:1'
+        ],
+        'custom_dress_body_width' => [
+            Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'dress'),
+            'nullable', 'numeric', 'min:1'
+        ],
+    ]);
+
+        // --- 2. Process Size Information ---
+        $sizeDetails = ''; // Initialize the variable for the final string
+
+        if ($validatedData['size'] === 'custom') {
+            // If the size is custom, build the detailed string
+            $sizeDetails = 'custom: ';
+            $measurements = [];
+
+            if ($validatedData['garment_type'] === 'shirt') {
+                // For a shirt, use the five shirt measurements
+                $measurements = [
+                    'bl:' . $validatedData['custom_body_length'],
+                    'sl:' . $validatedData['custom_sleeve_length'],
+                    'sw:' . $validatedData['custom_shoulder_width'],
+                    'bw:' . $validatedData['custom_body_width'],
+                    'ns:' . $validatedData['custom_neck_size'],
+                ];
+            } else { // Otherwise, it's a dress
+                // For a dress, use the four dress measurements
+                $measurements = [
+                    'bl:' . $validatedData['custom_dress_body_length'],
+                    'sl:' . $validatedData['custom_dress_sleeve_length'],
+                    'sw:' . $validatedData['custom_dress_shoulder_width'],
+                    'bw:' . $validatedData['custom_dress_body_width'],
+                ];
+            }
+            // Join the parts into a single string: "bl:70, sl:70, ..."
+            $sizeDetails .= implode(', ', $measurements);
+        } else {
+            // If it's a standard size, just use the value directly (e.g., "XS", "S")
+            $sizeDetails = $validatedData['size'];
+        }
+
+        // --- 3. Store File and Session Data ---
         $designPath = $request->file('design_file')->store('designs', 'public');
+
         $request->session()->put('order_details', [
-            'ukuran' => $validatedData['size'],
+            // Use the newly created $sizeDetails string here
+            'ukuran' => $sizeDetails,
             'desain' => $designPath,
         ]);
+
+        // Optional: Log the session data to check if it's correct
+Log::info('Order details saved to session: ', $request->session()->get('order_details'));
 
         return redirect()->route('checkout.show');
     }

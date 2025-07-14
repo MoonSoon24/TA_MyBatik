@@ -47,12 +47,18 @@
         .text-cyan-600 {
             color: #0891b2;
         }
+        .custom-size-input {
+            width: 60px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 4px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 pb-28" style="padding-bottom: 0px;">
 
     <x-header />
-    <!-- main section -->
     <main class="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-10 mt-8 mb-8">
         <div class="mb-8">
             <h2 class="text-3xl font-bold mb-2">Measurements</h2>
@@ -66,7 +72,6 @@
         <form action="{{ route('order.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                <!-- left side -->
                 <div class="flex flex-col justify-between">
                     <div>
                         <h4 class="text-xl font-bold mb-4">Choose Your Size</h4>
@@ -91,6 +96,10 @@
                                 <input type="radio" name="size" value="XL" class="h-5 w-5 text-cyan-600 focus:ring-cyan-500">
                                 <span class="ml-4 text-lg">XL (Extra Large)</span>
                             </label>
+                            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                                <input type="radio" name="size" value="custom" class="h-5 w-5 text-cyan-600 focus:ring-cyan-500">
+                                <span class="ml-4 text-lg">Custom Size</span>
+                            </label>
                         </div>
                     </div>
                     <div class="mt-8">
@@ -98,7 +107,6 @@
                     </div>
                 </div>
 
-                <!-- right side -->
                 <div>
                     <div class="flex justify-between items-center mb-4">
                         <h4 class="text-xl font-bold">Size Guide</h4>
@@ -134,6 +142,13 @@
                                 <tr data-size="M"><td class="size-col">M</td><td>73</td><td>83</td><td>46.5</td><td>57</td><td>41</td></tr>
                                 <tr data-size="L"><td class="size-col">L</td><td>75</td><td>85.5</td><td>48</td><td>60</td><td>43</td></tr>
                                 <tr data-size="XL"><td class="size-col">XL</td><td>78</td><td>88</td><td>50</td><td>64</td><td>45</td></tr>
+                                <tr data-size="custom" style="display: none;"><td class="size-col">Custom</td>
+                                    <td><input type="number" name="custom_body_length" class="custom-size-input"></td>
+                                    <td><input type="number" name="custom_sleeve_length" class="custom-size-input"></td>
+                                    <td><input type="number" name="custom_shoulder_width" class="custom-size-input"></td>
+                                    <td><input type="number" name="custom_body_width" class="custom-size-input"></td>
+                                    <td><input type="number" name="custom_neck_size" class="custom-size-input"></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -163,9 +178,17 @@
                                 <tr data-size="M"><td class="size-col">M</td><td>114</td><td>62</td><td>40</td><td>54</td></tr>
                                 <tr data-size="L"><td class="size-col">L</td><td>116</td><td>63</td><td>41</td><td>57</td></tr>
                                 <tr data-size="XL"><td class="size-col">XL</td><td>118</td><td>64</td><td>42</td><td>60</td></tr>
+                                <tr data-size="custom" style="display: none;"><td class="size-col">Custom</td>
+                                    <td><input type="number" name="custom_dress_body_length" class="custom-size-input"></td>
+                                    <td><input type="number" name="custom_dress_sleeve_length" class="custom-size-input"></td>
+                                    <td><input type="number" name="custom_dress_shoulder_width" class="custom-size-input"></td>
+                                    <td><input type="number" name="custom_dress_body_width" class="custom-size-input"></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
+
+                    <input type="hidden" name="garment_type" id="garment-type-input" value="shirt">
 
                     <div id="preview-container" class="mt-6 text-center" style="display: none;">
                         <h4 class="text-lg font-bold mb-4 text-gray-700">Your Design Preview</h4>
@@ -194,18 +217,32 @@
         const dressTable = document.getElementById('dress-size-table');
         const garmentToggleBtn = document.getElementById('garment-toggle-btn');
         const garmentTypeText = document.getElementById('garment-type-text');
-        const guideImage = document.getElementById('guide-image');
         const designFileInput = document.getElementById('design_file');
         const imagePreview = document.getElementById('image-preview');
         const previewContainer = document.getElementById('preview-container');
-        const shirtGuideImage = document.getElementById('shirt-guide-image');
-        const dressGuideImage = document.getElementById('dress-guide-image');
+        const customShirtRow = document.querySelector('#shirt-size-table tr[data-size="custom"]');
+        const customDressRow = document.querySelector('#dress-size-table tr[data-size="custom"]');
+        const garmentTypeInput = document.getElementById('garment-type-input');
+        
 
         function highlightRow(selectedValue) {
             const activeTable = shirtTable.style.display !== 'none' ? shirtTable : dressTable;
             activeTable.querySelectorAll('tbody tr').forEach(row => {
-                row.classList.toggle('selected', row.dataset.size === selectedValue);
+                if(row.dataset.size !== 'custom'){
+                    row.classList.toggle('selected', row.dataset.size === selectedValue);
+                }
             });
+
+            if(selectedValue === 'custom'){
+                if(shirtTable.style.display !== 'none'){
+                    customShirtRow.style.display = 'table-row';
+                } else {
+                    customDressRow.style.display = 'table-row';
+                }
+            } else {
+                customShirtRow.style.display = 'none';
+                customDressRow.style.display = 'none';
+            }
         }
 
         sizeOptions.addEventListener('change', (e) => {
@@ -216,26 +253,23 @@
         
         garmentToggleBtn.addEventListener('click', () => {
             const isShirtVisible = shirtTable.style.display !== 'none';
-            
+
             if (isShirtVisible) {
                 shirtTable.style.display = 'none';
                 dressTable.style.display = 'block';
                 garmentTypeText.textContent = 'Dress';
-                guideImage.src = dressGuideImage;
-                guideImage.alt = 'Dress Measurement Guide';
+                garmentTypeInput.value = 'dress';
             } else {
                 shirtTable.style.display = 'block';
                 dressTable.style.display = 'none';
                 garmentTypeText.textContent = 'Shirt';
-                guideImage.src = shirtGuideImage;
-                guideImage.alt = 'Shirt Measurement Guide';
+                garmentTypeInput.value = 'shirt';
             }
             
-            const xsRadio = document.querySelector('input[name="size"][value="XS"]');
-            if(xsRadio) {
-                xsRadio.checked = true;
+            const selectedRadio = document.querySelector('input[name="size"]:checked');
+            if(selectedRadio){
+                highlightRow(selectedRadio.value);
             }
-            highlightRow('XS');
         });
 
         designFileInput.addEventListener('change', (event) => {

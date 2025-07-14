@@ -65,7 +65,10 @@
                 <div class="py-6">
                     <h4 class="font-bold text-lg mb-4">Item Details</h4>
                     <div class="flex items-center">
-                        <img src="{{ asset('storage/' . $order->desain) }}" alt="Batik Shirt" class="w-20 h-20 rounded-lg border p-1 mr-4 object-cover">
+                        <div class="w-20 h-20 flex-shrink-0">
+                                        <img src="{{ asset('storage/' . $order->desain) ? asset('storage/' . $order->desain) : 'https://placehold.co/1088x544' }}" alt="Batik Design" class="w-full h-full object-contain rounded-md">
+                                    </div>
+                        
                         <div>
                             <h5 class="font-semibold text-lg">Custom Batik Shirt</h5>
                             <p class="text-gray-600 text-sm">Size: {{ $order->ukuran }}</p>

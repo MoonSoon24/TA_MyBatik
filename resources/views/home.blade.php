@@ -133,7 +133,7 @@
             <p class="mb-2">Have a question? We'd love to hear from you.</p>
             <p class="font-semibold">mybatik@mybatik.com</p>
             <p class="mt-1">+62 21 1234 5678</p>
-            <p class="mt-1">Jalan Batik No. 10, Jakarta, Indonesia</p>
+            <p class="mt-1">Jalan Batik No. 10, Yogyakarta, Indonesia</p>
             <div class="flex justify-center space-x-6 mt-6">
                 <a href="#" class="hover:text-gray-300">Facebook</a>
                 <a href="#" class="hover:text-gray-300">Instagram</a>
