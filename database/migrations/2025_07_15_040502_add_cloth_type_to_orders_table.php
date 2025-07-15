@@ -6,13 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
-{
-    Schema::table('orders', function (Blueprint $table) {
-        $table->string('promo_code')->nullable()->after('id_user');
-        $table->decimal('discount_amount', 15, 2)->default(0)->after('promo_code');
-    });
-}
+    {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->string('cloth_type')->after('ukuran')->nullable();
+        });
+    }
 
     /**
      * Reverse the migrations.
@@ -20,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            //
+            $table->dropColumn('cloth_type');
         });
     }
 };

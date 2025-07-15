@@ -63,19 +63,87 @@
             -webkit-mask-position: center;
             mask-position: center;
         }
-        .canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .motif-canvas { background-color: #ffffff; }
-        .garment-outline { background-size: contain; background-position: center; background-repeat: no-repeat; pointer-events: none; }
-        .motif-image { position: absolute; cursor: grab; user-select: none; -webkit-user-drag: none; }
-        #control-box { position: absolute; border: 2px dashed #0ea5e9; pointer-events: none; display: none; }
-        .handle { position: absolute; width: 12px; height: 12px; background-color: #0ea5e9; border: 2px solid white; border-radius: 50%; pointer-events: auto; }
-        .handle.resize { cursor: nwse-resize; }
-        .handle.br { bottom: -8px; right: -8px; }
-        .handle.bl { bottom: -8px; left: -8px; cursor: nesw-resize; }
-        .handle.tr { top: -8px; right: -8px; cursor: nesw-resize; }
-        .handle.tl { top: -8px; left: -8px; }
-        .handle.rotate { top: -25px; left: 50%; transform: translateX(-50%); cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%230ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>') 12 12, auto; width: 16px; height: 16px; }
-        #delete-btn { position: absolute; top: -12px; right: -12px; width: 24px; height: 24px; background-color: red; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; font-weight: bold; font-size: 14px; }
+        .canvas-layer { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+        }
+        .motif-canvas { 
+            background-color: #ffffff; 
+        }
+        .garment-outline { 
+            background-size: contain; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            pointer-events: none; 
+        }
+        .motif-image { 
+            position: absolute; 
+            cursor: grab; 
+            user-select: none; 
+            -webkit-user-drag: none; 
+        }
+        #control-box { 
+            position: absolute; 
+            border: 2px dashed #0ea5e9; 
+            pointer-events: none; 
+            display: none; }
+        .handle { position: absolute; 
+            width: 12px; 
+            height: 12px; 
+            background-color: #0ea5e9; 
+            border: 2px solid white; 
+            border-radius: 50%; 
+            pointer-events: auto; 
+        }
+        .handle.resize { 
+            cursor: nwse-resize; 
+        }
+        .handle.br { 
+            bottom: -8px; 
+            right: -8px; 
+        }
+        .handle.bl { 
+            bottom: -8px; 
+            left: -8px; 
+            cursor: nesw-resize; 
+        }
+        .handle.tr { 
+            top: -8px; 
+            right: -8px; 
+            cursor: nesw-resize; 
+        }
+        .handle.tl { 
+            top: -8px; 
+            left: -8px; 
+        }
+        .handle.rotate { 
+            top: -25px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%230ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>') 12 12, auto; 
+            width: 16px; 
+            height: 16px; 
+        }
+        #delete-btn { 
+            position: absolute; 
+            top: -12px; 
+            right: -12px; 
+            width: 24px; 
+            height: 24px; 
+            background-color: red; 
+            color: white; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            pointer-events: auto; 
+            font-weight: bold; 
+            font-size: 14px; 
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
@@ -598,7 +666,6 @@
             }, 100);
         });
 
-        // INITIAL SETUP
         updateGarmentView();
         setActiveCanvas(canvasContainerFront);
         saveState();

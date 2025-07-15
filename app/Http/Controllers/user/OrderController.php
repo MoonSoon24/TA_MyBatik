@@ -18,28 +18,37 @@ class OrderController extends Controller
 {
     public function applyPromo(Request $request)
     {
-        $request->validate(['promo_code' => 'required|string']);
-        $promo = Promo::where('code', $request->promo_code)->first();
+        $request->validate([
+            'promo_code' => 'required|string',
+        ]);
+
+        $promoCode = $request->input('promo_code');
+        $promo = Promo::where('code', $promoCode)->first();
 
         if (!$promo) {
-            return back()->withErrors(['promo_code' => 'Invalid promo code.']);
-        }
-        if ($promo->expires_at && $promo->expires_at < now()) {
-            return back()->withErrors(['promo_code' => 'This promo code has expired.']);
-        }
-        if ($promo->max_uses && $promo->current_uses >= $promo->max_uses) {
-            return back()->withErrors(['promo_code' => 'This promo code has reached its usage limit.']);
+            return response()->json(['success' => false, 'message' => 'Invalid promo code.']);
         }
 
+        if ($promo->expires_at && $promo->expires_at < now()) {
+            return response()->json(['success' => false, 'message' => 'This promo code has expired.']);
+        }
+
+        if ($promo->max_uses && $promo->current_uses >= $promo->max_uses) {
+            return response()->json(['success' => false, 'message' => 'This promo code has reached its usage limit.']);
+        }
         Session::put('promo', [
             'code' => $promo->code,
             'type' => $promo->type,
-            'value' => $promo->value
+            'value' => $promo->value,
         ]);
 
-        return back()->with('success', 'Promo code applied successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Promo code applied successfully!',
+            'promo' => session('promo')
+        ]);
     }
-    
+
     public function removePromo(Request $request)
     {
         $request->session()->forget('promo');
@@ -49,13 +58,11 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         Log::info('OrderController@store called with request data: ', $request->all());
-        // --- 1. Validation (remains the same) ---
         $validatedData = $request->validate([
         'size' => 'required|in:XS,S,M,L,XL,custom',
         'design_file' => 'required|image|mimes:png,jpeg,jpg|max:2048',
         'garment_type' => 'required|in:shirt,dress',
 
-        // --- Corrected Shirt Custom Measurements ---
         'custom_body_length' => [
             Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'shirt'),
             'nullable', 'numeric', 'min:1'
@@ -77,7 +84,6 @@ class OrderController extends Controller
             'nullable', 'numeric', 'min:1'
         ],
 
-        // --- Corrected Dress Custom Measurements ---
         'custom_dress_body_length' => [
             Rule::requiredIf(fn() => $request->input('size') === 'custom' && $request->input('garment_type') === 'dress'),
             'nullable', 'numeric', 'min:1'
@@ -96,16 +102,13 @@ class OrderController extends Controller
         ],
     ]);
 
-        // --- 2. Process Size Information ---
-        $sizeDetails = ''; // Initialize the variable for the final string
+        $sizeDetails = '';
 
         if ($validatedData['size'] === 'custom') {
-            // If the size is custom, build the detailed string
             $sizeDetails = 'custom: ';
             $measurements = [];
 
             if ($validatedData['garment_type'] === 'shirt') {
-                // For a shirt, use the five shirt measurements
                 $measurements = [
                     'bl:' . $validatedData['custom_body_length'],
                     'sl:' . $validatedData['custom_sleeve_length'],
@@ -113,8 +116,7 @@ class OrderController extends Controller
                     'bw:' . $validatedData['custom_body_width'],
                     'ns:' . $validatedData['custom_neck_size'],
                 ];
-            } else { // Otherwise, it's a dress
-                // For a dress, use the four dress measurements
+            } else {
                 $measurements = [
                     'bl:' . $validatedData['custom_dress_body_length'],
                     'sl:' . $validatedData['custom_dress_sleeve_length'],
@@ -122,24 +124,17 @@ class OrderController extends Controller
                     'bw:' . $validatedData['custom_dress_body_width'],
                 ];
             }
-            // Join the parts into a single string: "bl:70, sl:70, ..."
             $sizeDetails .= implode(', ', $measurements);
         } else {
-            // If it's a standard size, just use the value directly (e.g., "XS", "S")
             $sizeDetails = $validatedData['size'];
         }
 
-        // --- 3. Store File and Session Data ---
         $designPath = $request->file('design_file')->store('designs', 'public');
 
         $request->session()->put('order_details', [
-            // Use the newly created $sizeDetails string here
             'ukuran' => $sizeDetails,
             'desain' => $designPath,
         ]);
-
-        // Optional: Log the session data to check if it's correct
-Log::info('Order details saved to session: ', $request->session()->get('order_details'));
 
         return redirect()->route('checkout.show');
     }
@@ -178,10 +173,19 @@ Log::info('Order details saved to session: ', $request->session()->get('order_de
             'phone' => 'required|string|min:10|max:15',
             'payment_method' => 'required|in:bank_transfer,qris',
             'additional_note' => 'nullable|string|max:1000',
+            'cloth_type' => 'required|string|in:kain katun,kain mori,kain sutera',
         ]);
 
         $basePrice = 300000;
-        $promoDetails = $this->getPromoDetails($basePrice);
+        $fabricCost = 0;
+        if ($validatedCheckoutData['cloth_type'] === 'kain mori') {
+            $fabricCost = 100000;
+        } elseif ($validatedCheckoutData['cloth_type'] === 'kain sutera') {
+            $fabricCost = 300000;
+        }
+
+        $totalBeforeDiscount = $basePrice + $fabricCost;
+        $promoDetails = $this->getPromoDetails($totalBeforeDiscount);
         
         $user = Auth::user();
         $order = null;
@@ -189,19 +193,20 @@ Log::info('Order details saved to session: ', $request->session()->get('order_de
         try {
             DB::transaction(function () use ($validatedCheckoutData, $orderDetails, $user, &$order, $promoDetails) {
                 $order = Order::create([
-                    'id_user'       => $user->id,
-                    'email'         => $user->email,
-                    'nama'          => $validatedCheckoutData['first_name'] . ' ' . $validatedCheckoutData['last_name'],
-                    'alamat'        => $validatedCheckoutData['street_address'],
-                    'no_telepon'    => $validatedCheckoutData['phone'],
-                    'ukuran'        => $orderDetails['ukuran'],
-                    'desain'        => $orderDetails['desain'],
-                    'metode_bayar'  => $validatedCheckoutData['payment_method'],
-                    'tanggal_pesan' => now(),
-                    'status'        => 'Pending',
-                    'nota'          => $validatedCheckoutData['additional_note'],
-                    'total'         => $promoDetails['finalPrice'],
-                    'promo_code'    => $promoDetails['promoCodeUsed'],
+                    'id_user'         => $user->id,
+                    'email'           => $user->email,
+                    'nama'            => $validatedCheckoutData['first_name'] . ' ' . $validatedCheckoutData['last_name'],
+                    'alamat'          => $validatedCheckoutData['street_address'],
+                    'no_telepon'      => $validatedCheckoutData['phone'],
+                    'ukuran'          => $orderDetails['ukuran'],
+                    'cloth_type'      => $validatedCheckoutData['cloth_type'],
+                    'desain'          => $orderDetails['desain'],
+                    'metode_bayar'    => $validatedCheckoutData['payment_method'],
+                    'tanggal_pesan'   => now(),
+                    'status'          => 'Pending',
+                    'nota'            => $validatedCheckoutData['additional_note'],
+                    'total'           => $promoDetails['finalPrice'],
+                    'promo_code'      => $promoDetails['promoCodeUsed'],
                     'discount_amount' => $promoDetails['discountAmount'],
                 ]);
 

@@ -29,6 +29,40 @@
         .modal-content { transition: all 0.3s ease-out; }
         .modal-container { transition: opacity 0.3s ease; }
         body.modal-active { overflow: hidden; }
+
+        .fabric-option {
+            display: block;
+            border: 2px solid #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .fabric-option:hover {
+            border-color: #67e8f9; /* Tailwind cyan-300 */
+        }
+        .fabric-option.selected {
+            border-color: #0891b2; /* Tailwind cyan-600 */
+            background-color: #ecfeff; /* Tailwind cyan-50 */
+            box-shadow: 0 0 0 1px #0891b2;
+        }
+        .fabric-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #0891b2;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 pb-28">
@@ -76,56 +110,79 @@
                     <div class="bg-white p-6 md:p-8 rounded-xl shadow-md">
                         <h2 class="text-2xl font-semibold mb-6">Order Summary</h2>
                         
-                        <div class="flex items-center mb-6">
+                        <div class="flex items-start mb-4">
                             <img src="{{ $uploadedBatikUrl ?? 'https://placehold.co/80x80/e0e0e0/757575?text=No+Image' }}" alt="Custom Batik Design" class="w-20 h-20 rounded-lg border p-1 mr-4 object-cover">
-                            <div>
+                            <div class="w-full">
                                 <h3 class="font-semibold text-lg">Custom Batik</h3>
                                 <p class="text-gray-600 text-sm">Size: {{ session('order_details.ukuran') ?? 'N/A' }}</p>
                             </div>
                         </div>
 
+                        <div class="mb-6">
+                            <h4 class="text-md font-semibold text-gray-800 mb-3">Choose Your Fabric</h4>
+                            <div id="fabric-options" class="space-y-3">
+                                <label class="fabric-option">
+                                    <input type="radio" name="cloth_type" value="kain katun" class="hidden">
+                                    <div class="fabric-details">
+                                        <span class="font-semibold">Kain Katun</span>
+                                        <span class="text-sm text-gray-500">Standard</span>
+                                    </div>
+                                </label>
+                                <label class="fabric-option">
+                                    <input type="radio" name="cloth_type" value="kain mori" class="hidden">
+                                    <div class="fabric-details">
+                                        <span class="font-semibold">Kain Mori</span>
+                                        <span class="text-sm text-cyan-600 font-medium">+ Rp. 100.000</span>
+                                    </div>
+                                </label>
+                                <label class="fabric-option">
+                                    <input type="radio" name="cloth_type" value="kain sutera" class="hidden">
+                                    <div class="fabric-details">
+                                        <span class="font-semibold">Kain Sutera</span>
+                                        <span class="text-sm text-cyan-600 font-medium">+ Rp. 300.000</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="space-y-3 text-gray-700">
                             <div class="flex justify-between text-gray-700">
-                        <span>Product Price</span>
-                        <span class="font-medium">Rp. 250.000</span>
-                    </div>
-                    <div class="flex justify-between text-gray-700">
-                        <span>Customization</span>
-                        <span class="font-medium">Rp. 50.000</span>
-                    </div>
-                            @if($discountAmount > 0)
-                            <div class="flex justify-between text-green-600 font-semibold">
-                                <span>Discount ({{ session('promo.code') }})</span>
-                                <span>- Rp. {{ number_format($discountAmount, 0, ',', '.') }}</span>
+                                <span>Product Price</span>
+                                <span class="font-medium">Rp. 250.000</span>
                             </div>
-                            @endif
+                            <div class="flex justify-between text-gray-700">
+                                <span>Customization</span>
+                                <span class="font-medium">Rp. 50.000</span>
+                            </div>
+                            <div id="fabric-cost-line" class="flex justify-between text-gray-700" style="display: none;">
+                                <span>Fabric Cost</span>
+                                <span id="fabric-cost" class="font-medium"></span>
+                            </div>
+                            <div id="discount-line" class="flex justify-between text-green-600 font-semibold" style="display: none;">
+                                <span>Discount (<span id="promo-code-text"></span>)</span>
+                                <span id="discount-amount-text"></span>
+                            </div>
                         </div>
 
                         <div class="border-t my-4"></div>
 
                         <div class="flex justify-between font-bold text-lg mb-6">
                             <span>Total</span>
-                            <span>Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span>
+                            <span id="total-price">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span>
                         </div>
 
                         <div class="mb-4">
-                            @if (session()->has('promo'))
-                                <div class="flex justify-between items-center bg-green-100 text-green-800 p-3 rounded-lg">
-                                    <p>Promo applied: <span class="font-bold">{{ session('promo.code') }}</span></p>
-                                    <a href="{{ route('promo.remove') }}" class="font-semibold text-sm hover:underline">Remove</a>
-                                </div>
-                            @else
+                            <div id="promo-form-container">
                                 <div class="flex gap-2">
                                     <input type="text" id="promo-code-input" placeholder="Enter Promo Code" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 transition">
                                     <button type="button" id="apply-promo-btn" class="bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-all duration-300">Apply</button>
                                 </div>
-                            @endif
-
-                            @if ($errors->has('promo_code'))
-                                <p class="mt-2 text-sm text-red-600">{{ $errors->first('promo_code') }}</p>
-                            @elseif (session('success'))
-                                <p class="mt-2 text-sm text-green-600">{{ session('success') }}</p>
-                            @endif
+                            </div>
+                            <div id="promo-applied-container" class="flex justify-between items-center bg-green-100 text-green-800 p-3 rounded-lg" style="display: none;">
+                                <p>Promo applied: <span id="applied-promo-code" class="font-bold"></span></p>
+                                <a href="{{ route('promo.remove') }}" class="font-semibold text-sm hover:underline">Remove</a>
+                            </div>
+                            <p id="promo-message" class="mt-2 text-sm"></p>
                         </div>
 
                         <h3 class="text-lg font-semibold mb-4">Payment Methods</h3>
@@ -179,7 +236,7 @@
             </div>
             <div class="flex justify-between items-center border-t pt-6">
                <p class="text-red-500 font-semibold text-sm">For safety reason, this is the only time you will<br>see this information</p>
-               <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span></p>
+               <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="bank-total-price">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span></p>
             </div>
         </div>
     </div>
@@ -196,7 +253,7 @@
                 </div>
             </div>
              <div class="flex justify-end items-center border-t pt-6">
-                 <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span></p>
+                 <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="qris-total-price">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span></p>
             </div>
         </div>
     </div>
@@ -211,7 +268,91 @@
             const closeBankModalBtn = document.getElementById('close-bank-modal-btn');
             const closeQrisModalBtn = document.getElementById('close-qris-modal-btn');
             const checkoutForm = document.getElementById('checkout-form');
+            
+            const fabricOptions = document.querySelectorAll('input[name="cloth_type"]');
+            const fabricLabels = document.querySelectorAll('.fabric-option');
 
+            const basePriceWithoutDiscount = 300000;
+
+            let promoState = {
+                code: "{{ session('promo.code') ?? '' }}",
+                type: "{{ session('promo.type') ?? '' }}",
+                value: {{ session('promo.value') ?? 0 }}
+            };
+
+            const fabricCostLineEl = document.getElementById('fabric-cost-line');
+            const fabricCostEl = document.getElementById('fabric-cost');
+            const discountLineEl = document.getElementById('discount-line');
+            const promoCodeTextEl = document.getElementById('promo-code-text');
+            const discountAmountTextEl = document.getElementById('discount-amount-text');
+            const totalPriceEl = document.getElementById('total-price');
+            const bankTotalPriceEl = document.getElementById('bank-total-price');
+            const qrisTotalPriceEl = document.getElementById('qris-total-price');
+            const promoMessageEl = document.getElementById('promo-message');
+            const promoFormContainer = document.getElementById('promo-form-container');
+            const promoAppliedContainer = document.getElementById('promo-applied-container');
+            const appliedPromoCodeEl = document.getElementById('applied-promo-code');
+
+            function calculateAndUpdatePrice() {
+                const selectedFabric = document.querySelector('input[name="cloth_type"]:checked').value;
+                let additionalCost = 0;
+
+                if (selectedFabric === 'kain mori') {
+                    additionalCost = 100000;
+                } else if (selectedFabric === 'kain sutera') {
+                    additionalCost = 300000;
+                }
+
+                const totalBeforeDiscount = basePriceWithoutDiscount + additionalCost;
+                let dynamicDiscountAmount = 0;
+
+                if (promoState.code) {
+                    if (promoState.type === 'percentage') {
+                        dynamicDiscountAmount = totalBeforeDiscount * (promoState.value / 100);
+                    } else {
+                        dynamicDiscountAmount = promoState.value;
+                    }
+                    dynamicDiscountAmount = Math.min(dynamicDiscountAmount, totalBeforeDiscount);
+                }
+
+                const finalTotal = totalBeforeDiscount - dynamicDiscountAmount;
+
+                const formatCurrency = (amount) => 'Rp. ' + new Intl.NumberFormat('id-ID').format(amount);
+
+                fabricCostEl.textContent = formatCurrency(additionalCost);
+                fabricCostLineEl.style.display = additionalCost > 0 ? 'flex' : 'none';
+                
+                if (dynamicDiscountAmount > 0) {
+                    promoCodeTextEl.textContent = promoState.code;
+                    discountAmountTextEl.textContent = '- ' + formatCurrency(dynamicDiscountAmount);
+                    discountLineEl.style.display = 'flex';
+                } else {
+                    discountLineEl.style.display = 'none';
+                }
+
+                totalPriceEl.textContent = formatCurrency(finalTotal);
+                bankTotalPriceEl.textContent = formatCurrency(finalTotal);
+                qrisTotalPriceEl.textContent = formatCurrency(finalTotal);
+            }
+            
+            function updateSelectedStyle() {
+                const selectedRadio = document.querySelector('input[name="cloth_type"]:checked');
+                fabricLabels.forEach(label => label.classList.remove('selected'));
+                if (selectedRadio) {
+                    selectedRadio.parentElement.classList.add('selected');
+                }
+            }
+
+            fabricOptions.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    updateSelectedStyle();
+                    calculateAndUpdatePrice();
+                });
+            });
+
+            const initialFabricValue = "{{ old('cloth_type', session('order_details.cloth_type')) ?? 'kain katun' }}";
+            document.querySelector(`input[name="cloth_type"][value="${initialFabricValue}"]`).checked = true;
+            
             function openModal(modal) {
                 const modalContent = modal.querySelector('.modal-content');
                 modal.classList.remove('opacity-0', 'pointer-events-none');
@@ -238,34 +379,63 @@
 
             const applyPromoBtn = document.getElementById('apply-promo-btn');
             if (applyPromoBtn) {
-                applyPromoBtn.addEventListener('click', () => {
+                applyPromoBtn.addEventListener('click', async () => {
                     const promoCodeInput = document.getElementById('promo-code-input');
-                    if (!promoCodeInput.value) {
-                        alert('Please enter a promo code.');
+                    const code = promoCodeInput.value.trim();
+                    if (!code) {
+                        promoMessageEl.textContent = 'Please enter a promo code.';
+                        promoMessageEl.className = 'mt-2 text-sm text-red-600';
                         return;
                     }
-                    
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '{{ route("promo.apply") }}';
-                    
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = '{{ csrf_token() }}';
-                    form.appendChild(csrfToken);
-                    
-                    const promoInput = document.createElement('input');
-                    promoInput.type = 'hidden';
-                    promoInput.name = 'promo_code';
-                    promoInput.value = promoCodeInput.value;
-                    form.appendChild(promoInput);
-                    
-                    document.body.appendChild(form);
-                    form.submit();
-                    document.body.removeChild(form);
+
+                    applyPromoBtn.innerHTML = '<div class="loader"></div>';
+                    applyPromoBtn.disabled = true;
+                    promoMessageEl.textContent = '';
+
+                    try {
+                        const response = await fetch('{{ route("promo.apply") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ promo_code: code })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            promoState = data.promo;
+                            promoMessageEl.textContent = data.message;
+                            promoMessageEl.className = 'mt-2 text-sm text-green-600';
+                            promoFormContainer.style.display = 'none';
+                            appliedPromoCodeEl.textContent = promoState.code;
+                            promoAppliedContainer.style.display = 'flex';
+                            calculateAndUpdatePrice();
+                        } else {
+                            promoMessageEl.textContent = data.message || 'Invalid promo code.';
+                            promoMessageEl.className = 'mt-2 text-sm text-red-600';
+                        }
+                    } catch (error) {
+                        promoMessageEl.textContent = 'An error occurred. Please try again.';
+                        promoMessageEl.className = 'mt-2 text-sm text-red-600';
+                    } finally {
+                        applyPromoBtn.innerHTML = 'Apply';
+                        applyPromoBtn.disabled = false;
+                    }
                 });
             }
+            
+            function initializeUI() {
+                updateSelectedStyle();
+                if(promoState.code) {
+                    promoFormContainer.style.display = 'none';
+                    appliedPromoCodeEl.textContent = promoState.code;
+                    promoAppliedContainer.style.display = 'flex';
+                }
+                calculateAndUpdatePrice();
+            }
+            initializeUI();
 
             checkoutForm.addEventListener('submit', (e) => {
                 e.preventDefault();

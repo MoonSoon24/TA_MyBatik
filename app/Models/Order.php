@@ -27,6 +27,7 @@ class Order extends Model
         'nota',
         'desain',
         'ukuran',
+        'cloth_type',
         'promo_code',
         'discount_amount',
         'total',
