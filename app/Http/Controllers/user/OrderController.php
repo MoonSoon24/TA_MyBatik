@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Models\Order;
 use App\Models\Promo;
 use App\Models\RiwayatPesanan;
+use App\Models\Notification;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -213,6 +214,12 @@ class OrderController extends Controller
                 RiwayatPesanan::create([
                     'user_id'  => $user->id,
                     'order_id' => $order->id_pesanan, 
+                ]);
+                
+                Notification::create([
+                    'user_id' => $user->id,
+                    'title' => 'Your order has been placed',
+                    'message' => 'Please wait while we confirm your order within 24 hours.',
                 ]);
                 
                 if ($promoDetails['promoCodeUsed']) {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Promo;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -17,8 +18,9 @@ class UserController extends Controller
         $users = User::all();
         $orders = Order::all();
         $promos = Promo::latest()->get();
+        $notifications = Notification::with('user')->latest()->get();
 
-        return view('admin.home', compact('orders','users','promos'));
+        return view('admin.home', compact('orders','users','promos','notifications'));
     }
 
     public function update(Request $request, string $id)

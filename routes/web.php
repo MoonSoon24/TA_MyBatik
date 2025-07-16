@@ -12,6 +12,8 @@ use App\Http\Controllers\User\RiwayatPesananController;
 use App\Http\Controllers\User\ReviewController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Admin\PromoController;
+use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PromoController as AdminPromoController;
@@ -47,6 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/receipt/{order}', [OrderController::class, 'showReceipt'])->name('receipt');
     Route::get('/history', [RiwayatPesananController::class, 'index'])->name('history');
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::get('/notifications',[NotificationController::class, 'fetch'])->name('notifications.fetch');
+    Route::patch('/notifications/{notification}', [NotificationController::class, 'markAsRead'])->name('notification.markAsRead');
 
     Route::patch('/designs/{design}', [DesignController::class, 'update'])->name('designs.update');
     Route::delete('/designs/{design}', [DesignController::class, 'destroy'])->name('designs.destroy');
@@ -71,11 +75,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('users', AdminUserController::class);
     Route::resource('orders', AdminOrderController::class);
     Route::resource('promos', AdminPromoController::class);
+    Route::resource('notifications', NotificationController::class);
 
-    Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/promo-usage', [\App\Http\Controllers\Admin\ReportController::class, 'promoUsage'])->name('reports.promo');
-    Route::get('/reports/user-registrations', [\App\Http\Controllers\Admin\ReportController::class, 'userRegistrations'])->name('reports.users');
-    Route::get('/reports/top-customers', [\App\Http\Controllers\Admin\ReportController::class, 'topCustomers'])->name('reports.customers');
+
+    Route::get('/reports/sales', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/promo-usage', [ReportController::class, 'promoUsage'])->name('reports.promo');
+    Route::get('/reports/user-registrations', [ReportController::class, 'userRegistrations'])->name('reports.users');
+    Route::get('/reports/top-customers', [ReportController::class, 'topCustomers'])->name('reports.customers');
+
+    Route::get('/notifications/update', [NotificationController::class, 'update'])->name('notifications.update');
+    Route::get('/notifications/destroy', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::get('/notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
+    Route::post('/notifications', [NotificationController::class, 'store'])->name('notifications.store');
 });
 
 

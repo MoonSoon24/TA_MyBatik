@@ -76,10 +76,14 @@
                             <a href="#users" @click.prevent="activeTable = 'users'; tableDropdownOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Users</a>
                             <a href="#orders" @click.prevent="activeTable = 'orders'; tableDropdownOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Orders</a>
                             <a href="#promos" @click.prevent="activeTable = 'promos'; tableDropdownOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Promos</a>
+                            <a href="#notifications" @click.prevent="activeTable = 'notifications'; tableDropdownOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Notifications</a>
                         </div>
                     </div>
                     <div x-show="activeTable === 'promos'" x-cloak>
                         <button @click.prevent="createPromoModalOpen = true" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-blue-700 transition">Create Promo</button>
+                    </div>
+                    <div x-show="activeTable === 'notifications'" x-cloak>
+                        <button @click.prevent="createNotificationModalOpen = true" class="bg-green-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-green-700 transition">Send Notification</button>
                     </div>
                 </div>
                 
@@ -89,6 +93,7 @@
                 </div>
             </div>
 
+            <!-- Users Table -->
             <div id="users-table" x-show="activeTable === 'users'" class="overflow-x-auto" x-cloak>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
@@ -130,6 +135,7 @@
                 </table>
             </div>
 
+            <!-- Orders Table -->
             <div id="orders-table" x-show="activeTable === 'orders'" class="overflow-x-auto" x-cloak>
                  <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
@@ -155,6 +161,7 @@
                 </table>
             </div>
             
+            <!-- Promos Table -->
             <div id="promos-table" x-show="activeTable === 'promos'" class="overflow-x-auto" x-cloak>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
@@ -183,6 +190,41 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="button" @click="openDeleteModal(promo.id, 'promo')" class="px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-md hover:bg-red-700 transition-colors">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Notifications Table -->
+            <div id="notifications-table" x-show="activeTable === 'notifications'" class="overflow-x-auto" x-cloak>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-white">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">title</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Message</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Sent At</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="notification in filteredNotifications" :key="notification.id">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="notification.user.name"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="notification.title"></td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-gray-600" x-text="notification.message"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="new Date(notification.created_at).toLocaleString('id-ID')"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex items-center space-x-2">
+                                        <button @click="openEditNotificationModal(notification)" class="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-md hover:bg-blue-700 transition-colors">Edit</button>
+                                        <form :id="`delete-notification-form-${notification.id}`" :action="`/admin/notifications/${notification.id}`" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" @click="openDeleteModal(notification.id, 'notification')" class="px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-md hover:bg-red-700 transition-colors">Delete</button>
                                         </form>
                                     </div>
                                 </td>
@@ -242,7 +284,12 @@
                         <div class="flex items-center gap-x-3">
                             <label for="status" class="block text-sm font-bold text-gray-900">Status:</label>
                             <select x-model="selectedOrder.status" id="status" name="status" class="block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option>Pending</option><option>In Progress</option><option>Cancelled</option><option>Ready</option><option>Completed</option>
+                                <option>Pending</option>
+                                <option>Hold</option>
+                                <option>Cancelled</option>
+                                <option>In Progress</option>
+                                <option>Ready</option>
+                                <option>Completed</option>
                             </select>
                         </div>
                         <div class="flex gap-x-3">
@@ -292,42 +339,115 @@
     <div x-show="editPromoModalOpen" @keydown.escape.window="editPromoModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
         <div @click.away="editPromoModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
             <h3 class="text-2xl font-bold mb-6">Edit Promo Code</h3>
-            <form x-if="editingPromo" :action="`/admin/promos/${editingPromo.id}`" method="POST" @submit.prevent="handleFormSubmit($event, 'Promo updated successfully!', 'Failed to update promo.')">
+            <template x-if="editingPromo">
+                <form :action="`/admin/promos/${editingPromo.id}`" method="POST" @submit.prevent="handleFormSubmit($event, 'Promo updated successfully!', 'Failed to update promo.')">
+                    @csrf
+                    @method('PUT')
+                    <div class="space-y-4">
+                        <div>
+                            <label for="edit_code" class="block text-sm font-medium text-gray-700">Promo Code</label>
+                            <input type="text" name="code" id="edit_code" x-model="editingPromo.code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
+                        </div>
+                        <div>
+                            <label for="edit_type" class="block text-sm font-medium text-gray-700">Type</label>
+                            <select name="type" id="edit_type" x-model="editingPromo.type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                <option value="percentage">Percentage</option>
+                                <option value="fixed">Fixed Amount</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit_value" class="block text-sm font-medium text-gray-700">Value</label>
+                            <input type="number" name="value" id="edit_value" x-model="editingPromo.value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required step="any">
+                        </div>
+                        <div>
+                            <label for="edit_max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label>
+                            <input type="number" name="max_uses" id="edit_max_uses" x-model="editingPromo.max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                        </div>
+                        <div>
+                            <label for="edit_expires_at" class="block text-sm font-medium text-gray-700">Expires At (optional)</label>
+                            <input type="date" name="expires_at" id="edit_expires_at" :value="editingPromo.expires_at ? editingPromo.expires_at.split(' ')[0] : ''" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-end gap-4">
+                        <button type="button" @click="editPromoModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Update</button>
+                    </div>
+                </form>
+            </template>
+        </div>
+    </div>
+
+    <div x-show="createNotificationModalOpen" @keydown.escape.window="createNotificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
+        <div @click.away="createNotificationModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-6">Send New Notification</h3>
+            <form id="create-notification-form" action="{{ route('admin.notifications.store') }}" method="POST" @submit.prevent="handleNotificationSubmit($event, 'Notification(s) sent successfully!', 'Failed to send notification.')">
                 @csrf
-                @method('PUT')
                 <div class="space-y-4">
                     <div>
-                        <label for="edit_code" class="block text-sm font-medium text-gray-700">Promo Code</label>
-                        <input type="text" name="code" id="edit_code" x-model="editingPromo.code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
+                        <label class="block text-sm font-medium text-gray-700">Send to User(s)</label>
+                        <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-48 overflow-y-auto">
+                            <div @click="toggleUserSelection('all')" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes('all')}">
+                                <span class="font-semibold">-- ALL USERS --</span>
+                                <svg x-show="selectedUserIds.includes('all')" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <template x-for="user in usersData.filter(u => u.role !== 'admin')" :key="user.id">
+                                <div @click="toggleUserSelection(user.id)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes(user.id)}">
+                                    <span x-text="user.name + ' (' + user.email + ')'"></span>
+                                    <svg x-show="selectedUserIds.includes(user.id)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                     <div>
-                        <label for="edit_type" class="block text-sm font-medium text-gray-700">Type</label>
-                        <select name="type" id="edit_type" x-model="editingPromo.type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                            <option value="percentage">Percentage</option>
-                            <option value="fixed">Fixed Amount</option>
-                        </select>
+                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                        <input type="text" name="title" id="title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
                     </div>
                     <div>
-                        <label for="edit_value" class="block text-sm font-medium text-gray-700">Value</label>
-                        <input type="number" name="value" id="edit_value" x-model="editingPromo.value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required step="any">
-                    </div>
-                    <div>
-                        <label for="edit_max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label>
-                        <input type="number" name="max_uses" id="edit_max_uses" x-model="editingPromo.max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                    </div>
-                    <div>
-                        <label for="edit_expires_at" class="block text-sm font-medium text-gray-700">Expires At (optional)</label>
-                        <input type="date" name="expires_at" id="edit_expires_at" :value="editingPromo.expires_at ? editingPromo.expires_at.split(' ')[0] : ''" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                        <textarea name="message" id="message" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required></textarea>
                     </div>
                 </div>
                 <div class="mt-8 flex justify-end gap-4">
-                    <button type="button" @click="editPromoModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Update</button>
+                    <button type="button" @click="createNotificationModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">Send</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <div x-show="editNotificationModalOpen" @keydown.escape.window="editNotificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
+        <div @click.away="editNotificationModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-6">Edit Notification</h3>
+            <template x-if="editingNotification">
+                <form :action="`/admin/notifications/${editingNotification.id}`" method="POST" @submit.prevent="handleFormSubmit($event, 'Notification updated successfully!', 'Failed to update notification.')">
+                    @csrf
+                    @method('PUT')
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Sent to</label>
+                            <input type="text" :value="editingNotification.user ? editingNotification.user.name : 'N/A'" class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3" readonly>
+                        </div>
+                        <div>
+                            <label for="edit_title" class="block text-sm font-medium text-gray-700">Title</label>
+                            <textarea name="title" id="edit_title" x-model="editingNotification.title" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required></textarea>
+                        </div>
+                        <div>
+                            <label for="edit_message" class="block text-sm font-medium text-gray-700">Message</label>
+                            <textarea name="message" id="edit_message" x-model="editingNotification.message" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-end gap-4">
+                        <button type="button" @click="editNotificationModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Update</button>
+                    </div>
+                </form>
+            </template>
+        </div>
+    </div>
 
     <x-alert />
     <x-logout-modal />
@@ -341,6 +461,7 @@
                 usersData: @json($users ?? []),
                 ordersData: @json($orders ?? []),
                 promosData: @json($promos ?? []),
+                notificationsData: @json($notifications ?? []),
                 
                 open: false,
                 selectedOrder: null,
@@ -355,12 +476,15 @@
                 editPromoModalOpen: false,
                 editingPromo: null,
 
+                createNotificationModalOpen: false,
+                selectedUserIds: [],
+
                 init() {
                     const hash = window.location.hash.substring(1);
-                    if (['promos', 'orders', 'users'].includes(hash)) { this.activeTable = hash; }
+                    if (['promos', 'orders', 'users', 'notifications'].includes(hash)) { this.activeTable = hash; }
                     window.addEventListener('hashchange', () => {
                         const newHash = window.location.hash.substring(1);
-                        if (['promos', 'orders', 'users'].includes(newHash)) { this.activeTable = newHash; }
+                        if (['promos', 'orders', 'users', 'notifications'].includes(newHash)) { this.activeTable = newHash; }
                     });
 
                     @if (session('success'))
@@ -374,6 +498,11 @@
                 openEditModal(promo) {
                     this.editingPromo = JSON.parse(JSON.stringify(promo));
                     this.editPromoModalOpen = true;
+                },
+
+                openEditNotificationModal(notification) {
+                    this.editingNotification = JSON.parse(JSON.stringify(notification));
+                    this.editNotificationModalOpen = true;
                 },
 
                 openDeleteModal(id, type) {
@@ -466,6 +595,71 @@
                     }
                 },
 
+                toggleUserSelection(userId) {
+                    if (userId === 'all') {
+                        if (this.selectedUserIds.includes('all')) {
+                            this.selectedUserIds = [];
+                        } else {
+                            this.selectedUserIds = ['all'];
+                        }
+                        return;
+                    }
+
+                    if (this.selectedUserIds.includes('all')) {
+                        this.selectedUserIds = [];
+                    }
+
+                    const index = this.selectedUserIds.indexOf(userId);
+                    if (index === -1) {
+                        this.selectedUserIds.push(userId);
+                    } else {
+                        this.selectedUserIds.splice(index, 1);
+                    }
+                },
+
+                async handleNotificationSubmit(event, successMessage, errorMessage) {
+                    const form = event.target;
+                    const formData = new FormData();
+                    
+                    formData.append('message', form.querySelector('[name="message"]').value);
+                    formData.append('title', form.querySelector('[name="title"]').value);
+                    formData.append('_token', form.querySelector('[name="_token"]').value);
+
+                    if (this.selectedUserIds.length === 0) {
+                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Please select at least one user.' }}));
+                        return;
+                    }
+
+                    this.selectedUserIds.forEach(id => {
+                        formData.append('user_ids[]', id);
+                    });
+                    
+                    try {
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: { 'Accept': 'application/json' }
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            let message = data.message || errorMessage;
+                            if(data.errors) {
+                                message = Object.values(data.errors).flat().join(' ');
+                            }
+                            throw new Error(message);
+                        }
+                        
+                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message || successMessage }}));
+                        setTimeout(() => window.location.reload(), 1500);
+
+                    } catch (error) {
+                        console.error('Form submission error:', error);
+                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || errorMessage }}));
+                    }
+                },
+
                 async handleFormSubmit(event, successMessage, errorMessage) {
                     const form = event.target;
                     const formData = new FormData(form);
@@ -513,6 +707,11 @@
                     if (!this.searchTerm) return this.promosData;
                     const term = this.searchTerm.toLowerCase();
                     return this.promosData.filter(promo => (promo.code && promo.code.toLowerCase().includes(term)) || (promo.type && promo.type.toLowerCase().includes(term)));
+                },
+                get filteredNotifications() {
+                    if (!this.searchTerm) return this.notificationsData;
+                    const term = this.searchTerm.toLowerCase();
+                    return this.notificationsData.filter(notification => (notification.user.name && notification.user.name.toLowerCase().includes(term)) || (notification.message && notification.message.toLowerCase().includes(term)));
                 }
             }
         }
