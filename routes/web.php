@@ -5,14 +5,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\User\DesignController;
 use App\Http\Controllers\User\OrderController;
-use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\User\RiwayatPesananController;
 use App\Http\Controllers\User\ReviewController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Admin\PromoController;
-use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -47,10 +47,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/promo', [OrderController::class, 'applyPromo'])->name('promo.apply');
     Route::get('/remove-promo', [OrderController::class, 'removePromo'])->name('promo.remove');
     Route::get('/receipt/{order}', [OrderController::class, 'showReceipt'])->name('receipt');
+    Route::post('/order/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('order.upload.proof');
     Route::get('/history', [RiwayatPesananController::class, 'index'])->name('history');
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::get('/notifications',[NotificationController::class, 'fetch'])->name('notifications.fetch');
-    Route::patch('/notifications/{notification}', [NotificationController::class, 'markAsRead'])->name('notification.markAsRead');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notification.markAsRead');
 
     Route::patch('/designs/{design}', [DesignController::class, 'update'])->name('designs.update');
     Route::delete('/designs/{design}', [DesignController::class, 'destroy'])->name('designs.destroy');
@@ -71,12 +72,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::post('/users/{user}/verify', [AdminUserController::class, 'verify'])->name('users.verify');
     Route::post('/promos', [PromoController::class, 'store'])->name('promos.store');
+    Route::get('/users/{userIds}/orders', [AdminOrderController::class, 'getUserOrders'])->name('admin.users.orders');
     
     Route::resource('users', AdminUserController::class);
     Route::resource('orders', AdminOrderController::class);
     Route::resource('promos', AdminPromoController::class);
     Route::resource('notifications', NotificationController::class);
-
 
     Route::get('/reports/sales', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/promo-usage', [ReportController::class, 'promoUsage'])->name('reports.promo');

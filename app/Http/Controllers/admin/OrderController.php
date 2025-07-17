@@ -4,28 +4,46 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\User;
-use App\Models\Promo;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function dashboard()
-    {
-        $orders = Order::all();
-        $users = User::all();
-        $promos = Promo::latest()->get();
+public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'status' => 'required|string|in:Pending,Hold,Cancelled,In Progress,Ready,Completed',
+        'nota' => 'nullable|string',
+        'send_notification' => 'sometimes|boolean',
+        'notification_title' => 'required_if:send_notification,true|string|max:255',
+        'notification_message' => 'required_if:send_notification,true|string|max:1000',
+    ]);
 
-        return view('admin.home', compact('orders', 'users', 'promos'));
+    $order = Order::findOrFail($id);
+    $order->status = $validated['status'];
+    if (isset($validated['nota'])) {
+        $order->nota = $validated['nota'];
+    }
+    $order->save();
+
+    if ($request->input('send_notification', false)) {
+        Notification::create([
+            'user_id' => $order->id_user,
+            'order_id' => $order->id_pesanan,
+            'title' => $validated['notification_title'],
+            'message' => $validated['notification_message'],
+        ]);
     }
 
-    public function update(Request $request, $id)
+    return response()->json($order->fresh());
+}
+
+    public function getUserOrders($userId)
     {
-        $order = Order::findOrFail($id);
+        $userIdArray = explode(',', $userId);
 
-        $order->status = $request->input('status');
-        $order->save();
-
-    return response()->json($order);
+        $orders = Order::whereIn('id_user', $userIdArray)->latest()->get(); 
+        
+        return response()->json($orders);
     }
 }

@@ -28,9 +28,11 @@ class Order extends Model
         'desain',
         'ukuran',
         'cloth_type',
+        'jumlah',
         'promo_code',
         'discount_amount',
         'total',
+        'bukti_pembayaran',
     ];
 
     protected $casts = [

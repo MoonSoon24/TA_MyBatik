@@ -79,12 +79,20 @@
                 <div class="space-y-3 py-4 border-t">
                     <div class="flex justify-between text-gray-700">
                         <span>Product Price</span>
-                        <span class="font-medium">Rp. 250.000</span>
+                        <span class="font-medium">Rp. 300.000 x {{ $order->jumlah }}</span>
                     </div>
-                    <div class="flex justify-between text-gray-700">
-                        <span>Customization</span>
-                        <span class="font-medium">Rp. 50.000</span>
-                    </div>
+
+                    @if($order->cloth_type === 'kain mori')
+                        <div class="flex justify-between text-gray-700">
+                            <span>Fabric Cost (Kain Mori)</span>
+                            <span class="font-medium">+ Rp. 100.000 x {{ $order->jumlah }}</span>
+                        </div>
+                    @elseif($order->cloth_type === 'kain sutera')
+                        <div class="flex justify-between text-gray-700">
+                            <span>Fabric Cost (Kain Sutera)</span>
+                            <span class="font-medium">+ Rp. 300.000 x {{ $order->jumlah }}</span>
+                        </div>
+                    @endif
 
                     @if($order->discount_amount > 0)
                     <div class="flex justify-between text-batik-green font-semibold">
@@ -111,6 +119,80 @@
             </div>
 
             <div class="w-full lg:w-1/3 space-y-8">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+
+                    @if(in_array($order->status, ['Pending', 'Hold']))
+
+                        @if($order->status == 'Hold')
+                            <div class="border-l-4 border-yellow-400 bg-yellow-50 p-4 mb-5 rounded-r-lg">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 15a1 1 0 110-2 1 1 0 010 2zm-1-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-yellow-700">
+                                            Action required. There may be an issue with your previous submission. Please upload a new proof.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <h3 class="font-bold text-lg mb-2">Upload Payment Proof</h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            @if($order->bukti_pembayaran)
+                                You can update your submitted proof if needed.
+                            @else
+                                Please upload a photo or screenshot of your payment transfer.
+                            @endif
+                        </p>
+                        
+                        <div x-data="{ imageUrl: '{{ $order->bukti_pembayaran ? asset('storage/' . $order->bukti_pembayaran) : null }}' }">
+                            <form action="{{ route('order.upload.proof', $order) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                
+                                <template x-if="imageUrl">
+                                    <div class="mb-4">
+                                        <img :src="imageUrl" class="w-full rounded-lg object-contain max-h-64 border" alt="Image Preview">
+                                    </div>
+                                </template>
+
+                                <label for="bukti_pembayaran" class="cursor-pointer block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-batik-cyan transition">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span class="mt-2 block text-sm font-medium text-gray-600">
+                                        Click to upload a new image
+                                    </span>
+                                    <input id="bukti_pembayaran" name="bukti_pembayaran" type="file" class="sr-only" accept="image/*" @change="imageUrl = URL.createObjectURL($event.target.files[0])">
+                                </label>
+                                
+                                @error('bukti_pembayaran')
+                                    <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                                @enderror
+
+                                <button type="submit" class="w-full text-center bg-batik-cyan text-white font-bold py-3 px-4 rounded-lg mt-6 hover:bg-cyan-600 transition-all duration-300">
+                                    Save Payment Proof
+                                </button>
+                            </form>
+                        </div>
+
+                    @elseif(in_array($order->status, ['In Progress', 'Ready', 'Completed']))
+                        <h3 class="font-bold text-lg mb-4">Payment Proof Confirmed</h3>
+                        <p class="text-sm text-gray-600 mb-4">Thank you! Your payment has been verified and your order is being processed.</p>
+                        <div class="mt-4">
+                            <img src="{{ asset('storage/' . $order->bukti_pembayaran) }}" alt="Payment Proof" class="w-full rounded-lg object-contain border">
+                        </div>
+
+                    @elseif($order->status == 'canceled')
+                        <h3 class="font-bold text-lg mb-4">Order Canceled</h3>
+                        <div class="border-l-4 border-red-400 bg-red-50 p-4 rounded-r-lg">
+                            <p class="text-sm text-red-700">This order has been canceled. No payment is required.</p>
+                        </div>
+                    
+                    @endif
+                </div>
+
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <h3 class="font-bold text-lg mb-4">Need Help?</h3>
                     <div class="space-y-3">

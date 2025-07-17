@@ -32,18 +32,18 @@
 
         .fabric-option {
             display: block;
-            border: 2px solid #e5e7eb; /* Tailwind gray-200 */
-            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
             padding: 0.75rem 1rem;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
         }
         .fabric-option:hover {
-            border-color: #67e8f9; /* Tailwind cyan-300 */
+            border-color: #67e8f9;
         }
         .fabric-option.selected {
-            border-color: #0891b2; /* Tailwind cyan-600 */
-            background-color: #ecfeff; /* Tailwind cyan-50 */
+            border-color: #0891b2;
+            background-color: #ecfeff;
             box-shadow: 0 0 0 1px #0891b2;
         }
         .fabric-details {
@@ -115,6 +115,10 @@
                             <div class="w-full">
                                 <h3 class="font-semibold text-lg">Custom Batik</h3>
                                 <p class="text-gray-600 text-sm">Size: {{ session('order_details.ukuran') ?? 'N/A' }}</p>
+                                <div class="mt-2">
+                                    <label for="jumlah" class="text-sm font-medium text-gray-700">Quantity</label>
+                                    <input type="number" id="jumlah" name="jumlah" value="1" min="1" class="w-20 border border-gray-300 rounded-lg p-1 text-center focus:outline-none focus:ring-2 focus:ring-cyan-400 transition">
+                                </div>
                             </div>
                         </div>
 
@@ -148,11 +152,7 @@
                         <div class="space-y-3 text-gray-700">
                             <div class="flex justify-between text-gray-700">
                                 <span>Product Price</span>
-                                <span class="font-medium">Rp. 250.000</span>
-                            </div>
-                            <div class="flex justify-between text-gray-700">
-                                <span>Customization</span>
-                                <span class="font-medium">Rp. 50.000</span>
+                                <span class="font-medium">Rp. 300.000</span>
                             </div>
                             <div id="fabric-cost-line" class="flex justify-between text-gray-700" style="display: none;">
                                 <span>Fabric Cost</span>
@@ -271,6 +271,7 @@
             
             const fabricOptions = document.querySelectorAll('input[name="cloth_type"]');
             const fabricLabels = document.querySelectorAll('.fabric-option');
+            const jumlahInput = document.getElementById('jumlah');
 
             const basePriceWithoutDiscount = 300000;
 
@@ -296,6 +297,7 @@
             function calculateAndUpdatePrice() {
                 const selectedFabric = document.querySelector('input[name="cloth_type"]:checked').value;
                 let additionalCost = 0;
+                const quantity = parseInt(jumlahInput.value) || 1;
 
                 if (selectedFabric === 'kain mori') {
                     additionalCost = 100000;
@@ -303,7 +305,7 @@
                     additionalCost = 300000;
                 }
 
-                const totalBeforeDiscount = basePriceWithoutDiscount + additionalCost;
+                const totalBeforeDiscount = (basePriceWithoutDiscount + additionalCost) * quantity;
                 let dynamicDiscountAmount = 0;
 
                 if (promoState.code) {
@@ -319,7 +321,7 @@
 
                 const formatCurrency = (amount) => 'Rp. ' + new Intl.NumberFormat('id-ID').format(amount);
 
-                fabricCostEl.textContent = formatCurrency(additionalCost);
+                fabricCostEl.textContent = formatCurrency(additionalCost * quantity);
                 fabricCostLineEl.style.display = additionalCost > 0 ? 'flex' : 'none';
                 
                 if (dynamicDiscountAmount > 0) {
@@ -349,6 +351,8 @@
                     calculateAndUpdatePrice();
                 });
             });
+            
+            jumlahInput.addEventListener('input', calculateAndUpdatePrice);
 
             const initialFabricValue = "{{ old('cloth_type', session('order_details.cloth_type')) ?? 'kain katun' }}";
             document.querySelector(`input[name="cloth_type"][value="${initialFabricValue}"]`).checked = true;

@@ -17,6 +17,22 @@ use Exception;
 
 class OrderController extends Controller
 {
+    public function uploadProof(Request $request, Order $order)
+    {
+        $request->validate([
+            'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('bukti_pembayaran')) {
+            $path = $request->file('bukti_pembayaran')->store('payment_proof', 'public');
+
+            $order->update([
+                'bukti_pembayaran' => $path
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Payment proof uploaded successfully!');
+    }
     public function applyPromo(Request $request)
     {
         $request->validate([
@@ -175,6 +191,7 @@ class OrderController extends Controller
             'payment_method' => 'required|in:bank_transfer,qris',
             'additional_note' => 'nullable|string|max:1000',
             'cloth_type' => 'required|string|in:kain katun,kain mori,kain sutera',
+            'jumlah' => 'required|integer|min:1',
         ]);
 
         $basePrice = 300000;
@@ -185,7 +202,7 @@ class OrderController extends Controller
             $fabricCost = 300000;
         }
 
-        $totalBeforeDiscount = $basePrice + $fabricCost;
+        $totalBeforeDiscount = ($basePrice + $fabricCost) * $validatedCheckoutData['jumlah'];
         $promoDetails = $this->getPromoDetails($totalBeforeDiscount);
         
         $user = Auth::user();
@@ -206,6 +223,7 @@ class OrderController extends Controller
                     'tanggal_pesan'   => now(),
                     'status'          => 'Pending',
                     'nota'            => $validatedCheckoutData['additional_note'],
+                    'jumlah'          => $validatedCheckoutData['jumlah'],
                     'total'           => $promoDetails['finalPrice'],
                     'promo_code'      => $promoDetails['promoCodeUsed'],
                     'discount_amount' => $promoDetails['discountAmount'],
@@ -217,9 +235,10 @@ class OrderController extends Controller
                 ]);
                 
                 Notification::create([
-                    'user_id' => $user->id,
-                    'title' => 'Your order has been placed',
-                    'message' => 'Please wait while we confirm your order within 24 hours.',
+                    'user_id'  => $user->id,
+                    'order_id' => $order->id_pesanan,
+                    'title'    => 'Your order has been placed',
+                    'message'  => 'Please wait while we confirm your order within 24 hours.',
                 ]);
                 
                 if ($promoDetails['promoCodeUsed']) {

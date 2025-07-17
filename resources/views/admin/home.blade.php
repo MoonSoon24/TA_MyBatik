@@ -53,9 +53,9 @@
                     </button>
                     <div x-show="dropdownOpen" @click.away="dropdownOpen = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50" x-cloak>
                         <a href="{{ route('admin.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" id="logout-form">
                             @csrf
-                            <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="block px-4 py-2 text-sm font-semibold text-red-600 hover:text-red-800 transition">Logout</a>
+                            <a href="#" id="logout-link" class="block px-4 py-2 text-sm font-semibold text-red-600 hover:text-red-800 transition">Logout</a>
                         </form>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                         </div>
                     </div>
                     <div x-show="activeTable === 'promos'" x-cloak>
-                        <button @click.prevent="createPromoModalOpen = true" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-blue-700 transition">Create Promo</button>
+                        <button @click.prevent="createPromoModalOpen = true" class="bg-green-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-green-700 transition">Create Promo</button>
                     </div>
                     <div x-show="activeTable === 'notifications'" x-cloak>
                         <button @click.prevent="createNotificationModalOpen = true" class="bg-green-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-green-700 transition">Send Notification</button>
@@ -137,11 +137,11 @@
 
             <!-- Orders Table -->
             <div id="orders-table" x-show="activeTable === 'orders'" class="overflow-x-auto" x-cloak>
-                 <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Customer Name</th>
+                            <th scope="col" class="px-2 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
+                            <th scope="col" class="px-2 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">User ID</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Order Date</th>
@@ -150,10 +150,10 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         <template x-for="order in filteredOrders" :key="order.id_pesanan">
                             <tr class="hover:bg-gray-50 cursor-pointer" @click="showOrderModal(order)">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="order.id_pesanan"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="order.nama"></td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center" x-text="order.id_pesanan"></td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-600 text-center" x-text="order.id_user"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(order.total)"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold" :class="{ 'text-yellow-600': order.status === 'Pending', 'text-blue-600': order.status === 'In Progress', 'text-green-600': order.status === 'Ready', 'text-red-600': order.status === 'Cancelled', 'text-gray-600': order.status === 'Completed' }" x-text="order.status"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold" :class="{ 'text-yellow-600': order.status === 'Pending', 'text-blue-600': order.status === 'In Progress', 'text-green-600': order.status === 'Ready', 'text-red-600': order.status === 'Cancelled', 'text-green-700': order.status === 'Completed' }" x-text="order.status"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="new Date(order.tanggal_pesan).toLocaleDateString('id-ID')"></td>
                             </tr>
                         </template>
@@ -281,28 +281,87 @@
                         </div>
                     </div>
                     <div class="px-6 py-4 flex justify-between items-center border-t bg-gray-50 sticky bottom-0 z-10">
-                        <div class="flex items-center gap-x-3">
-                            <label for="status" class="block text-sm font-bold text-gray-900">Status:</label>
-                            <select x-model="selectedOrder.status" id="status" name="status" class="block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option>Pending</option>
-                                <option>Hold</option>
-                                <option>Cancelled</option>
-                                <option>In Progress</option>
-                                <option>Ready</option>
-                                <option>Completed</option>
-                            </select>
+                        <div class="flex items-center gap-x-6">
+                            <div class="flex items-center gap-x-3">
+                                <label for="status" class="block text-sm font-bold text-gray-900">Status:</label>
+                                <select x-model="selectedOrder.status" id="status" name="status" class="block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                    <option>Pending</option>
+                                    <option>Hold</option>
+                                    <option>Cancelled</option>
+                                    <option>In Progress</option>
+                                    <option>Ready</option>
+                                    <option>Completed</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="send-notification-checkbox" type="checkbox" x-model="sendNotification" class="h-4 w-4 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500">
+                                <label for="send-notification-checkbox" class="ml-2 block text-sm font-medium text-gray-900">
+                                    Send Notification
+                                </label>
+                            </div>
                         </div>
+
                         <div class="flex gap-x-3">
+                            <button 
+                                x-show="selectedOrder.bukti_pembayaran"
+                                type="button" 
+                                @click="$dispatch('open-proof-modal', { imageUrl: '/storage/' + selectedOrder.bukti_pembayaran })"
+                                class="px-6 py-2 bg-indigo-500 text-white rounded-lg font-semibold hover:bg-indigo-600 transition-colors">
+                                View Proof
+                            </button>
                             <button type="button" @click="exportOrder()" :disabled="isExporting" class="px-6 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors disabled:bg-green-300 disabled:cursor-not-allowed">
                                 <span x-show="!isExporting">Export</span><span x-show="isExporting">Exporting...</span>
                             </button>
                             <button type="button" @click="open = false" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancel</button>
-                            <button type="button" @click="updateOrderStatus()" class="px-8 py-2 bg-cyan-500 text-white rounded-lg font-semibold hover:bg-cyan-600 transition-colors">Save</button>
+                            <button type="button" @click="handleSaveClick()" class="px-8 py-2 bg-cyan-500 text-white rounded-lg font-semibold hover:bg-cyan-600 transition-colors">Save</button>
                         </div>
                     </div>
                 </div>
             </template>
         </div>
+    </div>
+
+    <div 
+        x-data="{ 
+            show: false, 
+            imageUrl: '',
+            zoomLevel: 1,
+            panning: false,
+            startX: 0, startY: 0,
+            translateX: 0, translateY: 0,
+            reset() {
+                this.zoomLevel = 1;
+                this.translateX = 0;
+                this.translateY = 0;
+            }
+        }"
+        @open-proof-modal.window="show = true; imageUrl = $event.detail.imageUrl; reset()"
+        @keydown.escape.window="show = false"
+        x-show="show"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4" 
+        x-cloak>
+
+        <div @click="show = false" x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
+
+        <div class="relative w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing"
+            @mousedown="panning = true; startX = $event.pageX - translateX; startY = $event.pageY - translateY;"
+            @mouseup="panning = false"
+            @mousemove.window="if (panning) { event.preventDefault(); translateX = $event.pageX - startX; translateY = $event.pageY - startY; }"
+            @mouseleave="panning = false"
+            @wheel.prevent="zoomLevel = Math.max(0.5, zoomLevel - event.deltaY * 0.005); event.preventDefault();">
+
+            <img :src="imageUrl" alt="Payment Proof"
+                class="transition-transform duration-75 ease-out"
+                :style="`transform: scale(${zoomLevel}) translate(${translateX}px, ${translateY}px); max-width: none; max-height: none;`">
+        </div>
+
+        <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-x-2 bg-gray-900/50 text-white p-2 rounded-lg backdrop-blur-sm shadow-lg">
+            <button @click="zoomLevel = Math.max(0.5, zoomLevel - 0.2)" title="Zoom Out" class="w-10 h-10 rounded-md hover:bg-white/20 flex items-center justify-center text-xl font-bold">-</button>
+            <button @click="reset()" title="Reset Zoom" class="px-4 h-10 rounded-md hover:bg-white/20 text-sm">Reset</button>
+            <button @click="zoomLevel += 0.2" title="Zoom In" class="w-10 h-10 rounded-md hover:bg-white/20 flex items-center justify-center text-xl font-bold">+</button>
+        </div>
+        
+        <button @click="show = false" title="Close" class="absolute top-4 right-4 w-10 h-10 text-white bg-gray-900/50 rounded-full hover:bg-white/20 text-2xl flex items-center justify-center leading-none">&times;</button>
     </div>
 
     <div x-show="deleteModalOpen" @keydown.escape.window="closeDeleteModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
@@ -377,31 +436,62 @@
         </div>
     </div>
 
-    <div x-show="createNotificationModalOpen" @keydown.escape.window="createNotificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
-        <div @click.away="createNotificationModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+    <div x-show="notificationModalOpen" @keydown.escape.window="notificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4" x-cloak>
+        <div @click.away="notificationModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
+            <h3 class="text-2xl font-bold mb-6">Compose Notification</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="modal_notification_title" class="block text-sm font-medium text-gray-700">Title</label>
+                    <input type="text" id="modal_notification_title" x-model="notificationTitle" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500">
+                </div>
+                <div>
+                    <label for="modal_notification_message" class="block text-sm font-medium text-gray-700">Message</label>
+                    <textarea id="modal_notification_message" rows="5" x-model="notificationMessage" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500"></textarea>
+                </div>
+            </div>
+            <div class="mt-8 flex justify-end gap-4">
+                <button type="button" @click="notificationModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                <button type="button" @click="confirmUpdateAndNotify()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded-lg">Send Notification</button>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="createNotificationModalOpen" @keydown.escape.window="closeCreateNotificationModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" x-cloak>
+        <div @click.away="closeCreateNotificationModal()" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
             <h3 class="text-2xl font-bold mb-6">Send New Notification</h3>
-            <form id="create-notification-form" action="{{ route('admin.notifications.store') }}" method="POST" @submit.prevent="handleNotificationSubmit($event, 'Notification(s) sent successfully!', 'Failed to send notification.')">
+            <form id="create-notification-form" action="{{ route('admin.notifications.store') }}" method="POST" @submit.prevent="handleNotificationSubmit($event)">
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Send to User(s)</label>
-                        <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-48 overflow-y-auto">
+                        <label class="block text-sm font-medium text-gray-700">User</label>
+                        <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-32 overflow-y-auto">
                             <div @click="toggleUserSelection('all')" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes('all')}">
                                 <span class="font-semibold">-- ALL USERS --</span>
-                                <svg x-show="selectedUserIds.includes('all')" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
+                                <svg x-show="selectedUserIds.includes('all')" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                             </div>
                             <template x-for="user in usersData.filter(u => u.role !== 'admin')" :key="user.id">
                                 <div @click="toggleUserSelection(user.id)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes(user.id)}">
                                     <span x-text="user.name + ' (' + user.email + ')'"></span>
-                                    <svg x-show="selectedUserIds.includes(user.id)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                    </svg>
+                                    <svg x-show="selectedUserIds.includes(user.id)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                                 </div>
                             </template>
                         </div>
                     </div>
+
+                    <div x-show="selectedUserIds.length > 0 && !selectedUserIds.includes('all')">
+                        <label class="block text-sm font-medium text-gray-700">Attach Order (Optional)</label>
+                        <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-32 overflow-y-auto">
+                            <template x-if="isFetchingOrders"><p class="text-center text-gray-500 p-4">Loading orders...</p></template>
+                            <template x-if="!isFetchingOrders && !selectedUserOrders.length"><p class="text-center text-gray-500 p-4">No orders found for the selected user(s).</p></template>
+                            <template x-for="order in selectedUserOrders" :key="order.id_pesanan">
+                                <div @click="toggleOrderSelection(order.id_pesanan)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex justify-between items-center" :class="{'bg-green-100 hover:bg-green-200': selectedOrderIds.includes(order.id_pesanan)}">
+                                    <span>Order #<span x-text="order.id_pesanan"></span> - <span x-text="order.status"></span></span>
+                                    <svg x-show="selectedOrderIds.includes(order.id_pesanan)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
                     <div>
                         <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
                         <input type="text" name="title" id="title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
@@ -412,7 +502,7 @@
                     </div>
                 </div>
                 <div class="mt-8 flex justify-end gap-4">
-                    <button type="button" @click="createNotificationModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                    <button type="button" @click="closeCreateNotificationModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">Send</button>
                 </div>
             </form>
@@ -453,268 +543,370 @@
     <x-logout-modal />
 
     <script>
-        function adminTableData() {
-            return {
-                activeTable: 'users',
-                tableDropdownOpen: false,
-                searchTerm: '',
-                usersData: @json($users ?? []),
-                ordersData: @json($orders ?? []),
-                promosData: @json($promos ?? []),
-                notificationsData: @json($notifications ?? []),
+    function adminTableData() {
+        return {
+            activeTable: 'users',
+            tableDropdownOpen: false,
+            searchTerm: '',
+            usersData: @json($users ?? []),
+            ordersData: @json($orders ?? []),
+            promosData: @json($promos ?? []),
+            notificationsData: @json($notifications ?? []),
+            
+            open: false,
+            selectedOrder: null,
+            isExporting: false,
+
+            deleteModalOpen: false,
+            deleteId: null,
+            deleteType: '',
+
+            createPromoModalOpen: false,
+
+            editPromoModalOpen: false,
+            editingPromo: null,
+
+            editNotificationModalOpen: false,
+            editingNotification: null,
+
+            createNotificationModalOpen: false,
+            selectedUserIds: [],
+            selectedUserOrders: [],
+            selectedOrderIds: [],
+            isFetchingOrders: false,
+            sendNotification: true,
+            notificationModalOpen: false,
+            notificationTitle: '',
+            notificationMessage: '',
+            
+            init() {
+                const hash = window.location.hash.substring(1);
+                if (['promos', 'orders', 'users', 'notifications'].includes(hash)) { this.activeTable = hash; }
                 
-                open: false,
-                selectedOrder: null,
-                isExporting: false,
+                window.addEventListener('hashchange', () => {
+                    const newHash = window.location.hash.substring(1);
+                    if (['promos', 'orders', 'users', 'notifications'].includes(newHash)) { this.activeTable = newHash; }
+                });
 
-                deleteModalOpen: false,
-                deleteId: null,
-                deleteType: '',
-
-                createPromoModalOpen: false,
-
-                editPromoModalOpen: false,
-                editingPromo: null,
-
-                createNotificationModalOpen: false,
-                selectedUserIds: [],
-
-                init() {
-                    const hash = window.location.hash.substring(1);
-                    if (['promos', 'orders', 'users', 'notifications'].includes(hash)) { this.activeTable = hash; }
-                    window.addEventListener('hashchange', () => {
-                        const newHash = window.location.hash.substring(1);
-                        if (['promos', 'orders', 'users', 'notifications'].includes(newHash)) { this.activeTable = newHash; }
-                    });
-
-                    @if (session('success'))
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: '{{ session('success') }}' }}));
-                    @endif
-                    @if (session('error'))
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: '{{ session('error') }}' }}));
-                    @endif
-                },
+                this.$watch('selectedOrder.status', (newStatus, oldStatus) => {
+                    if (this.selectedOrder && this.sendNotification) {
+                        this.notificationTitle = `Update for Order #${this.selectedOrder.id_pesanan}`;
+                        this.notificationMessage = `Hi ${this.selectedOrder.nama}, the status of your order has been updated to "${newStatus}".`;
+                    }
+                });
                 
-                openEditModal(promo) {
-                    this.editingPromo = JSON.parse(JSON.stringify(promo));
-                    this.editPromoModalOpen = true;
-                },
-
-                openEditNotificationModal(notification) {
-                    this.editingNotification = JSON.parse(JSON.stringify(notification));
-                    this.editNotificationModalOpen = true;
-                },
-
-                openDeleteModal(id, type) {
-                    this.deleteId = id;
-                    this.deleteType = type;
-                    this.deleteModalOpen = true;
-                },
-
-                closeDeleteModal() {
-                    this.deleteId = null;
-                    this.deleteType = '';
-                    this.deleteModalOpen = false;
-                },
-
-                confirmDelete() {
-                    if (this.deleteId && this.deleteType) {
-                        const form = document.getElementById(`delete-${this.deleteType}-form-${this.deleteId}`);
-                        if (form) {
-                            this.handleFormSubmit({ target: form }, `${this.deleteType.charAt(0).toUpperCase() + this.deleteType.slice(1)} deleted successfully!`, `Failed to delete ${this.deleteType}.`);
-                        }
-                    }
-                    this.closeDeleteModal();
-                },
-
-                showOrderModal(order) {
-                    this.selectedOrder = JSON.parse(JSON.stringify(order));
-                    this.open = true;
-                },
-
-                exportOrder() {
-                    if (!this.selectedOrder) return;
-                    this.isExporting = true;
-                    const content = document.getElementById('order-details-content');
-                    content.parentElement.scrollTop = 0;
-
-                    const waitForImagesToLoad = (element) => {
-                        const images = element.querySelectorAll('img');
-                        return Promise.all(Array.from(images).map(img => {
-                            if (img.complete) return Promise.resolve();
-                            return new Promise(resolve => { img.onload = img.onerror = resolve; });
-                        }));
-                    };
-
-                    setTimeout(() => {
-                        waitForImagesToLoad(content).then(() => {
-                            html2canvas(content, { scale: 2, useCORS: true }).then(canvas => {
-                                const imageData = canvas.toDataURL('image/png');
-                                const pdf = new window.jspdf.jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' });
-                                const pdfWidth = pdf.internal.pageSize.getWidth();
-                                const pdfHeight = pdf.internal.pageSize.getHeight();
-                                const canvasAspectRatio = canvas.width / canvas.height;
-                                let imgWidth = pdfWidth - 20;
-                                let imgHeight = imgWidth / canvasAspectRatio;
-                                if (imgHeight > pdfHeight - 20) {
-                                    imgHeight = pdfHeight - 20;
-                                    imgWidth = imgHeight * canvasAspectRatio;
-                                }
-                                const x = (pdfWidth - imgWidth) / 2;
-                                const y = 10;
-                                pdf.addImage(imageData, 'PNG', x, y, imgWidth, imgHeight);
-                                pdf.save(`order_${this.selectedOrder.id_pesanan}_details.pdf`);
-                                this.isExporting = false;
-                                window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: 'Order exported to PDF successfully!' }}));
-                            }).catch(error => {
-                                console.error('Error during PDF export:', error);
-                                this.isExporting = false;
-                                window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Could not export to PDF.' }}));
-                            });
-                        });
-                    }, 250);
-                },
-
-                async updateOrderStatus() {
-                    if (!this.selectedOrder) return;
-                    try {
-                        const response = await fetch(`/admin/orders/${this.selectedOrder.id_pesanan}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                            body: JSON.stringify({ status: this.selectedOrder.status, nota: this.selectedOrder.nota })
-                        });
-                        const data = await response.json();
-                        if (!response.ok) throw new Error(data.message || 'Server responded with an error');
-                        const index = this.ordersData.findIndex(o => o.id_pesanan === data.id_pesanan);
-                        if (index !== -1) this.ordersData.splice(index, 1, data);
-                        this.open = false;
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: 'Order status successfully updated!' }}));
-                    } catch (error) {
-                        console.error('Error details:', error);
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || 'Update failed. Please try again.' }}));
-                    }
-                },
-
-                toggleUserSelection(userId) {
-                    if (userId === 'all') {
-                        if (this.selectedUserIds.includes('all')) {
-                            this.selectedUserIds = [];
-                        } else {
-                            this.selectedUserIds = ['all'];
-                        }
-                        return;
-                    }
-
-                    if (this.selectedUserIds.includes('all')) {
-                        this.selectedUserIds = [];
-                    }
-
-                    const index = this.selectedUserIds.indexOf(userId);
-                    if (index === -1) {
-                        this.selectedUserIds.push(userId);
+                this.$watch('sendNotification', (isSending) => {
+                    if (isSending && this.selectedOrder) {
+                        this.notificationTitle = `Update for Order #${this.selectedOrder.id_pesanan}`;
+                        this.notificationMessage = `Hi ${this.selectedOrder.nama}, the status of your order has been updated to "${this.selectedOrder.status}".`;
                     } else {
-                        this.selectedUserIds.splice(index, 1);
+                        this.notificationTitle = '';
+                        this.notificationMessage = '';
                     }
-                },
+                });
 
-                async handleNotificationSubmit(event, successMessage, errorMessage) {
-                    const form = event.target;
-                    const formData = new FormData();
+                @if (session('success'))
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: '{{ session('success') }}' }}));
+                @endif
+                @if (session('error'))
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: '{{ session('error') }}' }}));
+                @endif
+            },
+
+            openCreateNotificationModal() {
+                this.createNotificationModalOpen = true;
+                this.selectedUserIds = [];
+                this.selectedUserOrders = [];
+                this.selectedOrderIds = [];
+                document.getElementById('create-notification-form').reset();
+            },
+            closeCreateNotificationModal() {
+                this.createNotificationModalOpen = false;
+            },
+            
+            toggleUserSelection(userId) {
+                this.selectedUserOrders = [];
+                this.selectedOrderIds = [];
+                
+                const index = this.selectedUserIds.indexOf(userId);
+
+                if (userId === 'all') {
+                    this.selectedUserIds = this.selectedUserIds.includes('all') ? [] : ['all'];
+                } else {
+                    if (this.selectedUserIds.includes('all')) this.selectedUserIds = [];
                     
-                    formData.append('message', form.querySelector('[name="message"]').value);
-                    formData.append('title', form.querySelector('[name="title"]').value);
-                    formData.append('_token', form.querySelector('[name="_token"]').value);
-
-                    if (this.selectedUserIds.length === 0) {
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Please select at least one user.' }}));
-                        return;
-                    }
-
-                    this.selectedUserIds.forEach(id => {
-                        formData.append('user_ids[]', id);
-                    });
-                    
-                    try {
-                        const response = await fetch(form.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: { 'Accept': 'application/json' }
-                        });
-
-                        const data = await response.json();
-
-                        if (!response.ok) {
-                            let message = data.message || errorMessage;
-                            if(data.errors) {
-                                message = Object.values(data.errors).flat().join(' ');
-                            }
-                            throw new Error(message);
-                        }
-                        
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message || successMessage }}));
-                        setTimeout(() => window.location.reload(), 1500);
-
-                    } catch (error) {
-                        console.error('Form submission error:', error);
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || errorMessage }}));
-                    }
-                },
-
-                async handleFormSubmit(event, successMessage, errorMessage) {
-                    const form = event.target;
-                    const formData = new FormData(form);
-                    
-                    try {
-                        const response = await fetch(form.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: { 
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        });
-
-                        const data = await response.json();
-
-                        if (!response.ok) {
-                            let message = data.message || errorMessage;
-                            if(data.errors) {
-                                message = Object.values(data.errors).flat().join(' ');
-                            }
-                            throw new Error(message);
-                        }
-                        
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message || successMessage }}));
-                        setTimeout(() => window.location.reload(), 1500);
-
-                    } catch (error) {
-                        console.error('Form submission error:', error);
-                        window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || errorMessage }}));
-                    }
-                },
-
-                get filteredUsers() {
-                    if (!this.searchTerm) return this.usersData;
-                    const term = this.searchTerm.toLowerCase();
-                    return this.usersData.filter(user => (user.name && user.name.toLowerCase().includes(term)) || (user.email && user.email.toLowerCase().includes(term)));
-                },
-                get filteredOrders() {
-                    if (!this.searchTerm) return this.ordersData;
-                    const term = this.searchTerm.toLowerCase();
-                    return this.ordersData.filter(order => (order.nama && order.nama.toLowerCase().includes(term)) || (String(order.id_pesanan).toLowerCase().includes(term)) || (order.status && order.status.toLowerCase().includes(term)));
-                },
-                get filteredPromos() {
-                    if (!this.searchTerm) return this.promosData;
-                    const term = this.searchTerm.toLowerCase();
-                    return this.promosData.filter(promo => (promo.code && promo.code.toLowerCase().includes(term)) || (promo.type && promo.type.toLowerCase().includes(term)));
-                },
-                get filteredNotifications() {
-                    if (!this.searchTerm) return this.notificationsData;
-                    const term = this.searchTerm.toLowerCase();
-                    return this.notificationsData.filter(notification => (notification.user.name && notification.user.name.toLowerCase().includes(term)) || (notification.message && notification.message.toLowerCase().includes(term)));
+                    if (index === -1) this.selectedUserIds.push(userId);
+                    else this.selectedUserIds.splice(index, 1);
                 }
+                
+                if (this.selectedUserIds.length > 0 && !this.selectedUserIds.includes('all')) {
+                    this.fetchUserOrders(this.selectedUserIds);
+                }
+            },
+
+            toggleOrderSelection(orderId) {
+                const index = this.selectedOrderIds.indexOf(orderId);
+                if (index === -1) this.selectedOrderIds.push(orderId);
+                else this.selectedOrderIds.splice(index, 1);
+            },
+            
+            async fetchUserOrders(userIds) {
+                if (!userIds.length) return;
+                this.isFetchingOrders = true;
+                try {
+                    const response = await fetch(`/admin/users/${userIds.join(',')}/orders`);
+                    if (!response.ok) throw new Error('Failed to fetch orders from server.');
+                    
+                    const data = await response.json();
+                    this.selectedUserOrders = data;
+                } catch (error) {
+                    console.error('Error fetching user orders:', error);
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Could not load user orders.' }}));
+                } finally {
+                    this.isFetchingOrders = false;
+                }
+            },
+
+            openEditModal(promo) {
+                this.editingPromo = JSON.parse(JSON.stringify(promo));
+                this.editPromoModalOpen = true;
+            },
+
+            openEditNotificationModal(notification) {
+                this.editingNotification = JSON.parse(JSON.stringify(notification));
+                this.editNotificationModalOpen = true;
+            },
+
+            openDeleteModal(id, type) {
+                this.deleteId = id;
+                this.deleteType = type;
+                this.deleteModalOpen = true;
+            },
+
+            closeDeleteModal() {
+                this.deleteId = null;
+                this.deleteType = '';
+                this.deleteModalOpen = false;
+            },
+
+            confirmDelete() {
+                if (this.deleteId && this.deleteType) {
+                    const form = document.getElementById(`delete-${this.deleteType}-form-${this.deleteId}`);
+                    if (form) {
+                        this.handleFormSubmit({ target: form }, `${this.deleteType.charAt(0).toUpperCase() + this.deleteType.slice(1)} deleted successfully!`, `Failed to delete ${this.deleteType}.`);
+                    }
+                }
+                this.closeDeleteModal();
+            },
+
+            showOrderModal(order) {
+                this.selectedOrder = JSON.parse(JSON.stringify(order));
+                this.sendNotification = true;
+                
+                this.notificationTitle = `Update for Order #${this.selectedOrder.id_pesanan}`;
+                this.notificationMessage = `Hi ${this.selectedOrder.nama}, the status of your order has been updated to "${this.selectedOrder.status}".`;
+
+                this.open = true;
+            },
+
+            handleSaveClick() {
+            if (!this.sendNotification) {
+                this.confirmUpdateAndNotify();
+            } else {
+                this.notificationModalOpen = true;
+            }
+        },
+
+        async confirmUpdateAndNotify() {
+            if (!this.selectedOrder) return;
+            
+            try {
+                let payload = { 
+                    status: this.selectedOrder.status, 
+                    nota: this.selectedOrder.nota,
+                    send_notification: this.sendNotification
+                };
+                
+                if (this.sendNotification) {
+                    payload.notification_title = this.notificationTitle;
+                    payload.notification_message = this.notificationMessage;
+                }
+
+                const response = await fetch(`/admin/orders/${this.selectedOrder.id_pesanan}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Server responded with an error');
+
+                const index = this.ordersData.findIndex(o => o.id_pesanan === data.id_pesanan);
+                if (index !== -1) this.ordersData.splice(index, 1, data);
+                
+                this.notificationModalOpen = false;
+                this.open = false;
+                window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: 'Order successfully updated!' }}));
+
+            } catch (error) {
+                console.error('Error details:', error);
+                window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || 'Update failed. Please try again.' }}));
+            }
+        },
+
+            exportOrder() {
+                if (!this.selectedOrder) return;
+                this.isExporting = true;
+                const content = document.getElementById('order-details-content');
+                content.parentElement.scrollTop = 0;
+
+                const waitForImagesToLoad = (element) => {
+                    const images = element.querySelectorAll('img');
+                    return Promise.all(Array.from(images).map(img => {
+                        if (img.complete) return Promise.resolve();
+                        return new Promise(resolve => { img.onload = img.onerror = resolve; });
+                    }));
+                };
+
+                setTimeout(() => {
+                    waitForImagesToLoad(content).then(() => {
+                        html2canvas(content, { scale: 2, useCORS: true }).then(canvas => {
+                            const imageData = canvas.toDataURL('image/png');
+                            const pdf = new window.jspdf.jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' });
+                            const pdfWidth = pdf.internal.pageSize.getWidth();
+                            const pdfHeight = pdf.internal.pageSize.getHeight();
+                            const canvasAspectRatio = canvas.width / canvas.height;
+                            let imgWidth = pdfWidth - 20;
+                            let imgHeight = imgWidth / canvasAspectRatio;
+                            if (imgHeight > pdfHeight - 20) {
+                                imgHeight = pdfHeight - 20;
+                                imgWidth = imgHeight * canvasAspectRatio;
+                            }
+                            const x = (pdfWidth - imgWidth) / 2;
+                            const y = 10;
+                            pdf.addImage(imageData, 'PNG', x, y, imgWidth, imgHeight);
+                            pdf.save(`order_${this.selectedOrder.id_pesanan}_details.pdf`);
+                            this.isExporting = false;
+                            window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: 'Order exported to PDF successfully!' }}));
+                        }).catch(error => {
+                            console.error('Error during PDF export:', error);
+                            this.isExporting = false;
+                            window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Could not export to PDF.' }}));
+                        });
+                    });
+                }, 250);
+            },
+
+            async updateOrderStatus() {
+            if (!this.selectedOrder) return;
+            try {
+                let payload = { 
+                    status: this.selectedOrder.status, 
+                    nota: this.selectedOrder.nota,
+                    send_notification: this.sendNotification
+                };
+                
+                if (this.sendNotification) {
+                    payload.notification_title = this.notificationTitle;
+                    payload.notification_message = this.notificationMessage;
+                }
+
+                const response = await fetch(`/admin/orders/${this.selectedOrder.id_pesanan}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify(payload)
+                });
+                } catch (error) {
+                    console.error('Error details:', error);
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || 'Update failed. Please try again.' }}));
+                }
+            },
+
+            async handleNotificationSubmit(event) {
+                const form = event.target;
+                const formData = new FormData(form);
+                
+                if (!this.selectedUserIds.length) {
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Please select at least one user.' }}));
+                    return;
+                }
+                
+                this.selectedUserIds.forEach(id => formData.append('user_ids[]', id));
+                this.selectedOrderIds.forEach(id => formData.append('order_ids[]', id));
+                
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || 'Failed to send notification(s).');
+                    
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message }}));
+                    this.closeCreateNotificationModal();
+                    setTimeout(() => window.location.reload(), 1500);
+                } catch (error) {
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message }}));
+                }
+            },
+            
+            async handleFormSubmit(event, successMessage, errorMessage) {
+                const form = event.target;
+                const formData = new FormData(form);
+                
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        let message = data.message || errorMessage;
+                        if(data.errors) {
+                            message = Object.values(data.errors).flat().join(' ');
+                        }
+                        throw new Error(message);
+                    }
+                    
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message || successMessage }}));
+                    setTimeout(() => window.location.reload(), 1500);
+
+                } catch (error) {
+                    console.error('Form submission error:', error);
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || errorMessage }}));
+                }
+            },
+
+            get filteredUsers() {
+                if (!this.searchTerm) return this.usersData;
+                const term = this.searchTerm.toLowerCase();
+                return this.usersData.filter(user => (user.name && user.name.toLowerCase().includes(term)) || (user.email && user.email.toLowerCase().includes(term)));
+            },
+            get filteredOrders() {
+                if (!this.searchTerm) return this.ordersData;
+                const term = this.searchTerm.toLowerCase();
+                return this.ordersData.filter(order => (order.nama && order.nama.toLowerCase().includes(term)) || (String(order.id_pesanan).toLowerCase().includes(term)) || (order.status && order.status.toLowerCase().includes(term)));
+            },
+            get filteredPromos() {
+                if (!this.searchTerm) return this.promosData;
+                const term = this.searchTerm.toLowerCase();
+                return this.promosData.filter(promo => (promo.code && promo.code.toLowerCase().includes(term)) || (promo.type && promo.type.toLowerCase().includes(term)));
+            },
+            get filteredNotifications() {
+                if (!this.searchTerm) return this.notificationsData;
+                const term = this.searchTerm.toLowerCase();
+                return this.notificationsData.filter(notification => (notification.user.name && notification.user.name.toLowerCase().includes(term)) || (notification.title && notification.title.toLowerCase().includes(term)) ||(notification.message && notification.message.toLowerCase().includes(term)));
             }
         }
-    </script>
+    }
+</script>
 </body>
 </html>
