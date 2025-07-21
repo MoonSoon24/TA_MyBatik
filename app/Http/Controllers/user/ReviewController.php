@@ -8,16 +8,6 @@ use App\Http\Controllers\Controller;
 
 class ReviewController extends Controller
 {
-    public function index()
-    {
-        $reviews = Review::with('user')
-                         ->latest()
-                         ->limit(3)
-                         ->get();
-
-        return view('home', ['reviews' => $reviews]);
-    }
-
     public function store(Request $request)
     {
         $request->validate([

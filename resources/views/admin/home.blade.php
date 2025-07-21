@@ -93,7 +93,6 @@
                 </div>
             </div>
 
-            <!-- Users Table -->
             <div id="users-table" x-show="activeTable === 'users'" class="overflow-x-auto" x-cloak>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
@@ -116,6 +115,8 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
+                                        <button @click="openEditUserModal(user)" class="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-md hover:bg-blue-700 transition-colors">Edit</button>
+
                                         <form :action="`/admin/users/${user.id}/verify`" method="POST" class="inline-block" @submit.prevent="handleFormSubmit($event, 'User verification status changed!', `Failed to change status.` )">
                                             @csrf
                                             <button type="submit" class="px-3 py-1 text-white text-xs font-semibold rounded-md transition-colors" :class="user.email_verified_at ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'">
@@ -135,7 +136,6 @@
                 </table>
             </div>
 
-            <!-- Orders Table -->
             <div id="orders-table" x-show="activeTable === 'orders'" class="overflow-x-auto" x-cloak>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
@@ -161,7 +161,6 @@
                 </table>
             </div>
             
-            <!-- Promos Table -->
             <div id="promos-table" x-show="activeTable === 'promos'" class="overflow-x-auto" x-cloak>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
@@ -199,7 +198,6 @@
                 </table>
             </div>
 
-            <!-- Notifications Table -->
             <div id="notifications-table" x-show="activeTable === 'notifications'" class="overflow-x-auto" x-cloak>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
@@ -375,6 +373,32 @@
         </div>
     </div>
 
+    <div x-show="editUserModalOpen" @keydown.escape.window="editUserModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
+        <div @click.away="editUserModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-6">Edit User</h3>
+            <template x-if="editingUser">
+                <form :action="`/admin/users/${editingUser.id}`" method="POST" @submit.prevent="handleFormSubmit($event, 'User updated successfully!', 'Failed to update user.')">
+                    @csrf
+                    @method('PUT')
+                    <div class="space-y-4">
+                        <div>
+                            <label for="edit_user_name" class="block text-sm font-medium text-gray-700">Name</label>
+                            <input type="text" name="name" id="edit_user_name" x-model="editingUser.name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
+                        </div>
+                        <div>
+                            <label for="edit_user_email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" name="email" id="edit_user_email" x-model="editingUser.email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-end gap-4">
+                        <button type="button" @click="editUserModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Update</button>
+                    </div>
+                </form>
+            </template>
+        </div>
+    </div>
+
     <div x-show="createPromoModalOpen" @keydown.escape.window="createPromoModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
         <div @click.away="createPromoModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
             <h3 class="text-2xl font-bold mb-6">Create New Promo Code</h3>
@@ -455,7 +479,7 @@
             </div>
         </div>
     </div>
-
+    
     <div x-show="createNotificationModalOpen" @keydown.escape.window="closeCreateNotificationModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" x-cloak>
         <div @click.away="closeCreateNotificationModal()" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
             <h3 class="text-2xl font-bold mb-6">Send New Notification</h3>
@@ -508,7 +532,7 @@
             </form>
         </div>
     </div>
-
+    
     <div x-show="editNotificationModalOpen" @keydown.escape.window="editNotificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
         <div @click.away="editNotificationModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
             <h3 class="text-2xl font-bold mb-6">Edit Notification</h3>
@@ -538,7 +562,6 @@
             </template>
         </div>
     </div>
-
     <x-alert />
     <x-logout-modal />
 
@@ -566,6 +589,9 @@
             editPromoModalOpen: false,
             editingPromo: null,
 
+            editUserModalOpen: false,
+            editingUser: null,
+
             editNotificationModalOpen: false,
             editingNotification: null,
 
@@ -588,17 +614,19 @@
                     if (['promos', 'orders', 'users', 'notifications'].includes(newHash)) { this.activeTable = newHash; }
                 });
 
-                this.$watch('selectedOrder.status', (newStatus, oldStatus) => {
+                this.$watch('selectedOrder.status', (newStatus) => {
                     if (this.selectedOrder && this.sendNotification) {
-                        this.notificationTitle = `Update for Order #${this.selectedOrder.id_pesanan}`;
-                        this.notificationMessage = `Hi ${this.selectedOrder.nama}, the status of your order has been updated to "${newStatus}".`;
+                        const content = this.getNotificationContent(newStatus);
+                        this.notificationTitle = content.title;
+                        this.notificationMessage = content.message;
                     }
                 });
                 
                 this.$watch('sendNotification', (isSending) => {
                     if (isSending && this.selectedOrder) {
-                        this.notificationTitle = `Update for Order #${this.selectedOrder.id_pesanan}`;
-                        this.notificationMessage = `Hi ${this.selectedOrder.nama}, the status of your order has been updated to "${this.selectedOrder.status}".`;
+                        const content = this.getNotificationContent(this.selectedOrder.status);
+                        this.notificationTitle = content.title;
+                        this.notificationMessage = content.message;
                     } else {
                         this.notificationTitle = '';
                         this.notificationMessage = '';
@@ -611,6 +639,38 @@
                 @if (session('error'))
                     window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: '{{ session('error') }}' }}));
                 @endif
+            },
+
+            getNotificationContent(status) {
+                if (!this.selectedOrder) return { title: '', message: '' };
+
+                const orderId = this.selectedOrder.id_pesanan;
+                const customerName = this.selectedOrder.nama;
+                let title = `Update for Order #${orderId}`;
+                let message = '';
+
+                switch (status) {
+                    case 'Hold':
+                        message = `Hi ${customerName}, your order #${orderId} is currently on hold. We will notify you with any updates.`;
+                        break;
+                    case 'Cancelled':
+                        message = `Hi ${customerName}, we are sorry to inform you that your order #${orderId} has been cancelled.`;
+                        break;
+                    case 'In Progress':
+                        message = `Hi ${customerName}, great news! Your order #${orderId} is now in progress. We estimate it will be completed in approximately 7 days.`;
+                        break;
+                    case 'Ready':
+                        message = `Hi ${customerName}, your order #${orderId} is now ready for pickup or shipment. We will provide tracking details shortly if applicable.`;
+                        break;
+                    case 'Completed':
+                        message = `Hi ${customerName}, your order #${orderId} has been completed. We hope you enjoy your custom batik! Thank you for your purchase.`;
+                        break;
+                    default:
+                        message = `Hi ${customerName}, the status of your order #${orderId} has been updated to "${status}".`;
+                        break;
+                }
+
+                return { title, message };
             },
 
             openCreateNotificationModal() {
@@ -667,6 +727,11 @@
                 }
             },
 
+            openEditUserModal(user) {
+                this.editingUser = JSON.parse(JSON.stringify(user));
+                this.editUserModalOpen = true;
+            },
+            
             openEditModal(promo) {
                 this.editingPromo = JSON.parse(JSON.stringify(promo));
                 this.editPromoModalOpen = true;
@@ -717,42 +782,42 @@
             }
         },
 
-        async confirmUpdateAndNotify() {
-            if (!this.selectedOrder) return;
-            
-            try {
-                let payload = { 
-                    status: this.selectedOrder.status, 
-                    nota: this.selectedOrder.nota,
-                    send_notification: this.sendNotification
-                };
+            async confirmUpdateAndNotify() {
+                if (!this.selectedOrder) return;
                 
-                if (this.sendNotification) {
-                    payload.notification_title = this.notificationTitle;
-                    payload.notification_message = this.notificationMessage;
+                try {
+                    let payload = { 
+                        status: this.selectedOrder.status, 
+                        nota: this.selectedOrder.nota,
+                        send_notification: this.sendNotification
+                    };
+                    
+                    if (this.sendNotification) {
+                        payload.notification_title = this.notificationTitle;
+                        payload.notification_message = this.notificationMessage;
+                    }
+
+                    const response = await fetch(`/admin/orders/${this.selectedOrder.id_pesanan}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || 'Server responded with an error');
+
+                    const index = this.ordersData.findIndex(o => o.id_pesanan === data.id_pesanan);
+                    if (index !== -1) this.ordersData.splice(index, 1, data);
+                    
+                    this.notificationModalOpen = false;
+                    this.open = false;
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: 'Order successfully updated!' }}));
+
+                } catch (error) {
+                    console.error('Error details:', error);
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || 'Update failed. Please try again.' }}));
                 }
-
-                const response = await fetch(`/admin/orders/${this.selectedOrder.id_pesanan}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Server responded with an error');
-
-                const index = this.ordersData.findIndex(o => o.id_pesanan === data.id_pesanan);
-                if (index !== -1) this.ordersData.splice(index, 1, data);
-                
-                this.notificationModalOpen = false;
-                this.open = false;
-                window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: 'Order successfully updated!' }}));
-
-            } catch (error) {
-                console.error('Error details:', error);
-                window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || 'Update failed. Please try again.' }}));
-            }
-        },
+            },
 
             exportOrder() {
                 if (!this.selectedOrder) return;
@@ -795,31 +860,6 @@
                         });
                     });
                 }, 250);
-            },
-
-            async updateOrderStatus() {
-            if (!this.selectedOrder) return;
-            try {
-                let payload = { 
-                    status: this.selectedOrder.status, 
-                    nota: this.selectedOrder.nota,
-                    send_notification: this.sendNotification
-                };
-                
-                if (this.sendNotification) {
-                    payload.notification_title = this.notificationTitle;
-                    payload.notification_message = this.notificationMessage;
-                }
-
-                const response = await fetch(`/admin/orders/${this.selectedOrder.id_pesanan}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify(payload)
-                });
-                } catch (error) {
-                    console.error('Error details:', error);
-                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || 'Update failed. Please try again.' }}));
-                }
             },
 
             async handleNotificationSubmit(event) {

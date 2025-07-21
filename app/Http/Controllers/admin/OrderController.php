@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -13,7 +14,6 @@ public function update(Request $request, $id)
 {
     $validated = $request->validate([
         'status' => 'required|string|in:Pending,Hold,Cancelled,In Progress,Ready,Completed',
-        'nota' => 'nullable|string',
         'send_notification' => 'sometimes|boolean',
         'notification_title' => 'required_if:send_notification,true|string|max:255',
         'notification_message' => 'required_if:send_notification,true|string|max:1000',
@@ -21,9 +21,11 @@ public function update(Request $request, $id)
 
     $order = Order::findOrFail($id);
     $order->status = $validated['status'];
-    if (isset($validated['nota'])) {
-        $order->nota = $validated['nota'];
+
+    if ($order->status == 'In Progress') { 
+        $order->tanggal_estimasi = Carbon::now()->addDays(7);
     }
+    
     $order->save();
 
     if ($request->input('send_notification', false)) {

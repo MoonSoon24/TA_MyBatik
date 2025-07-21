@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
@@ -17,6 +18,7 @@ class ReportController extends Controller
             DB::raw('SUM(total) as total_sales'),
             DB::raw('COUNT(*) as total_orders')
         )
+        ->whereIn('status', ['Ready', 'Completed'])
         ->groupBy('year', 'month')
         ->orderBy('year', 'desc')
         ->orderBy('month', 'desc')
@@ -56,5 +58,17 @@ class ReportController extends Controller
             'userData', 
             'topCustomers'
         ));
+    }
+
+    public function getMonthlyDetails(Request $request, $year, $month)
+    {
+        $details = Order::whereYear('created_at', $year)
+                        ->whereMonth('created_at', $month)
+                        ->whereIn('status', ['Ready', 'Completed'])
+                        ->with('user')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+        return response()->json($details);
     }
 }

@@ -88,6 +88,9 @@
     </div>
 </header>
 
+<x-logout-modal />
+<x-alert />
+
 <script>
     function notifications() {
         return {

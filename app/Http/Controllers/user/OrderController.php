@@ -221,6 +221,7 @@ class OrderController extends Controller
                     'desain'          => $orderDetails['desain'],
                     'metode_bayar'    => $validatedCheckoutData['payment_method'],
                     'tanggal_pesan'   => now(),
+                    'tanggal_estimasi' => null,
                     'status'          => 'Pending',
                     'nota'            => $validatedCheckoutData['additional_note'],
                     'jumlah'          => $validatedCheckoutData['jumlah'],

@@ -24,7 +24,7 @@ use App\Http\Controllers\Admin\PromoController as AdminPromoController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [ReviewController::class, 'index'])->name('home');
+Route::get('/', [UserController::class, 'index'])->name('home');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 Route::get('/profile', [UserController::class, 'showProfile'])->name('profile');
 Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
@@ -37,6 +37,7 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'loginPost']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/notifications',[NotificationController::class, 'fetch'])->name('notifications.fetch');
 
 //  user
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -50,7 +51,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/order/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('order.upload.proof');
     Route::get('/history', [RiwayatPesananController::class, 'index'])->name('history');
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
-    Route::get('/notifications',[NotificationController::class, 'fetch'])->name('notifications.fetch');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notification.markAsRead');
 
     Route::patch('/designs/{design}', [DesignController::class, 'update'])->name('designs.update');
@@ -83,6 +83,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/reports/promo-usage', [ReportController::class, 'promoUsage'])->name('reports.promo');
     Route::get('/reports/user-registrations', [ReportController::class, 'userRegistrations'])->name('reports.users');
     Route::get('/reports/top-customers', [ReportController::class, 'topCustomers'])->name('reports.customers');
+    Route::get('/report/details/{year}/{month}', [ReportController::class, 'getMonthlyDetails'])->name('admin.report.details');
 
     Route::get('/notifications/update', [NotificationController::class, 'update'])->name('notifications.update');
     Route::get('/notifications/destroy', [NotificationController::class, 'destroy'])->name('notifications.destroy');

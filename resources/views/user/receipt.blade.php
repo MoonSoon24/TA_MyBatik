@@ -38,18 +38,95 @@
 
     <x-header />
     <main class="container mx-auto py-8 md:py-12 px-4">
-        <div class="bg-batik-light-green border border-batik-green/50 rounded-xl p-6 flex items-center gap-6 mb-8">
-            <div class="flex-shrink-0">
-                <svg class="w-16 h-16 text-batik-green" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+
+        @if($order->status == 'Pending')
+            <div class="bg-batik-light-green border border-batik-green/50 rounded-xl p-6 flex items-center gap-6 mb-8">
+                <div class="flex-shrink-0">
+                    <svg class="w-16 h-16 text-batik-green" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Order Successfully Placed!</h2>
+                    <p class="text-gray-700 mt-1">Thank you for your order. Your order number is <span class="font-bold text-batik-cyan">#{{ $order->id_pesanan }}</span></p>
+                    <p class="text-gray-600 mt-1">Your order will be processed once payment is confirmed.</p>
+                </div>
             </div>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-900">Order Successfully Placed!</h2>
-                <p class="text-gray-700 mt-1">Thank you for your order. Your order number is <span class="font-bold text-batik-cyan">#{{ $order->id_pesanan }}</span></p>
-                <p class="text-gray-600">Your order will be processed once payment is confirmed.</p>
+
+        @elseif($order->status == 'In Progress')
+            <div class="bg-blue-50 border border-blue-400/50 rounded-xl p-6 flex items-center gap-6 mb-8">
+                <div class="flex-shrink-0">
+                    <svg class="w-16 h-16 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Your Order is In Progress</h2>
+                    <p class="text-gray-700 mt-1">Our artisans are crafting your custom batik!<span class="font-bold text-blue-600"></span></p>
+                    @if($order->tanggal_estimasi)
+                        <p class="text-gray-600 mt-1">Estimated Completion Date: <span class="font-semibold">{{ $order->tanggal_estimasi->format('d F, Y') }}</span></p>
+                        <p class="text-gray-600 mt-1">If you have any questions, please contact our support.</p>
+                    @endif
+                </div>
             </div>
-        </div>
+
+        @elseif($order->status == 'Hold')
+            <div class="bg-yellow-50 border border-yellow-400/50 rounded-xl p-6 flex items-center gap-6 mb-8">
+                <div class="flex-shrink-0">
+                    <svg class="w-16 h-16 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Action Required: Order on Hold</h2>
+                    <p class="text-gray-700 mt-1">There might be an issue with your payment proof. Please review and re-upload if necessary.</p>
+                    <p class="text-gray-600 mt-1">Your order number is <span class="font-bold text-yellow-600">#{{ $order->id_pesanan }}</span></p>
+                </div>
+            </div>
+            
+        @elseif($order->status == 'Ready')
+            <div class="bg-batik-light-green border border-batik-green/50 rounded-xl p-6 flex items-center gap-6 mb-8">
+                <div class="flex-shrink-0">
+                    <svg class="w-16 h-16 text-batik-green" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Your Order is Ready for Pickup!</h2>
+                    <p class="text-gray-700 mt-1">Please visit our store to collect your custom batik. Thank you for your patience!</p>
+                    <p class="text-gray-600 mt-1">Your order number is <span class="font-bold text-batik-cyan">#{{ $order->id_pesanan }}</span></p>
+                    <p class="text-gray-600 mt-1">If you have any questions, please contact our support.</p>
+                </div>
+            </div>
+            
+        @elseif($order->status == 'Completed')
+            <div class="bg-teal-50 border border-teal-500/50 rounded-xl p-6 flex items-center gap-6 mb-8">
+                <div class="flex-shrink-0">
+                    <svg class="w-16 h-16 text-batik-green" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Order Completed</h2>
+                    <p class="text-gray-700 mt-1">We hope you enjoy your unique batik creation. Thank you for your business!</p>
+                    <p class="text-gray-600 mt-1">Order <span class="font-bold text-teal-700">#{{ $order->id_pesanan }}</span></p>
+                </div>
+            </div>
+
+        @elseif($order->status == 'Cancelled')
+            <div class="bg-red-50 border border-red-400/50 rounded-xl p-6 flex items-center gap-6 mb-8">
+                <div class="flex-shrink-0">
+                    <svg class="w-16 h-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Order cancelled</h2>
+                    <p class="text-gray-700 mt-1">This order has been cancelled. No further action is required.</p>
+                    <p class="text-gray-600 mt-1">If you have any questions, please contact our support.</p>
+                </div>
+            </div>
+        @endif
 
         <div class="flex flex-col lg:flex-row gap-8 items-start">
             
@@ -184,10 +261,10 @@
                             <img src="{{ asset('storage/' . $order->bukti_pembayaran) }}" alt="Payment Proof" class="w-full rounded-lg object-contain border">
                         </div>
 
-                    @elseif($order->status == 'canceled')
-                        <h3 class="font-bold text-lg mb-4">Order Canceled</h3>
+                    @elseif($order->status == 'Cancelled')
+                        <h3 class="font-bold text-lg mb-4">Order cancelled</h3>
                         <div class="border-l-4 border-red-400 bg-red-50 p-4 rounded-r-lg">
-                            <p class="text-sm text-red-700">This order has been canceled. No payment is required.</p>
+                            <p class="text-sm text-red-700">This order has been cancelled. No payment is required.</p>
                         </div>
                     
                     @endif
@@ -235,7 +312,5 @@
         </div>
     </main>
 
-    <x-logout-modal />
-    
 </body>
 </html>

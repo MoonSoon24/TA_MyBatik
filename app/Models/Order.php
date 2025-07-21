@@ -23,6 +23,7 @@ class Order extends Model
         'no_telepon',
         'metode_bayar',
         'tanggal_pesan',
+        'tanggal_estimasi',
         'status',
         'nota',
         'desain',
@@ -37,6 +38,7 @@ class Order extends Model
 
     protected $casts = [
         'tanggal_pesan' => 'datetime',
+        'tanggal_estimasi' => 'datetime',
         'total' => 'float',
     ];
 

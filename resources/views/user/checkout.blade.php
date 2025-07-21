@@ -206,9 +206,6 @@
             </div>
         </form>
     </main>
-
-    <x-logout-modal />
-    <x-alert />
     
     <div id="note-modal" class="modal-container fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-content bg-white w-full max-w-md p-6 rounded-xl shadow-lg transform -translate-y-10 opacity-0">

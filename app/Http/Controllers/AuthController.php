@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,14 @@ class AuthController extends Controller
             'role' => 'user',
             'email_verified_at' => null,
         ]);
+
+        if ($user) {
+            Notification::create([
+                'user_id' => $user->id,
+                'title' => 'Welcome to MyBatik!',
+                'message' => 'Thank you for registering. Special for our new members, enjoy a 10% discount on your purchase with the code WELCOME10.',
+            ]);
+        }
 
         Auth::login($user);
 

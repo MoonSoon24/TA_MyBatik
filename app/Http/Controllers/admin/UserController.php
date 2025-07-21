@@ -34,7 +34,7 @@ class UserController extends Controller
 
         $user->update($validatedData);
 
-        return redirect()->route('admin.home')->with('success', 'User details updated successfully.');
+        return response()->json(['message' => 'User updated successfully!']);
     }
 
     public function verify(string $id)

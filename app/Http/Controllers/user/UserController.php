@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\User;
 
 use App\Models\User;
+use App\Models\Review;
+use App\Models\Design;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +13,22 @@ use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {
+    public function index()
+    {
+        $reviews = Review::with('user')
+                        ->latest()
+                        ->limit(3)
+                        ->get();
+        $topGalleryPosts = Design::withCount(['likes', 'comments'])
+                        ->orderBy('likes_count', 'desc')
+                        ->limit(3)
+                        ->get();
+
+        $reviews = Review::with('user')->latest()->take(3)->get();
+
+        return view('home', ['reviews' => $reviews, 'topGalleryPosts' => $topGalleryPosts]);
+    }
+
     public function showProfile()
     {
         

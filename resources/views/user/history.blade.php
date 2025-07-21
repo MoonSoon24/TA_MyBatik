@@ -217,9 +217,6 @@
         </div>
     </main>
 
-    <x-logout-modal />
-    <x-alert />
-
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('search-input');

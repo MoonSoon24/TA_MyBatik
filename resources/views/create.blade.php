@@ -149,6 +149,7 @@
 <body class="bg-gray-100 font-sans text-gray-800">
 
     <x-header />
+    
     <main class="w-full max-w-screen-2xl mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-8 flex flex-col lg:flex-row gap-8 mt-8">
 
         <div class="flex-grow bg-gray-50 rounded-xl p-6 flex flex-col">

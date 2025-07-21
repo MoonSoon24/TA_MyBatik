@@ -43,10 +43,10 @@
              <div class="text-center py-16"><p class="text-xl text-gray-500">No designs have been shared yet. Be the first!</p></div>
         @else
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-4">
+                
                 @foreach($designs as $design)
-
-                <div id="design-card-{{ $design->id }}" @click="openDetailModal({{ json_encode($design) }})" class="group relative aspect-square cursor-pointer">
-                    <img src="{{ asset('storage/' . $design->image_path) }}" alt="{{ $design->title }}" class="w-full h-full object-cover rounded-md">
+                <div id="design-card-{{ $design->id }}" @click="openDetailModal({{ json_encode($design) }})" class="group relative aspect-square cursor-pointer bg-white">
+                    <img src="{{ asset('storage/' . $design->image_path) }}" alt="{{ $design->title }}" class="w-full h-full object-contain rounded-md">
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                         <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center space-x-6 text-white">
                             <div class="flex items-center space-x-2">
@@ -182,9 +182,6 @@
             </form>
         </div>
     </div>
-    
-    <x-logout-modal />
-    <x-alert />
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {

@@ -208,7 +208,6 @@
         </form>
     </main>
 
-    <x-logout-modal />
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {

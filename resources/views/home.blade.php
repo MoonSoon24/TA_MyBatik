@@ -94,7 +94,51 @@
         </div>
     </section>
 
-    <section id="about" class="py-16 md:py-24 bg-white">
+    <section id="top-gallery" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-6 md:px-12">
+            <h2 class="text-3xl font-bold text-center mb-12">Top Gallery Posts</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                
+                @forelse ($topGalleryPosts as $post)
+                    <a href="/gallery" class="block group">
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden h-full flex flex-col transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                            <div class="h-64 w-full bg-gray-50">
+                                 <img src="{{ asset('storage/' . $post->image_path) }}" alt="{{ htmlspecialchars($post->title) }}" class="w-full h-full object-contain" onerror="this.onerror=null;this.src='https://placehold.co/400x400/eeeeee/222222?text=Batik';">
+                            </div>
+                            
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="font-semibold text-lg text-gray-900 mb-2 truncate" title="{{ htmlspecialchars($post->title) }}">{{ $post->title }}</h3>
+                                <div class="flex justify-between items-center text-gray-500">
+                                    <div class="flex items-center space-x-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>{{ $post->likes_count ?? 0 }}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.08-3.239A8.995 8.995 0 011 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM4.416 12.584A7 7 0 0010 15c3.309 0 6-2.239 6-5s-2.691-5-6-5-6 2.239-6 5c0 1.282.47 2.45 1.253 3.388L4.416 12.584z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>{{ $post->comments_count ?? 0 }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                @empty
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500 py-10">
+                        <p>No popular designs to show yet. Check back soon!</p>
+                    </div>
+                @endforelse
+
+            </div>
+            <div class="text-center mt-12">
+                <a href="/gallery" class="bg-blue-500 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 text-lg">View Full Gallery</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-16 md:py-24 bg-gray-100">
         <div class="container mx-auto px-6 md:px-12 text-center">
             <h2 class="text-3xl font-bold mb-4">About Us</h2>
             <p class="max-w-3xl mx-auto text-gray-600">
@@ -139,13 +183,10 @@
                 <a href="#" class="hover:text-gray-300">Instagram</a>
             </div>
             <div class="mt-8 border-t border-gray-700 pt-6">
-                <p class="text-sm text-gray-400">&copy; 2025 myBatik. All Rights Reserved.</p>
+                <p class="text-sm text-gray-400" style="padding-bottom: 20px;">&copy; 2025 myBatik. All Rights Reserved.</p>
             </div>
         </div>
     </footer>
-
-    <x-logout-modal />
-    <x-alert />
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
