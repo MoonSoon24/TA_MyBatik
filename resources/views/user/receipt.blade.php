@@ -159,12 +159,12 @@
                         <span class="font-medium">Rp. 300.000 x {{ $order->jumlah }}</span>
                     </div>
 
-                    @if($order->cloth_type === 'kain mori')
+                    @if($order->fabric_type === 'kain mori')
                         <div class="flex justify-between text-gray-700">
                             <span>Fabric Cost (Kain Mori)</span>
                             <span class="font-medium">+ Rp. 100.000 x {{ $order->jumlah }}</span>
                         </div>
-                    @elseif($order->cloth_type === 'kain sutera')
+                    @elseif($order->fabric_type === 'kain sutera')
                         <div class="flex justify-between text-gray-700">
                             <span>Fabric Cost (Kain Sutera)</span>
                             <span class="font-medium">+ Rp. 300.000 x {{ $order->jumlah }}</span>

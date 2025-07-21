@@ -21,6 +21,7 @@ class Promo extends Model
         'value',
         'current_uses',
         'max_uses',
+        'max_uses_scope',
         'expires_at',
     ];
 

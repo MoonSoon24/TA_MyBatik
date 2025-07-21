@@ -25,6 +25,15 @@
             overflow-x: hidden;
             overflow-y: auto !important;
         }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .has-tooltip:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
@@ -92,7 +101,7 @@
                                                 <p class="text-gray-900 whitespace-no-wrap">{{ $data->total_orders }}</p>
                                             </td>
                                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                                <p class="text-gray-900 whitespace-no-wrap">Rp {{ number_format($data->total_sales, 2, ',', '.') }}</p>
+                                                <p class="text-gray-900 whitespace-no-wrap">Rp {{ number_format($data->total_sales, 0, ',', '.') }}</p>
                                             </td>
                                         </tr>
                                         @empty
@@ -122,7 +131,7 @@
                                          @forelse ($promoData as $promo)
                                          <tr>
                                              <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">{{ $promo->code }}</p></td>
-                                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">{{ $promo->type == 'percentage' ? $promo->value.'%' : 'Rp '.number_format($promo->value, 2, ',', '.') }}</p></td>
+                                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">{{ $promo->type == 'percentage' ? $promo->value.'%' : 'Rp '.number_format($promo->value, 0, ',', '.') }}</p></td>
                                              <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">{{ $promo->usage_count }}</p></td>
                                          </tr>
                                          @empty
@@ -202,8 +211,8 @@
             </div>
 
             <div x-show="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" x-cloak>
-                <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-full overflow-y-auto" @click.away="closeModal()">
-                    <div class="p-6 border-b">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-full overflow-y-auto" @click.away="closeModal()">
+                    <div class="p-6 border-b sticky top-0 bg-white z-10">
                         <h3 class="text-2xl font-bold" x-text="`Sales Details for ${modalMonth}`"></h3>
                     </div>
                     <div class="p-6">
@@ -215,7 +224,34 @@
                                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Order ID</th>
                                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
                                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                            <div class="relative has-tooltip inline-flex gap-x-1 cursor-pointer">
+                                                <span>Fabric</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 hover:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                                                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                                <div class="tooltip absolute z-20 w-56 p-3 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300 bg-gray-800 text-white text-sm rounded-lg shadow-lg">
+                                                    <div class="font-bold mb-2 text-center">Fabric Summary</div>
+                                                    <div x-html="fabricTooltipContent"></div>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Qty</th>
+
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                            <div class="relative has-tooltip inline-flex gap-x-1 cursor-pointer">
+                                                <span>Payment Method</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 hover:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                                                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                                <div class="tooltip absolute z-20 w-64 p-3 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300 bg-gray-800 text-white text-sm rounded-lg shadow-lg">
+                                                    <div class="font-bold mb-2 text-center">Payment Summary</div>
+                                                    <div x-html="paymentTooltipContent"></div>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Discount</th>
                                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
                                     </tr>
                                 </thead>
@@ -224,12 +260,11 @@
                             </table>
                         </div>
                     </div>
-                    <div class="p-4 bg-gray-50 border-t flex justify-end">
+                    <div class="p-4 bg-gray-50 border-t sticky bottom-0 flex justify-end">
                         <button @click="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-semibold">Close</button>
                     </div>
                 </div>
             </div>
-
         </main>
     </div>
 
@@ -240,9 +275,12 @@
                 isModalOpen: false,
                 modalMonth: '',
                 monthlyDetails: '',
+                fabricTooltipContent: 'Hover to see summary',
+                paymentTooltipContent: 'Hover to see summary',
+
                 getDetails(year, month) {
-                    const monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
-                    this.modalMonth = `${monthName} ${year}`;
+                    const monthName = new Date(year, month - 1, 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                    this.modalMonth = `${monthName}`;
 
                     fetch(`/admin/report/details/${year}/${month}`)
                         .then(response => {
@@ -253,35 +291,61 @@
                         })
                         .then(data => {
                             let tableRows = '';
-                            let totalSales = 0;
-                            if (data.length > 0) {
+                            let totalMonthlySales = 0;
+                            let fabricSummary = {};
+                            let paymentSummary = {};
+                            if (data && data.length > 0) {
                                 data.forEach((order, index) => {
-                                    totalSales += order.total;
+                                    totalMonthlySales += parseFloat(order.total || 0);
+
+                                    const fabric = order.fabric_type || 'Unknown';
+                                    const quantity = parseInt(order.jumlah || 0);
+                                    const payment = order.metode_bayar || 'Unknown';
+
+                                    fabricSummary[fabric] = (fabricSummary[fabric] || 0) + quantity;
+                                    paymentSummary[payment] = (paymentSummary[payment] || 0) + 1;
+
                                     tableRows += `
                                         <tr class="border-b border-gray-200">
                                             <td class="px-5 py-4 bg-white text-sm">${index + 1}</td>
-                                            <td class="px-5 py-4 bg-white text-sm">${order.id_pesanan}</td>
-                                            <td class="px-5 py-4 bg-white text-sm">${order.user ? order.user.name : 'N/A'}</td>
-                                            <td class="px-5 py-4 bg-white text-sm">${new Date(order.created_at).toLocaleDateString('id-ID')}</td>
-                                            <td class="px-5 py-4 bg-white text-sm">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                                                    ${order.status}
-                                                </span>
+                                            <td class="px-5 py-4 bg-white text-sm font-semibold text-blue-600">${order.id_pesanan || 'N/A'}</td>
+                                            <td class="px-5 py-4 bg-white text-sm">${order.nama || 'N/A'}</td>
+                                            <td class="px-5 py-4 bg-white text-sm">${new Date(order.tanggal_pesan).toLocaleDateString('id-ID')}</td>
+                                            <td class="px-5 py-4 bg-white text-sm">${order.fabric_type || 'N/A'}</td>
+                                            <td class="px-5 py-4 bg-white text-sm text-center">${order.jumlah || 0}</td>
+                                            <td class="px-5 py-4 bg-white text-sm">${order.metode_bayar || 'N/A'}</td>
+                                            <td class="px-5 py-4 bg-white text-sm text-right text-red-600">
+                                                ${order.discount_amount > 0 ? 
+                                                    `Rp ${new Intl.NumberFormat('id-ID').format(order.discount_amount)}` : 
+                                                    'Rp 0'
+                                                }
                                             </td>
-                                            <td class="px-5 py-4 bg-white text-sm text-right">Rp ${new Intl.NumberFormat('id-ID').format(order.total)}</td>
+                                            <td class="px-5 py-4 bg-white text-sm text-right font-bold">Rp ${new Intl.NumberFormat('id-ID').format(order.total)}</td>
                                         </tr>
                                     `;
                                 });
 
+                                let fabricTooltipHtml = '<ul class="space-y-1 text-left">';
+                                Object.entries(fabricSummary).forEach(([type, qty]) => {
+                                    fabricTooltipHtml += `<li class="flex justify-between"><span>${type}</span><span class="font-bold ml-2">${qty} pcs</span></li>`;
+                                });
+                                this.fabricTooltipContent = fabricTooltipHtml + '</ul>';
+
+                                let paymentTooltipHtml = '<ul class="space-y-1 text-left">';
+                                Object.entries(paymentSummary).forEach(([method, count]) => {
+                                    paymentTooltipHtml += `<li class="flex justify-between"><span>${method}</span><span class="font-bold ml-2">${count}x</span></li>`;
+                                });
+                                this.paymentTooltipContent = paymentTooltipHtml + '</ul>';
+
                                 tableRows += `
                                     <tr class="font-bold bg-gray-50 border-t-2 border-gray-300">
-                                        <td colspan="5" class="px-5 py-4 text-right">Total Monthly Sales</td>
-                                        <td class="px-5 py-4 text-right">Rp ${new Intl.NumberFormat('id-ID').format(totalSales)}</td>
+                                        <td colspan="8" class="px-5 py-4 text-right">Total Sales for ${monthName} :</td>
+                                        <td class="px-5 py-4 text-right">Rp ${new Intl.NumberFormat('id-ID').format(totalMonthlySales)}</td>
                                     </tr>
                                 `;
 
                             } else {
-                                tableRows = '<tr><td colspan="6" class="text-center p-5">No detailed sales data for this month.</td></tr>';
+                                tableRows = `<tr><td colspan="9" class="text-center p-5">No detailed sales data for this month.</td></tr>`;
                             }
                             this.monthlyDetails = tableRows;
                             this.isModalOpen = true;
@@ -289,7 +353,7 @@
                         })
                         .catch(error => {
                             console.error('Error fetching monthly details:', error);
-                            this.monthlyDetails = `<tr><td colspan="6" class="text-center p-5 text-red-500">Failed to load data. ${error.message}</td></tr>`;
+                            this.monthlyDetails = `<tr><td colspan="9" class="text-center p-5 text-red-500">Failed to load data. ${error.message}</td></tr>`;
                             this.isModalOpen = true;
                             document.body.classList.add('modal-active');
                         });
@@ -299,6 +363,8 @@
                     document.body.classList.remove('modal-active');
                     this.monthlyDetails = '';
                     this.modalMonth = '';
+                    this.fabricTooltipContent = 'Hover to see summary';
+                    this.paymentTooltipContent = 'Hover to see summary';
                 }
             }
         }

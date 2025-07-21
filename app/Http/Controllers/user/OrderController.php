@@ -33,6 +33,7 @@ class OrderController extends Controller
 
         return redirect()->back()->with('success', 'Payment proof uploaded successfully!');
     }
+
     public function applyPromo(Request $request)
     {
         $request->validate([
@@ -50,9 +51,21 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'This promo code has expired.']);
         }
 
-        if ($promo->max_uses && $promo->current_uses >= $promo->max_uses) {
-            return response()->json(['success' => false, 'message' => 'This promo code has reached its usage limit.']);
+        if ($promo->max_uses) {
+            if ($promo->max_uses_scope === 'global') {
+                if ($promo->current_uses >= $promo->max_uses) {
+                    return response()->json(['success' => false, 'message' => 'This promo code has reached its usage limit.']);
+                }
+            } elseif ($promo->max_uses_scope === 'personal') {
+                $userUsageCount = Order::where('id_user', Auth::id())
+                                       ->where('promo_code', $promo->code)
+                                       ->count();
+                if ($userUsageCount >= $promo->max_uses) {
+                    return response()->json(['success' => false, 'message' => 'You have already used this promo code the maximum number of times.']);
+                }
+            }
         }
+
         Session::put('promo', [
             'code' => $promo->code,
             'type' => $promo->type,
@@ -190,15 +203,15 @@ class OrderController extends Controller
             'phone' => 'required|string|min:10|max:15',
             'payment_method' => 'required|in:bank_transfer,qris',
             'additional_note' => 'nullable|string|max:1000',
-            'cloth_type' => 'required|string|in:kain katun,kain mori,kain sutera',
+            'fabric_type' => 'required|string|in:kain katun,kain mori,kain sutera',
             'jumlah' => 'required|integer|min:1',
         ]);
 
         $basePrice = 300000;
         $fabricCost = 0;
-        if ($validatedCheckoutData['cloth_type'] === 'kain mori') {
+        if ($validatedCheckoutData['fabric_type'] === 'kain mori') {
             $fabricCost = 100000;
-        } elseif ($validatedCheckoutData['cloth_type'] === 'kain sutera') {
+        } elseif ($validatedCheckoutData['fabric_type'] === 'kain sutera') {
             $fabricCost = 300000;
         }
 
@@ -217,7 +230,7 @@ class OrderController extends Controller
                     'alamat'          => $validatedCheckoutData['street_address'],
                     'no_telepon'      => $validatedCheckoutData['phone'],
                     'ukuran'          => $orderDetails['ukuran'],
-                    'cloth_type'      => $validatedCheckoutData['cloth_type'],
+                    'fabric_type'      => $validatedCheckoutData['fabric_type'],
                     'desain'          => $orderDetails['desain'],
                     'metode_bayar'    => $validatedCheckoutData['payment_method'],
                     'tanggal_pesan'   => now(),

@@ -15,6 +15,7 @@ class PromoController extends Controller
             'type' => 'required|in:percentage,fixed',
             'value' => 'required|numeric|min:0',
             'max_uses' => 'nullable|integer|min:1',
+            'max_uses_scope' => 'nullable|string|in:global,personal',
             'expires_at' => 'nullable|date|after:today',
         ]);
         
@@ -35,6 +36,7 @@ class PromoController extends Controller
             'type' => 'required|in:percentage,fixed',
             'value' => 'required|numeric|min:0',
             'max_uses' => 'nullable|integer|min:1',
+            'max_uses_scope' => 'nullable|string|in:global,personal',
             'expires_at' => 'nullable|date|after:today',
         ]);
 

@@ -126,21 +126,21 @@
                             <h4 class="text-md font-semibold text-gray-800 mb-3">Choose Your Fabric</h4>
                             <div id="fabric-options" class="space-y-3">
                                 <label class="fabric-option">
-                                    <input type="radio" name="cloth_type" value="kain katun" class="hidden">
+                                    <input type="radio" name="fabric_type" value="kain katun" class="hidden">
                                     <div class="fabric-details">
                                         <span class="font-semibold">Kain Katun</span>
                                         <span class="text-sm text-gray-500">Standard</span>
                                     </div>
                                 </label>
                                 <label class="fabric-option">
-                                    <input type="radio" name="cloth_type" value="kain mori" class="hidden">
+                                    <input type="radio" name="fabric_type" value="kain mori" class="hidden">
                                     <div class="fabric-details">
                                         <span class="font-semibold">Kain Mori</span>
                                         <span class="text-sm text-cyan-600 font-medium">+ Rp. 100.000</span>
                                     </div>
                                 </label>
                                 <label class="fabric-option">
-                                    <input type="radio" name="cloth_type" value="kain sutera" class="hidden">
+                                    <input type="radio" name="fabric_type" value="kain sutera" class="hidden">
                                     <div class="fabric-details">
                                         <span class="font-semibold">Kain Sutera</span>
                                         <span class="text-sm text-cyan-600 font-medium">+ Rp. 300.000</span>
@@ -266,7 +266,7 @@
             const closeQrisModalBtn = document.getElementById('close-qris-modal-btn');
             const checkoutForm = document.getElementById('checkout-form');
             
-            const fabricOptions = document.querySelectorAll('input[name="cloth_type"]');
+            const fabricOptions = document.querySelectorAll('input[name="fabric_type"]');
             const fabricLabels = document.querySelectorAll('.fabric-option');
             const jumlahInput = document.getElementById('jumlah');
 
@@ -292,7 +292,7 @@
             const appliedPromoCodeEl = document.getElementById('applied-promo-code');
 
             function calculateAndUpdatePrice() {
-                const selectedFabric = document.querySelector('input[name="cloth_type"]:checked').value;
+                const selectedFabric = document.querySelector('input[name="fabric_type"]:checked').value;
                 let additionalCost = 0;
                 const quantity = parseInt(jumlahInput.value) || 1;
 
@@ -335,7 +335,7 @@
             }
             
             function updateSelectedStyle() {
-                const selectedRadio = document.querySelector('input[name="cloth_type"]:checked');
+                const selectedRadio = document.querySelector('input[name="fabric_type"]:checked');
                 fabricLabels.forEach(label => label.classList.remove('selected'));
                 if (selectedRadio) {
                     selectedRadio.parentElement.classList.add('selected');
@@ -351,8 +351,8 @@
             
             jumlahInput.addEventListener('input', calculateAndUpdatePrice);
 
-            const initialFabricValue = "{{ old('cloth_type', session('order_details.cloth_type')) ?? 'kain katun' }}";
-            document.querySelector(`input[name="cloth_type"][value="${initialFabricValue}"]`).checked = true;
+            const initialFabricValue = "{{ old('fabric_type', session('order_details.fabric_type')) ?? 'kain katun' }}";
+            document.querySelector(`input[name="fabric_type"][value="${initialFabricValue}"]`).checked = true;
             
             function openModal(modal) {
                 const modalContent = modal.querySelector('.modal-content');

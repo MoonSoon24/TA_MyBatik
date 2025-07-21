@@ -66,7 +66,7 @@ class NotificationController extends Controller
             Notification::insert($notificationsData);
         }
         
-        return response()->json(['message' => 'Notification(s) sent successfully!']);
+        return response()->json(['message' => 'Notification sent successfully!']);
     }
 
     public function update(Request $request, Notification $notification)

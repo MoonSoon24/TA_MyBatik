@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->foreignId('order_id')->nullable()->constrained('orders', 'id_pesanan')->onDelete('cascade');
-        });
+        Schema::table('promos', function (Blueprint $table) {
+        $table->string('max_uses_scope')->default('global')->after('max_uses');
+    });
     }
 
     /**
@@ -21,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->dropForeign(['order_id']);
-            $table->dropColumn('order_id');
+        Schema::table('promos', function (Blueprint $table) {
+            //
         });
     }
 };

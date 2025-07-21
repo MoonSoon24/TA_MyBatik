@@ -157,11 +157,11 @@
                 </div>
                 <div>
                     <h3 class="font-semibold text-lg mb-2">What materials do you use?</h3>
-                    <p class="text-gray-600">We use high-quality, natural fabrics like primissima cotton and silk, which are ideal for the Batik process.</p>
+                    <p class="text-gray-600">We use high-quality, natural fabrics like silk, cotton and mori, which are ideal for the Batik process.</p>
                 </div>
                 <div>
                     <h3 class="font-semibold text-lg mb-2">How long does it take to receive my order?</h3>
-                    <p class="text-gray-600">Because each piece is handmade, the process takes time. Please allow 4-6 weeks for creation and an additional 1-2 weeks for shipping.</p>
+                    <p class="text-gray-600">Because each piece is handmade, the process takes time. Please allow 3-7 days for creation.</p>
                 </div>
             </div>
         </div>

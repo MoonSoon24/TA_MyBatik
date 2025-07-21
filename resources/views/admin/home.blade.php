@@ -305,7 +305,7 @@
                                 type="button" 
                                 @click="$dispatch('open-proof-modal', { imageUrl: '/storage/' + selectedOrder.bukti_pembayaran })"
                                 class="px-6 py-2 bg-indigo-500 text-white rounded-lg font-semibold hover:bg-indigo-600 transition-colors">
-                                View Proof
+                                View Payment
                             </button>
                             <button type="button" @click="exportOrder()" :disabled="isExporting" class="px-6 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors disabled:bg-green-300 disabled:cursor-not-allowed">
                                 <span x-show="!isExporting">Export</span><span x-show="isExporting">Exporting...</span>
@@ -405,11 +405,39 @@
             <form id="create-promo-form" action="{{ route('admin.promos.store') }}" method="POST" @submit.prevent="handleFormSubmit($event, 'Promo created successfully!', 'Failed to create promo.')">
                 @csrf
                 <div class="space-y-4">
-                    <div><label for="code" class="block text-sm font-medium text-gray-700">Promo Code</label><input type="text" name="code" id="code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required></div>
-                    <div><label for="type" class="block text-sm font-medium text-gray-700">Type</label><select name="type" id="type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"><option value="percentage">Percentage</option><option value="fixed">Fixed Amount</option></select></div>
-                    <div><label for="value" class="block text-sm font-medium text-gray-700">Value</label><input type="number" name="value" id="value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required step="any"></div>
-                    <div><label for="max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label><input type="number" name="max_uses" id="max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"></div>
-                    <div><label for="expires_at" class="block text-sm font-medium text-gray-700">Expires At (optional)</label><input type="date" name="expires_at" id="expires_at" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"></div>
+                    <div>
+                        <label for="code" class="block text-sm font-medium text-gray-700">Promo Code</label>
+                        <input type="text" name="code" id="code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
+                    </div>
+                    <div>
+                        <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
+                        <select name="type" id="type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="value" class="block text-sm font-medium text-gray-700">Value</label>
+                        <input type="number" name="value" id="value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required step="any">
+                    </div>
+
+                    <div class="flex items-end gap-x-4">
+                        <div class="flex-1">
+                            <label for="max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label>
+                            <input type="number" name="max_uses" id="max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                        </div>
+                        <div class="flex-1">
+                            <label for="max_uses_scope" class="block text-sm font-medium text-gray-700">Usage Scope</label>
+                            <select name="max_uses_scope" id="max_uses_scope" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                <option value="global">Global</option>
+                                <option value="personal">Per User</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="expires_at" class="block text-sm font-medium text-gray-700">Expires At (optional)</label>
+                        <input type="date" name="expires_at" id="expires_at" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                    </div>
                 </div>
                 <div class="mt-8 flex justify-end gap-4">
                     <button type="button" @click="createPromoModalOpen = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
@@ -442,9 +470,19 @@
                             <label for="edit_value" class="block text-sm font-medium text-gray-700">Value</label>
                             <input type="number" name="value" id="edit_value" x-model="editingPromo.value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required step="any">
                         </div>
-                        <div>
-                            <label for="edit_max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label>
-                            <input type="number" name="max_uses" id="edit_max_uses" x-model="editingPromo.max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+
+                        <div class="flex items-end gap-x-4">
+                            <div class="flex-1">
+                                <label for="edit_max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label>
+                                <input type="number" name="max_uses" id="edit_max_uses" x-model="editingPromo.max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                            </div>
+                            <div class="flex-1">
+                                <label for="edit_max_uses_scope" class="block text-sm font-medium text-gray-700">Usage Scope</label>
+                                <select name="max_uses_scope" id="edit_max_uses_scope" x-model="editingPromo.max_uses_scope" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                    <option value="global">Global</option>
+                                    <option value="personal">Per User</option>
+                                </select>
+                            </div>
                         </div>
                         <div>
                             <label for="edit_expires_at" class="block text-sm font-medium text-gray-700">Expires At (optional)</label>
@@ -481,57 +519,61 @@
     </div>
     
     <div x-show="createNotificationModalOpen" @keydown.escape.window="closeCreateNotificationModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" x-cloak>
-        <div @click.away="closeCreateNotificationModal()" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
-            <h3 class="text-2xl font-bold mb-6">Send New Notification</h3>
-            <form id="create-notification-form" action="{{ route('admin.notifications.store') }}" method="POST" @submit.prevent="handleNotificationSubmit($event)">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">User</label>
-                        <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-32 overflow-y-auto">
-                            <div @click="toggleUserSelection('all')" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes('all')}">
-                                <span class="font-semibold">-- ALL USERS --</span>
-                                <svg x-show="selectedUserIds.includes('all')" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+    <div @click.away="closeCreateNotificationModal()" class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+        <h3 class="text-2xl font-bold mb-6">Send New Notification</h3>
+        
+        <form id="create-notification-form" action="{{ route('admin.notifications.store') }}" method="POST" @submit.prevent="handleNotificationSubmit($event)">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Recipient(s)</label>
+                    <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-36 overflow-y-auto text-sm">
+                        <div @click="toggleUserSelection('all')" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes('all')}">
+                            <span class="font-semibold">-- ALL USERS --</span>
+                            <svg x-show="selectedUserIds.includes('all')" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <template x-for="user in usersData.filter(u => u.role !== 'admin')" :key="user.id">
+                            <div @click="toggleUserSelection(user.id)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes(user.id)}">
+                                <span x-text="user.name + ' (' + user.email + ')'"></span>
+                                <svg x-show="selectedUserIds.includes(user.id)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                             </div>
-                            <template x-for="user in usersData.filter(u => u.role !== 'admin')" :key="user.id">
-                                <div @click="toggleUserSelection(user.id)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes(user.id)}">
-                                    <span x-text="user.name + ' (' + user.email + ')'"></span>
-                                    <svg x-show="selectedUserIds.includes(user.id)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <div x-show="selectedUserIds.length > 0 && !selectedUserIds.includes('all')">
-                        <label class="block text-sm font-medium text-gray-700">Attach Order (Optional)</label>
-                        <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-32 overflow-y-auto">
-                            <template x-if="isFetchingOrders"><p class="text-center text-gray-500 p-4">Loading orders...</p></template>
-                            <template x-if="!isFetchingOrders && !selectedUserOrders.length"><p class="text-center text-gray-500 p-4">No orders found for the selected user(s).</p></template>
-                            <template x-for="order in selectedUserOrders" :key="order.id_pesanan">
-                                <div @click="toggleOrderSelection(order.id_pesanan)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex justify-between items-center" :class="{'bg-green-100 hover:bg-green-200': selectedOrderIds.includes(order.id_pesanan)}">
-                                    <span>Order #<span x-text="order.id_pesanan"></span> - <span x-text="order.status"></span></span>
-                                    <svg x-show="selectedOrderIds.includes(order.id_pesanan)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                        <input type="text" name="title" id="title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
-                    </div>
-                    <div>
-                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
-                        <textarea name="message" id="message" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required></textarea>
+                        </template>
                     </div>
                 </div>
-                <div class="mt-8 flex justify-end gap-4">
-                    <button type="button" @click="closeCreateNotificationModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">Send</button>
+
+                <div x-show="selectedUserIds.length > 0 && !selectedUserIds.includes('all')" x-transition>
+                    <label class="block text-sm font-medium text-gray-700">Attach Order (Optional)</label>
+                    <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-36 overflow-y-auto text-sm">
+                        <template x-if="isFetchingOrders"><p class="text-center text-gray-500 p-4">Loading orders...</p></template>
+                        <template x-if="!isFetchingOrders && !selectedUserOrders.length"><p class="text-center text-gray-500 p-4">No orders found for the selected user(s).</p></template>
+                        
+                        <template x-for="order in selectedUserOrders" :key="order.id_pesanan">
+                            <div @click="toggleOrderSelection(order.id_pesanan)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex justify-between items-center" :class="{'bg-green-100 hover:bg-green-200': selectedOrderIds.includes(order.id_pesanan)}">
+                                <span>Order #<span x-text="order.id_pesanan"></span> - <span x-text="order.status"></span> - <span x-text="order.user.name"></span></span>
+                                <svg x-show="selectedOrderIds.includes(order.id_pesanan)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </template>
+                    </div>
                 </div>
-            </form>
-        </div>
+
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                    <input type="text" name="title" id="title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500" required>
+                </div>
+                
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                    <textarea name="message" id="message" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500" required></textarea>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-4">
+                <button type="button" @click="closeCreateNotificationModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">Send</button>
+            </div>
+        </form>
     </div>
+</div>
     
     <div x-show="editNotificationModalOpen" @keydown.escape.window="editNotificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
         <div @click.away="editNotificationModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
@@ -614,9 +656,9 @@
                     if (['promos', 'orders', 'users', 'notifications'].includes(newHash)) { this.activeTable = newHash; }
                 });
 
-                this.$watch('selectedOrder.status', (newStatus) => {
-                    if (this.selectedOrder && this.sendNotification) {
-                        const content = this.getNotificationContent(newStatus);
+                this.$watch('selectedOrder', (newOrder) => {
+                    if (newOrder && this.sendNotification) {
+                        const content = this.getNotificationContent(newOrder.status);
                         this.notificationTitle = content.title;
                         this.notificationMessage = content.message;
                     }
@@ -683,7 +725,7 @@
             closeCreateNotificationModal() {
                 this.createNotificationModalOpen = false;
             },
-            
+
             toggleUserSelection(userId) {
                 this.selectedUserOrders = [];
                 this.selectedOrderIds = [];
@@ -709,7 +751,7 @@
                 if (index === -1) this.selectedOrderIds.push(orderId);
                 else this.selectedOrderIds.splice(index, 1);
             },
-            
+
             async fetchUserOrders(userIds) {
                 if (!userIds.length) return;
                 this.isFetchingOrders = true;
@@ -724,6 +766,69 @@
                     window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Could not load user orders.' }}));
                 } finally {
                     this.isFetchingOrders = false;
+                }
+            },
+
+            async handleNotificationSubmit(event) {
+                const form = event.target;
+                const formData = new FormData(form);
+                
+                if (!this.selectedUserIds.length) {
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Please select at least one recipient.' }}));
+                    return;
+                }
+                
+                this.selectedUserIds.forEach(id => formData.append('user_ids[]', id));
+                this.selectedOrderIds.forEach(id => formData.append('order_ids[]', id));
+                
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || 'Failed to send notification(s).');
+                    
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message }}));
+                    this.closeCreateNotificationModal();
+                    setTimeout(() => window.location.reload(), 1500);
+                } catch (error) {
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message }}));
+                }
+            },
+
+            async handleFormSubmit(event, successMessage, errorMessage) {
+                const form = event.target;
+                const formData = new FormData(form);
+                
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        let message = data.message || errorMessage;
+                        if(data.errors) {
+                            message = Object.values(data.errors).flat().join(' ');
+                        }
+                        throw new Error(message);
+                    }
+                    
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message || successMessage }}));
+                    setTimeout(() => window.location.reload(), 1500);
+
+                } catch (error) {
+                    console.error('Form submission error:', error);
+                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || errorMessage }}));
                 }
             },
 
@@ -860,69 +965,6 @@
                         });
                     });
                 }, 250);
-            },
-
-            async handleNotificationSubmit(event) {
-                const form = event.target;
-                const formData = new FormData(form);
-                
-                if (!this.selectedUserIds.length) {
-                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: 'Please select at least one user.' }}));
-                    return;
-                }
-                
-                this.selectedUserIds.forEach(id => formData.append('user_ids[]', id));
-                this.selectedOrderIds.forEach(id => formData.append('order_ids[]', id));
-                
-                try {
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                    });
-
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || 'Failed to send notification(s).');
-                    
-                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message }}));
-                    this.closeCreateNotificationModal();
-                    setTimeout(() => window.location.reload(), 1500);
-                } catch (error) {
-                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message }}));
-                }
-            },
-            
-            async handleFormSubmit(event, successMessage, errorMessage) {
-                const form = event.target;
-                const formData = new FormData(form);
-                
-                try {
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        let message = data.message || errorMessage;
-                        if(data.errors) {
-                            message = Object.values(data.errors).flat().join(' ');
-                        }
-                        throw new Error(message);
-                    }
-                    
-                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'success', message: data.message || successMessage }}));
-                    setTimeout(() => window.location.reload(), 1500);
-
-                } catch (error) {
-                    console.error('Form submission error:', error);
-                    window.dispatchEvent(new CustomEvent('alert', { detail: { type: 'error', message: error.message || errorMessage }}));
-                }
             },
 
             get filteredUsers() {
