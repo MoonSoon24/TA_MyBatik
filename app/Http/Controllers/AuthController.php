@@ -42,7 +42,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/login')->with('success', 'Registration successful! Welcome to MyBatik.');
+        return redirect('/')->with('success', 'Registration successful! Welcome to MyBatik.');
     }
 
     public function login()
@@ -51,26 +51,26 @@ class AuthController extends Controller
     }
 
     public function loginPost(Request $request)
-{
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
 
-        if (Auth::user()->role === 'admin') {
-            return redirect()->intended('/admin');
+            if (Auth::user()->role === 'admin') {
+                return redirect()->intended('/admin');
+            }
+
+            return redirect('/')->with('success', 'Login successful! Welcome to MyBatik.');
         }
 
-        return redirect('/')->with('success', 'Login successful! Welcome to MyBatik.');
+        return back()->withErrors([
+            'email' => 'wrong email or password',
+        ])->onlyInput('email');
     }
-
-    return back()->withErrors([
-        'email' => 'The provided credentials do not match our records.',
-    ])->onlyInput('email');
-}
 
     public function logout(Request $request)
     {

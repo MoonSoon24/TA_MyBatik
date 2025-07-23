@@ -10,32 +10,24 @@ class Promo extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'code',
         'type',
         'value',
-        'current_uses',
         'max_uses',
         'max_uses_scope',
+        'current_uses',
         'expires_at',
+        'constraints',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected $casts = [
         'expires_at' => 'datetime',
+        'constraints' => 'array',
     ];
 
     public function orders(): HasMany
     {
-        return $this->hasMany(Order::class, 'promo_id', 'id');
+        return $this->hasMany(Order::class, 'promo_code', 'code');
     }
 }

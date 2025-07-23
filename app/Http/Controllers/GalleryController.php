@@ -9,7 +9,7 @@ class GalleryController extends Controller
 {
     public function index()
     {
-        $designs = \App\Models\Design::where('is_public', true)
+        $designs = Design::where('is_public', true)
                          ->with(['user', 'comments.user', 'likes'])
                          ->latest()
                          ->paginate(9);

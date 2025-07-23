@@ -28,7 +28,7 @@ class Order extends Model
         'nota',
         'desain',
         'ukuran',
-        'cloth_type',
+        'fabric_type',
         'jumlah',
         'promo_code',
         'discount_amount',
@@ -50,5 +50,10 @@ class Order extends Model
     public function review()
     {
         return $this->hasOne(Review::class, 'id_pesanan', 'id_pesanan');
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'order_id', 'id_pesanan');
     }
 }

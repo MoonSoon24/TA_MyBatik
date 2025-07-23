@@ -30,6 +30,7 @@ Route::get('/profile', [UserController::class, 'showProfile'])->name('profile');
 Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
 Route::get('/create', function () { return view('create'); })->name('create');
 
+
 // login & register
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'registerPost']);
@@ -38,6 +39,7 @@ Route::post('/login', [AuthController::class, 'loginPost']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/notifications',[NotificationController::class, 'fetch'])->name('notifications.fetch');
+
 
 //  user
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -71,19 +73,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     })->name('profile');
 
     Route::post('/users/{user}/verify', [AdminUserController::class, 'verify'])->name('users.verify');
-    Route::post('/promos', [PromoController::class, 'store'])->name('promos.store');
-    Route::get('/users/{userIds}/orders', [AdminOrderController::class, 'getUserOrders'])->name('admin.users.orders');
+    Route::post('/promo', [PromoController::class, 'store'])->name('promo.store');
+    Route::get('/users/{userId}/orders', [AdminOrderController::class, 'getUserOrders'])->name('admin.users.orders');
     
     Route::resource('users', AdminUserController::class);
     Route::resource('orders', AdminOrderController::class);
     Route::resource('promos', AdminPromoController::class);
     Route::resource('notifications', NotificationController::class);
 
-    Route::get('/reports/sales', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/promo-usage', [ReportController::class, 'promoUsage'])->name('reports.promo');
-    Route::get('/reports/user-registrations', [ReportController::class, 'userRegistrations'])->name('reports.users');
-    Route::get('/reports/top-customers', [ReportController::class, 'topCustomers'])->name('reports.customers');
-    Route::get('/report/details/{year}/{month}', [ReportController::class, 'getMonthlyDetails'])->name('admin.report.details');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/report/promo-details/{code}', [ReportController::class, 'getPromoDetails'])->name('admin.reports.promoDetails');
+    Route::get('/report/sales-details/{year}/{month}', [ReportController::class, 'getMonthlyDetails'])->name('admin.report.salesDetails');
+    Route::get('/report/user-details/{year}/{month}', [ReportController::class, 'getUserDetails'])->name('admin.reports.userDetails');
+    Route::get('/report/customer-details/{userId}', [ReportController::class, 'getCustomerDetails'])->name('admin.reports.customerDetails');
 
     Route::get('/notifications/update', [NotificationController::class, 'update'])->name('notifications.update');
     Route::get('/notifications/destroy', [NotificationController::class, 'destroy'])->name('notifications.destroy');

@@ -33,7 +33,6 @@
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 pb-28 style="padding-bottom: 0px;">
 
-    <!-- header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
             <div class="flex items-center gap-x-12">

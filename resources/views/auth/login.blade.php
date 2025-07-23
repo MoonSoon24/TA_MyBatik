@@ -44,32 +44,30 @@
                 <p class="text-gray-500 mt-2">Log in to continue to your account.</p>
             </div>
 
-            @if ($errors->any())
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">Oops!</strong>
-                    <span class="block sm:inline">There were some problems with your input.</span>
-                    <ul class="mt-3 list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <form action="/login" method="POST" class="space-y-6">
                 @csrf
 
                 <div>
-                    <label for="Email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                     <div class="mt-1">
-                        <input id="email" name="email" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <input id="email" name="email" type="email" required autocomplete="email" value="{{ old('email') }}"
+                            class="w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition @error('email') border-red-500 @else border-gray-300 @enderror">
+
+                        @error('email')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <div class="mt-1">
-                        <input id="password" name="password" type="password" autocomplete="current-password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <input id="password" name="password" type="password" required autocomplete="current-password"
+                            class="w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition @error('password') border-red-500 @else border-gray-300 @enderror">
+
+                        @error('password')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
@@ -97,12 +95,6 @@
             @if (session('success'))
                 window.dispatchEvent(new CustomEvent('alert', {
                     detail: { type: 'success', message: "{{ session('success') }}" }
-                }));
-            @endif
-
-            @if ($errors->any())
-                window.dispatchEvent(new CustomEvent('alert', {
-                    detail: { type: 'error', message: "{{ $errors->first() }}" }
                 }));
             @endif
         });

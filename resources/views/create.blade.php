@@ -28,7 +28,7 @@
         body { font-family: 'Inter', sans-serif; }
         .active-garment-btn { background-color: #333; color: white; }
         .inactive-garment-btn { background-color: #e5e7eb; color: #374151; }
-        #customMotifInput { display: none; }
+        #customMotifInput, #customTextureInput { display: none; }
         #color-picker-container {
             position: relative;
             width: 40px;
@@ -83,7 +83,7 @@
             position: absolute; 
             cursor: grab; 
             user-select: none; 
-            -webkit-user-drag: none; 
+            -webkit-user-drag: none;
         }
         #control-box { 
             position: absolute; 
@@ -144,6 +144,12 @@
             font-weight: bold; 
             font-size: 14px; 
         }
+        .texture-element {
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-blend-mode: multiply;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
@@ -164,7 +170,7 @@
                 </div>
             </div>
 
-             <div class="flex flex-col md:flex-row gap-8 justify-center items-start">
+            <div class="flex flex-col md:flex-row gap-8 justify-center items-start">
                 
                 <div class="flex flex-col items-center">
                     <h3 class="text-center font-bold text-xl mb-2">Front</h3>
@@ -230,20 +236,45 @@
 
         <div class="lg:w-1/3 bg-gray-50 rounded-xl p-8 flex flex-col justify-between">
             <div>
-                <h2 class="text-2xl font-bold mb-4">Batik Motifs</h2>
+                <h3 class="text-lg font-semibold mb-3">Motifs</h3>
                 <input type="file" id="customMotifInput" accept="image/*">
-                <button id="uploadBtn" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload Custom Motifs
+                <button id="uploadMotifBtn" class="w-full bg-black hover:bg-black text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Upload Custom Motif
+                </button>
+                
+                <div class="max-h-64 overflow-y-auto p-3 border border-gray-200 rounded-lg">
+                    <h4 class="text-md font-medium text-gray-600 mb-2">Default Motifs</h4>
+                    <div class="grid grid-cols-3 gap-4" id="default-motifs-container">
+                        <img src="images/batik1.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Motif 1" data-type="motif">
+                        <img src="images/batik2.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Motif 2" data-type="motif">
+                        <img src="images/batik3.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Motif 3" data-type="motif">
+                    </div>
+                    <h4 class="text-md font-medium text-gray-600 mt-4 mb-2">Custom Motifs</h4>
+                    <div id="custom-motifs-container" class="grid grid-cols-3 gap-4"></div>
+                </div>
+
+                <hr class="my-6">
+
+                <h3 class="text-lg font-semibold mb-3">Textures</h3>
+                <input type="file" id="customTextureInput" accept="image/*">
+                <button id="uploadTextureBtn" class="w-full bg-black hover:bg-black text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Upload Custom Texture
                 </button>
 
-                <h3 class="text-lg font-semibold mb-3">Default Motifs</h3>
-                <div class="grid grid-cols-3 gap-4" id="default-motifs-container">
-                    <img src="images/batik1.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Motif 1">
-                    <img src="images/batik2.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Motif 2">
-                    <img src="images/batik3.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Motif 3">
+                <div class="max-h-64 overflow-y-auto p-3 border border-gray-200 rounded-lg">
+                    <h4 class="text-md font-medium text-gray-600 mb-2">Default Textures</h4>
+                    <div class="grid grid-cols-3 gap-4" id="default-textures-container">
+                        <img src="images/texture1.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Texture 1" data-type="texture">
+                        <img src="images/texture2.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Texture 2" data-type="texture">
+                        <img src="images/texture3.png" class="motif-item rounded-lg cursor-pointer border-2 border-transparent" alt="Batik Texture 3" data-type="texture">
+                    </div>
+                    <h4 class="text-md font-medium text-gray-600 mt-4 mb-2">Custom Textures</h4>
+                    <div id="custom-textures-container" class="grid grid-cols-3 gap-4"></div>
                 </div>
-                 <div id="custom-motif-thumbnail-container" class="grid grid-cols-3 gap-4 mt-4"></div>
             </div>
+            
             @auth
                 <a href="/ukuran" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-2 mt-8 text-lg">
                     Continue Order
@@ -269,409 +300,507 @@
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-        const shirtBtn = document.getElementById('shirtBtn');
-        const dressBtn = document.getElementById('dressBtn');
-        const longSleeveBtn = document.getElementById('longSleeveBtn');
-        const shortSleeveBtn = document.getElementById('shortSleeveBtn');
-        const canvasContainerFront = document.getElementById('canvas-container-front');
-        const canvasContainerBack = document.getElementById('canvas-container-back');
-        const shirtContainerFront = document.getElementById('shirt-container-front');
-        const dressContainerFront = document.getElementById('dress-container-front');
-        const shirtContainerBack = document.getElementById('shirt-container-back');
-        const dressContainerBack = document.getElementById('dress-container-back');
-        const clothColorInput = document.getElementById('clothColor');
-        const resetBtn = document.getElementById('resetBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const customMotifInput = document.getElementById('customMotifInput');
-        const defaultMotifsContainer = document.getElementById('default-motifs-container');
-        const customMotifThumbnailContainer = document.getElementById('custom-motif-thumbnail-container');
-        const controlBox = document.getElementById('control-box');
-        const deleteBtn = document.getElementById('delete-btn');
-        const resetModal = document.getElementById('reset-modal');
-        const confirmResetBtn = document.getElementById('confirm-reset-btn');
-        const cancelResetBtn = document.getElementById('cancel-reset-btn');
-        const undoBtn = document.getElementById('undoBtn');
-        const redoBtn = document.getElementById('redoBtn');
+    const shirtBtn = document.getElementById('shirtBtn');
+    const dressBtn = document.getElementById('dressBtn');
+    const longSleeveBtn = document.getElementById('longSleeveBtn');
+    const shortSleeveBtn = document.getElementById('shortSleeveBtn');
+    const canvasContainerFront = document.getElementById('canvas-container-front');
+    const canvasContainerBack = document.getElementById('canvas-container-back');
+    const shirtContainerFront = document.getElementById('shirt-container-front');
+    const dressContainerFront = document.getElementById('dress-container-front');
+    const shirtContainerBack = document.getElementById('shirt-container-back');
+    const dressContainerBack = document.getElementById('dress-container-back');
+    const clothColorInput = document.getElementById('clothColor');
+    const resetBtn = document.getElementById('resetBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const defaultMotifsContainer = document.getElementById('default-motifs-container');
+    const defaultTexturesContainer = document.getElementById('default-textures-container');
+    const controlBox = document.getElementById('control-box');
+    const deleteBtn = document.getElementById('delete-btn');
+    const resetModal = document.getElementById('reset-modal');
+    const confirmResetBtn = document.getElementById('confirm-reset-btn');
+    const cancelResetBtn = document.getElementById('cancel-reset-btn');
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
 
-        let activeGarment = 'shirt';
-        let activeSleeve = 'long';
-        let activeCanvasContainer = null;
-        let selectedElement = null;
-        let currentAction = null;
-        let startX, startY, startLeft, startTop, startWidth, startHeight, startAngle;
-        let undoStack = [];
-        let redoStack = [];
-        let lastSavedState = '';
+    const uploadMotifBtn = document.getElementById('uploadMotifBtn');
+    const customMotifInput = document.getElementById('customMotifInput');
+    const customMotifsContainer = document.getElementById('custom-motifs-container');
+    const uploadTextureBtn = document.getElementById('uploadTextureBtn');
+    const customTextureInput = document.getElementById('customTextureInput');
+    const customTexturesContainer = document.getElementById('custom-textures-container');
 
-        const imagePaths = {
-            shirt: {
-                long: { front: { mask: 'images/custom_shirt_design.png', outline: 'images/shirt_outline.png' }, back: { mask: 'images/backshirt_long.png', outline: 'images/backshirt_long_outline.png' } },
-                short: { front: { mask: 'images/short_sleeve_shirt.png', outline: 'images/short_sleeve_shirt_outline.png' }, back: { mask: 'images/backshirt_short.png', outline: 'images/backshirt_short_outline.png' } }
-            },
-            dress: {
-                long: { front: { mask: 'images/custom_dress_design.png', outline: 'images/dress_outline.png' }, back: { mask: 'images/backdress_long.png', outline: 'images/backdress_long_outline.png' } },
-                short: { front: { mask: 'images/short_sleeve_dress.png', outline: 'images/short_sleeve_dress_outline.png' }, back: { mask: 'images/backdress_short.png', outline: 'images/backdress_short_outline.png' } }
-            }
-        };
 
-        function setActiveCanvas(container) {
-            if (activeCanvasContainer) activeCanvasContainer.classList.remove('active-canvas');
-            activeCanvasContainer = container;
-            activeCanvasContainer.classList.add('active-canvas');
+    let activeGarment = 'shirt';
+    let activeSleeve = 'long';
+    let activeCanvasContainer = null;
+    let selectedElement = null;
+    let currentAction = null;
+    let startX, startY, startLeft, startTop, startWidth, startHeight, startAngle;
+    let undoStack = [];
+    let redoStack = [];
+    let lastSavedState = '';
+
+    const imagePaths = {
+        shirt: {
+            long: { front: { mask: 'images/custom_shirt_design.png', outline: 'images/shirt_outline.png' }, back: { mask: 'images/backshirt_long.png', outline: 'images/backshirt_long_outline.png' } },
+            short: { front: { mask: 'images/short_sleeve_shirt.png', outline: 'images/short_sleeve_shirt_outline.png' }, back: { mask: 'images/backshirt_short.png', outline: 'images/backshirt_short_outline.png' } }
+        },
+        dress: {
+            long: { front: { mask: 'images/custom_dress_design.png', outline: 'images/dress_outline.png' }, back: { mask: 'images/backdress_long.png', outline: 'images/backdress_long_outline.png' } },
+            short: { front: { mask: 'images/short_sleeve_dress.png', outline: 'images/short_sleeve_dress_outline.png' }, back: { mask: 'images/backdress_short.png', outline: 'images/backdress_short_outline.png' } }
         }
+    };
 
-        function saveState() {
-            const frontCanvas = document.getElementById(`motif-canvas-${activeGarment}-front`);
-            const backCanvas = document.getElementById(`motif-canvas-${activeGarment}-back`);
-            if (!frontCanvas || !backCanvas) return;
-            const currentState = { frontHTML: frontCanvas.innerHTML, backHTML: backCanvas.innerHTML, color: frontCanvas.style.backgroundColor };
-            const currentStateString = JSON.stringify(currentState);
-            if (currentStateString === lastSavedState) return;
-            lastSavedState = currentStateString;
-            undoStack.push(currentState);
-            redoStack = [];
-            updateUndoRedoButtons();
-        }
+    function setActiveCanvas(container) {
+        if (activeCanvasContainer) activeCanvasContainer.classList.remove('active-canvas');
+        activeCanvasContainer = container;
+        activeCanvasContainer.classList.add('active-canvas');
+    }
 
-        function restoreState(state) {
-            if (!state) return;
-            const frontCanvas = document.getElementById(`motif-canvas-${activeGarment}-front`);
-            const backCanvas = document.getElementById(`motif-canvas-${activeGarment}-back`);
-            frontCanvas.innerHTML = state.frontHTML;
-            backCanvas.innerHTML = state.backHTML;
-            frontCanvas.style.backgroundColor = state.color;
-            backCanvas.style.backgroundColor = state.color;
-            document.querySelectorAll('.motif-image').forEach(image => image.addEventListener('mousedown', onMotifMouseDown));
-            clothColorInput.value = rgbToHex(state.color);
-            deselectElement();
-            lastSavedState = JSON.stringify(state);
-        }
+    function saveState() {
+        const frontCanvas = document.getElementById(`motif-canvas-${activeGarment}-front`);
+        const backCanvas = document.getElementById(`motif-canvas-${activeGarment}-back`);
+        if (!frontCanvas || !backCanvas) return;
+        const currentState = { frontHTML: frontCanvas.innerHTML, backHTML: backCanvas.innerHTML, color: frontCanvas.style.backgroundColor };
+        const currentStateString = JSON.stringify(currentState);
+        if (currentStateString === lastSavedState) return;
+        lastSavedState = currentStateString;
+        undoStack.push(currentState);
+        redoStack = [];
+        updateUndoRedoButtons();
+    }
 
-        function undo() {
-            if (undoStack.length <= 1) return;
-            redoStack.push(undoStack.pop());
-            restoreState(undoStack[undoStack.length - 1]);
-            updateUndoRedoButtons();
-        }
+    function restoreState(state) {
+        if (!state) return;
+        const frontCanvas = document.getElementById(`motif-canvas-${activeGarment}-front`);
+        const backCanvas = document.getElementById(`motif-canvas-${activeGarment}-back`);
+        frontCanvas.innerHTML = state.frontHTML;
+        backCanvas.innerHTML = state.backHTML;
+        frontCanvas.style.backgroundColor = state.color;
+        backCanvas.style.backgroundColor = state.color;
+        
+        document.querySelectorAll('.motif-image').forEach(element => element.addEventListener('mousedown', onMotifMouseDown));
+        
+        clothColorInput.value = rgbToHex(state.color);
+        deselectElement();
+        lastSavedState = JSON.stringify(state);
+    }
 
-        function redo() {
-            if (redoStack.length === 0) return;
-            const nextState = redoStack.pop();
-            undoStack.push(nextState);
-            restoreState(nextState);
-            updateUndoRedoButtons();
-        }
+    function undo() {
+        if (undoStack.length <= 1) return;
+        redoStack.push(undoStack.pop());
+        restoreState(undoStack[undoStack.length - 1]);
+        updateUndoRedoButtons();
+    }
 
-        function updateUndoRedoButtons() {
-            undoBtn.disabled = undoStack.length <= 1;
-            redoBtn.disabled = redoStack.length === 0;
-        }
+    function redo() {
+        if (redoStack.length === 0) return;
+        const nextState = redoStack.pop();
+        undoStack.push(nextState);
+        restoreState(nextState);
+        updateUndoRedoButtons();
+    }
 
-        function addMotif(imageUrl) {
-            if (!activeCanvasContainer) return;
-            
-            const view = activeCanvasContainer.id.includes('front') ? 'front' : 'back';
-            const motifCanvasId = `motif-canvas-${activeGarment}-${view}`;
-            const activeMotifCanvas = document.getElementById(motifCanvasId);
+    function updateUndoRedoButtons() {
+        undoBtn.disabled = undoStack.length <= 1;
+        redoBtn.disabled = redoStack.length === 0;
+    }
 
-            if (!activeMotifCanvas) {
-                console.error("Fatal Error: Could not find active motif canvas with ID:", motifCanvasId);
-                return;
-            }
-            
-            const image = document.createElement('img');
-            image.src = imageUrl;
-            image.crossOrigin = "anonymous";
-            image.className = 'motif-image';
-            image.style.cssText = 'width: 150px; height: auto; left: 100px; top: 100px; transform: rotate(0deg);';
-            activeMotifCanvas.appendChild(image);
-            image.addEventListener('mousedown', onMotifMouseDown);
-            saveState();
-        }
+    function addElementToCanvas(imageUrl, type = 'motif') {
+        if (!activeCanvasContainer) return;
+        
+        const view = activeCanvasContainer.id.includes('front') ? 'front' : 'back';
+        const motifCanvasId = `motif-canvas-${activeGarment}-${view}`;
+        const activeMotifCanvas = document.getElementById(motifCanvasId);
 
-        function onMotifMouseDown(e) {
-            const element = e.target;
-            selectElement(element);
-            startDrag(e);
+        if (!activeMotifCanvas) {
+            console.error("Fatal Error: Could not find active motif canvas with ID:", motifCanvasId);
+            return;
         }
         
-        function selectElement(element) {
-            if (!element) return;
-            const elementCanvasContainer = element.closest('.canvas-wrapper');
-            if (elementCanvasContainer !== activeCanvasContainer) {
-                setActiveCanvas(elementCanvasContainer);
-            }
-            activeCanvasContainer.appendChild(controlBox);
-            selectedElement = element;
-            updateControlBox();
-            controlBox.style.display = 'block';
+        let element;
+        if (type === 'texture') {
+            element = document.createElement('div');
+            element.className = 'motif-image texture-element';
+            element.style.cssText = 'width: 150px; height: 150px; left: 100px; top: 100px; transform: rotate(0deg);';
+            element.style.backgroundImage = `url(${imageUrl})`;
+            element.style.backgroundColor = clothColorInput.value;
+        } 
+        else {
+            element = document.createElement('img');
+            element.src = imageUrl;
+            element.crossOrigin = "anonymous";
+            element.className = 'motif-image';
+            element.style.cssText = 'width: 150px; height: auto; left: 100px; top: 100px; transform: rotate(0deg);';
         }
 
-        function deselectElement() {
-            if (selectedElement) {
-                selectedElement = null;
-                controlBox.style.display = 'none';
-            }
+        activeMotifCanvas.appendChild(element);
+        element.addEventListener('mousedown', onMotifMouseDown);
+        saveState();
+    }
+
+    function onMotifMouseDown(e) {
+        const element = e.target;
+        selectElement(element);
+        startDrag(e);
+    }
+    
+    function selectElement(element) {
+        if (!element) return;
+        const elementCanvasContainer = element.closest('.canvas-wrapper');
+        if (elementCanvasContainer !== activeCanvasContainer) {
+            setActiveCanvas(elementCanvasContainer);
+        }
+        activeCanvasContainer.appendChild(controlBox);
+        selectedElement = element;
+        updateControlBox();
+        controlBox.style.display = 'block';
+    }
+
+    function deselectElement() {
+        if (selectedElement) {
+            selectedElement = null;
+            controlBox.style.display = 'none';
+        }
+    }
+
+    function updateControlBox() {
+        if (!selectedElement || !activeCanvasContainer) return;
+        const view = activeCanvasContainer.id.includes('front') ? 'front' : 'back';
+        const motifCanvasId = `motif-canvas-${activeGarment}-${view}`;
+        const activeMotifCanvas = document.getElementById(motifCanvasId);
+
+        if (!activeMotifCanvas) {
+             console.error("Fatal Error: Could not find active motif canvas for control box with ID:", motifCanvasId);
+            return;
         }
 
-        function updateControlBox() {
-            if (!selectedElement || !activeCanvasContainer) return;
+        const rect = selectedElement.getBoundingClientRect();
+        const containerRect = activeMotifCanvas.getBoundingClientRect();
+        const height = selectedElement.tagName === 'IMG' ? rect.height : parseFloat(selectedElement.style.height);
 
-            const view = activeCanvasContainer.id.includes('front') ? 'front' : 'back';
-            const motifCanvasId = `motif-canvas-${activeGarment}-${view}`;
-            const activeMotifCanvas = document.getElementById(motifCanvasId);
+        controlBox.style.left = `${rect.left - containerRect.left}px`;
+        controlBox.style.top = `${rect.top - containerRect.top}px`;
+        controlBox.style.width = `${rect.width}px`;
+        controlBox.style.height = `${height}px`;
+        controlBox.style.transform = selectedElement.style.transform;
+    }
 
-            if (!activeMotifCanvas) {
-                 console.error("Fatal Error: Could not find active motif canvas for control box with ID:", motifCanvasId);
-                return;
-            }
+    function startDrag(e) {
+        e.preventDefault();
+        currentAction = 'drag';
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = selectedElement.offsetLeft;
+        startTop = selectedElement.offsetTop;
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    }
 
-            const rect = selectedElement.getBoundingClientRect();
-            const containerRect = activeMotifCanvas.getBoundingClientRect();
-            controlBox.style.left = `${rect.left - containerRect.left}px`;
-            controlBox.style.top = `${rect.top - containerRect.top}px`;
-            controlBox.style.width = `${rect.width}px`;
-            controlBox.style.height = `${rect.height}px`;
-            controlBox.style.transform = selectedElement.style.transform;
-        }
-
-        function startDrag(e) {
-            e.preventDefault();
-            currentAction = 'drag';
+    controlBox.querySelectorAll('.resize').forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            currentAction = 'resize';
             startX = e.clientX;
             startY = e.clientY;
-            startLeft = selectedElement.offsetLeft;
-            startTop = selectedElement.offsetTop;
+            startWidth = selectedElement.offsetWidth;
+            startHeight = selectedElement.offsetHeight;
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
-        }
-
-        controlBox.querySelectorAll('.resize').forEach(handle => {
-            handle.addEventListener('mousedown', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                currentAction = 'resize';
-                startX = e.clientX;
-                startWidth = selectedElement.offsetWidth;
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
-            });
         });
+    });
 
-        controlBox.querySelector('.rotate').addEventListener('mousedown', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            currentAction = 'rotate';
+    controlBox.querySelector('.rotate').addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        currentAction = 'rotate';
+        const rect = selectedElement.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const startVector = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        const rotateMatch = /rotate\(([^deg)]+)deg\)/.exec(selectedElement.style.transform);
+        const currentRotation = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
+        startAngle = startVector - (currentRotation * Math.PI / 180);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    });
+
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (selectedElement) {
+            selectedElement.remove();
+            deselectElement();
+            saveState();
+        }
+    });
+
+    function handleMouseMove(e) {
+        if (!currentAction || !selectedElement) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (currentAction === 'drag') {
+            selectedElement.style.left = `${startLeft + dx}px`;
+            selectedElement.style.top = `${startTop + dy}px`;
+        } else if (currentAction === 'resize') {
+            const newWidth = startWidth + dx;
+            selectedElement.style.width = `${newWidth}px`;
+            if (selectedElement.tagName === 'DIV') {
+                const aspectRatio = startHeight / startWidth;
+                selectedElement.style.height = `${newWidth * aspectRatio}px`;
+            } else {
+                selectedElement.style.height = 'auto';
+            }
+        } else if (currentAction === 'rotate') {
             const rect = selectedElement.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            const startVector = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-            const rotateMatch = /rotate\(([^deg)]+)deg\)/.exec(selectedElement.style.transform);
-            const currentRotation = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
-            startAngle = startVector - (currentRotation * Math.PI / 180);
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        });
-
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (selectedElement) {
-                selectedElement.remove();
-                deselectElement();
-                saveState();
-            }
-        });
-
-        function handleMouseMove(e) {
-            if (!currentAction || !selectedElement) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            if (currentAction === 'drag') {
-                selectedElement.style.left = `${startLeft + dx}px`;
-                selectedElement.style.top = `${startTop + dy}px`;
-            } else if (currentAction === 'resize') {
-                selectedElement.style.width = `${startWidth + dx}px`;
-                selectedElement.style.height = 'auto';
-            } else if (currentAction === 'rotate') {
-                const rect = selectedElement.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                const newVector = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-                const newAngle = (newVector - startAngle) * (180 / Math.PI);
-                selectedElement.style.transform = `rotate(${newAngle}deg)`;
-            }
-            updateControlBox();
+            const newVector = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+            const newAngle = (newVector - startAngle) * (180 / Math.PI);
+            selectedElement.style.transform = `rotate(${newAngle}deg)`;
         }
+        updateControlBox();
+    }
 
-        function handleMouseUp() {
-            if (currentAction) saveState();
-            currentAction = null;
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        }
+    function handleMouseUp() {
+        if (currentAction) saveState();
+        currentAction = null;
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+    }
 
-        function updateGarmentView() {
-            const garmentPaths = imagePaths[activeGarment][activeSleeve];
-            shirtContainerFront.style.display = (activeGarment === 'shirt') ? 'block' : 'none';
-            dressContainerFront.style.display = (activeGarment === 'dress') ? 'block' : 'none';
-            shirtContainerBack.style.display = (activeGarment === 'shirt') ? 'block' : 'none';
-            dressContainerBack.style.display = (activeGarment === 'dress') ? 'block' : 'none';
-            const currentFrontContainer = document.getElementById(`${activeGarment}-container-front`);
-            const currentBackContainer = document.getElementById(`${activeGarment}-container-back`);
-            const currentFrontOutline = document.getElementById(`garment-outline-${activeGarment}-front`);
-            const currentBackOutline = document.getElementById(`garment-outline-${activeGarment}-back`);
-            currentFrontContainer.style.webkitMaskImage = `url('${garmentPaths.front.mask}')`;
-            currentFrontContainer.style.maskImage = `url('${garmentPaths.front.mask}')`;
-            currentFrontOutline.style.backgroundImage = `url('${garmentPaths.front.outline}')`;
-            currentBackContainer.style.webkitMaskImage = `url('${garmentPaths.back.mask}')`;
-            currentBackContainer.style.maskImage = `url('${garmentPaths.back.mask}')`;
-            currentBackOutline.style.backgroundImage = `url('${garmentPaths.back.outline}')`;
-            resetDesign(false);
-        }
+    function updateGarmentView() {
+        const garmentPaths = imagePaths[activeGarment][activeSleeve];
+        shirtContainerFront.style.display = (activeGarment === 'shirt') ? 'block' : 'none';
+        dressContainerFront.style.display = (activeGarment === 'dress') ? 'block' : 'none';
+        shirtContainerBack.style.display = (activeGarment === 'shirt') ? 'block' : 'none';
+        dressContainerBack.style.display = (activeGarment === 'dress') ? 'block' : 'none';
+        const currentFrontContainer = document.getElementById(`${activeGarment}-container-front`);
+        const currentBackContainer = document.getElementById(`${activeGarment}-container-back`);
+        const currentFrontOutline = document.getElementById(`garment-outline-${activeGarment}-front`);
+        const currentBackOutline = document.getElementById(`garment-outline-${activeGarment}-back`);
+        currentFrontContainer.style.webkitMaskImage = `url('${garmentPaths.front.mask}')`;
+        currentFrontContainer.style.maskImage = `url('${garmentPaths.front.mask}')`;
+        currentFrontOutline.style.backgroundImage = `url('${garmentPaths.front.outline}')`;
+        currentBackContainer.style.webkitMaskImage = `url('${garmentPaths.back.mask}')`;
+        currentBackContainer.style.maskImage = `url('${garmentPaths.back.mask}')`;
+        currentBackOutline.style.backgroundImage = `url('${garmentPaths.back.outline}')`;
+        resetDesign(false);
+    }
 
-        function setGarment(type) {
-            activeGarment = type;
-            shirtBtn.classList.toggle('active-garment-btn', type === 'shirt');
-            shirtBtn.classList.toggle('inactive-garment-btn', type !== 'shirt');
-            dressBtn.classList.toggle('active-garment-btn', type === 'dress');
-            dressBtn.classList.toggle('inactive-garment-btn', type !== 'dress');
-            updateGarmentView();
-        }
-
-        function setSleeve(type) {
-            activeSleeve = type;
-            longSleeveBtn.classList.toggle('active-garment-btn', type === 'long');
-            longSleeveBtn.classList.toggle('inactive-garment-btn', type !== 'long');
-            shortSleeveBtn.classList.toggle('active-garment-btn', type === 'short');
-            shortSleeveBtn.classList.toggle('inactive-garment-btn', type !== 'short');
-            updateGarmentView();
-        }
-
-        function resetDesign(shouldSaveState = true) {
-            document.querySelectorAll('.motif-canvas').forEach(canvas => {
-                canvas.innerHTML = '';
-                canvas.style.backgroundColor = '#ffffff';
-            });
-            clothColorInput.value = '#ffffff';
-            deselectElement();
-            if (shouldSaveState) {
-                undoStack = [];
-                redoStack = [];
-                saveState();
-            }
-        }
-
-        function rgbToHex(rgb) {
-            if (!rgb || !rgb.match(/^rgb/)) return rgb;
-            let sep = rgb.indexOf(",") > -1 ? "," : " ";
-            rgb = rgb.substr(4).split(")")[0].split(sep);
-            let r = (+rgb[0]).toString(16), g = (+rgb[1]).toString(16), b = (+rgb[2]).toString(16);
-            if (r.length == 1) r = "0" + r;
-            if (g.length == 1) g = "0" + g;
-            if (b.length == 1) b = "0" + b;
-            return "#" + r + g + b;
-        }
-
-        const loadImage = (src) => new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.onload = () => resolve(img);
-            img.onerror = (err) => reject(new Error(`Failed to load image: ${src}`));
-            img.src = src;
-        });
-
-        canvasContainerFront.addEventListener('click', () => setActiveCanvas(canvasContainerFront));
-        canvasContainerBack.addEventListener('click', () => setActiveCanvas(canvasContainerBack));
-        undoBtn.addEventListener('click', undo);
-        redoBtn.addEventListener('click', redo);
-        shirtBtn.addEventListener('click', () => setGarment('shirt'));
-        dressBtn.addEventListener('click', () => setGarment('dress'));
-        longSleeveBtn.addEventListener('click', () => setSleeve('long'));
-        shortSleeveBtn.addEventListener('click', () => setSleeve('short'));
-        clothColorInput.addEventListener('input', (e) => {
-            document.querySelectorAll('.motif-canvas').forEach(canvas => canvas.style.backgroundColor = e.target.value);
-        });
-        clothColorInput.addEventListener('change', saveState);
-        resetBtn.addEventListener('click', () => resetModal.classList.remove('hidden'));
-        confirmResetBtn.addEventListener('click', () => { resetDesign(true); resetModal.classList.add('hidden'); });
-        cancelResetBtn.addEventListener('click', () => resetModal.classList.add('hidden'));
-        uploadBtn.addEventListener('click', () => customMotifInput.click());
-        customMotifInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const imageUrl = e.target.result;
-                    const thumb = document.createElement('img');
-                    thumb.src = imageUrl;
-                    thumb.className = 'motif-item rounded-lg cursor-pointer border-2 border-transparent';
-                    customMotifThumbnailContainer.appendChild(thumb);
-                    thumb.addEventListener('click', () => addMotif(imageUrl));
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        defaultMotifsContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('motif-item')) addMotif(e.target.src);
-        });
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.canvas-wrapper') && !e.target.closest('#control-box')) deselectElement();
-        });
-
-        downloadBtn.addEventListener('click', () => {
-            if(typeof html2canvas === 'undefined') { console.error('html2canvas not loaded'); return; }
-            deselectElement(); 
-            
-            setTimeout(() => {
-                const garmentFrontContainer = document.getElementById(`${activeGarment}-container-front`);
-                const garmentBackContainer = document.getElementById(`${activeGarment}-container-back`);
-                const paths = imagePaths[activeGarment][activeSleeve];
-
-                const processView = (container, viewPaths) => {
-                    return Promise.all([
-                        html2canvas(container, { backgroundColor: null, allowTaint: true, useCORS: true }),
-                        loadImage(viewPaths.mask),
-                        loadImage(viewPaths.outline)
-                    ]).then(([canvas, mask, outline]) => {
-                        const offscreenCanvas = document.createElement('canvas');
-                        const ctx = offscreenCanvas.getContext('2d');
-                        offscreenCanvas.width = canvas.width;
-                        offscreenCanvas.height = canvas.height;
-                        
-                        ctx.drawImage(canvas, 0, 0);
-                        ctx.globalCompositeOperation = 'destination-in';
-                        ctx.drawImage(mask, 0, 0, canvas.width, canvas.height);
-                        ctx.globalCompositeOperation = 'source-over';
-                        ctx.drawImage(outline, 0, 0, canvas.width, canvas.height);
-                        return offscreenCanvas;
-                    });
-                };
-                
-                Promise.all([
-                    processView(garmentFrontContainer, paths.front),
-                    processView(garmentBackContainer, paths.back)
-                ]).then(([frontCanvas, backCanvas]) => {
-                    const finalCanvas = document.createElement('canvas');
-                    const ctx = finalCanvas.getContext('2d');
-                    finalCanvas.width = frontCanvas.width * 2;
-                    finalCanvas.height = frontCanvas.height;
-                    ctx.drawImage(frontCanvas, 0, 0);
-                    ctx.drawImage(backCanvas, frontCanvas.width, 0);
-                    const link = document.createElement('a');
-                    link.download = `myBatik-${activeGarment}-${activeSleeve}.png`;
-                    link.href = finalCanvas.toDataURL('image/png');
-                    link.click();
-                }).catch(error => console.error("Failed to download design:", error));
-            }, 100);
-        });
-
+    function setGarment(type) {
+        activeGarment = type;
+        shirtBtn.classList.toggle('active-garment-btn', type === 'shirt');
+        shirtBtn.classList.toggle('inactive-garment-btn', type !== 'shirt');
+        dressBtn.classList.toggle('active-garment-btn', type === 'dress');
+        dressBtn.classList.toggle('inactive-garment-btn', type !== 'dress');
         updateGarmentView();
-        setActiveCanvas(canvasContainerFront);
-        saveState();
+    }
 
+    function setSleeve(type) {
+        activeSleeve = type;
+        longSleeveBtn.classList.toggle('active-garment-btn', type === 'long');
+        longSleeveBtn.classList.toggle('inactive-garment-btn', type !== 'long');
+        shortSleeveBtn.classList.toggle('active-garment-btn', type === 'short');
+        shortSleeveBtn.classList.toggle('inactive-garment-btn', type !== 'short');
+        updateGarmentView();
+    }
+
+    function resetDesign(shouldSaveState = true) {
+        document.querySelectorAll('.motif-canvas').forEach(canvas => {
+            canvas.innerHTML = '';
+            canvas.style.backgroundColor = '#ffffff';
+        });
+        clothColorInput.value = '#ffffff';
+        deselectElement();
+        if (shouldSaveState) {
+            undoStack = [];
+            redoStack = [];
+            saveState();
+        }
+    }
+
+    function rgbToHex(rgb) {
+        if (!rgb || !rgb.match(/^rgb/)) return rgb;
+        let sep = rgb.indexOf(",") > -1 ? "," : " ";
+        rgb = rgb.substr(4).split(")")[0].split(sep);
+        let r = (+rgb[0]).toString(16), g = (+rgb[1]).toString(16), b = (+rgb[2]).toString(16);
+        if (r.length == 1) r = "0" + r;
+        if (g.length == 1) g = "0" + g;
+        if (b.length == 1) b = "0" + b;
+        return "#" + r + g + b;
+    }
+
+    const loadImage = (src) => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = (err) => reject(new Error(`Failed to load image: ${src}`));
+        img.src = src;
     });
-    </script>
+
+    function createCustomThumbnail(imageUrl, type, container) {
+        const thumb = document.createElement('img');
+        thumb.src = imageUrl;
+        thumb.className = 'motif-item rounded-lg cursor-pointer border-2 border-transparent';
+        thumb.dataset.type = type;
+        container.appendChild(thumb);
+        thumb.addEventListener('click', () => addElementToCanvas(imageUrl, type));
+    }
+
+    canvasContainerFront.addEventListener('click', () => setActiveCanvas(canvasContainerFront));
+    canvasContainerBack.addEventListener('click', () => setActiveCanvas(canvasContainerBack));
+    undoBtn.addEventListener('click', undo);
+    redoBtn.addEventListener('click', redo);
+    shirtBtn.addEventListener('click', () => setGarment('shirt'));
+    dressBtn.addEventListener('click', () => setGarment('dress'));
+    longSleeveBtn.addEventListener('click', () => setSleeve('long'));
+    shortSleeveBtn.addEventListener('click', () => setSleeve('short'));
+
+    clothColorInput.addEventListener('input', (e) => {
+        const newColor = e.target.value;
+        document.querySelectorAll('.motif-canvas').forEach(canvas => canvas.style.backgroundColor = newColor);
+        document.querySelectorAll('.texture-element').forEach(texture => texture.style.backgroundColor = newColor);
+    });
+
+    clothColorInput.addEventListener('change', saveState);
+    resetBtn.addEventListener('click', () => resetModal.classList.remove('hidden'));
+    confirmResetBtn.addEventListener('click', () => { resetDesign(true); resetModal.classList.add('hidden'); });
+    cancelResetBtn.addEventListener('click', () => resetModal.classList.add('hidden'));
+
+    uploadMotifBtn.addEventListener('click', () => customMotifInput.click());
+    customMotifInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                createCustomThumbnail(e.target.result, 'motif', customMotifsContainer);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    uploadTextureBtn.addEventListener('click', () => customTextureInput.click());
+    customTextureInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                createCustomThumbnail(e.target.result, 'texture', customTexturesContainer);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    defaultMotifsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('motif-item')) {
+            addElementToCanvas(e.target.src, e.target.dataset.type);
+        }
+    });
+    defaultTexturesContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('motif-item')) {
+            addElementToCanvas(e.target.src, e.target.dataset.type);
+        }
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.canvas-wrapper') && !e.target.closest('#control-box')) deselectElement();
+    });
+
+    downloadBtn.addEventListener('click', () => {
+        deselectElement(); 
+
+        setTimeout(() => {
+            const garmentFrontContainer = document.getElementById(`${activeGarment}-container-front`);
+            const garmentBackContainer = document.getElementById(`${activeGarment}-container-back`);
+            const paths = imagePaths[activeGarment][activeSleeve];
+
+            const processView = (container, viewPaths) => {
+                return new Promise((resolve, reject) => {
+                    const outputCanvas = document.createElement('canvas');
+                    const ctx = outputCanvas.getContext('2d');
+                    const width = 500;
+                    const height = 500;
+                    outputCanvas.width = width;
+                    outputCanvas.height = height;
+
+                    ctx.fillStyle = clothColorInput.value;
+                    ctx.fillRect(0, 0, width, height);
+
+                    const elements = container.querySelectorAll('.motif-image');
+                    const imagePromises = [];
+
+                    elements.forEach(el => {
+                        let src;
+                        if (el.tagName === 'IMG') {
+                            src = el.src;
+                        } else {
+                            src = el.style.backgroundImage.slice(5, -2);
+                        }
+                        imagePromises.push(loadImage(src).then(img => ({el, img})));
+                    });
+
+                    Promise.all(imagePromises).then(loadedElements => {
+                        loadedElements.forEach(({ el, img }) => {
+                            const matrix = new DOMMatrix(window.getComputedStyle(el).transform);
+                            const w = el.offsetWidth;
+                            const h = el.offsetHeight;
+
+                            ctx.save();
+                            ctx.translate(el.offsetLeft + w / 2, el.offsetTop + h / 2);
+                            ctx.transform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+                            ctx.translate(-w / 2, -h / 2);
+
+                            if (el.tagName === 'IMG') {
+                                ctx.drawImage(img, 0, 0, w, h);
+                            } else {
+                                ctx.fillStyle = el.style.backgroundColor;
+                                ctx.fillRect(0, 0, w, h);
+                                ctx.globalCompositeOperation = 'multiply';
+                                ctx.drawImage(img, 0, 0, w, h);
+                                ctx.globalCompositeOperation = 'source-over';
+                            }
+                            ctx.restore();
+                        });
+                        
+                        Promise.all([loadImage(viewPaths.mask), loadImage(viewPaths.outline)])
+                            .then(([mask, outline]) => {
+                                ctx.globalCompositeOperation = 'destination-in';
+                                ctx.drawImage(mask, 0, 0, width, height);
+                                ctx.globalCompositeOperation = 'source-over';
+                                ctx.drawImage(outline, 0, 0, width, height);
+                                resolve(outputCanvas);
+                            }).catch(reject);
+
+                    }).catch(reject);
+                });
+            };
+            
+            Promise.all([
+                processView(garmentFrontContainer, paths.front),
+                processView(garmentBackContainer, paths.back)
+            ]).then(([frontCanvas, backCanvas]) => {
+                const finalCanvas = document.createElement('canvas');
+                const ctx = finalCanvas.getContext('2d');
+                finalCanvas.width = frontCanvas.width * 2;
+                finalCanvas.height = frontCanvas.height;
+                ctx.drawImage(frontCanvas, 0, 0);
+                ctx.drawImage(backCanvas, frontCanvas.width, 0);
+                const link = document.createElement('a');
+                link.download = `myBatik-${activeGarment}-${activeSleeve}.png`;
+                link.href = finalCanvas.toDataURL('image/png');
+                link.click();
+            }).catch(error => console.error("Failed to download design:", error));
+        }, 100);
+    });
+
+    updateGarmentView();
+    setActiveCanvas(canvasContainerFront);
+    saveState();
+
+});
+</script>
 </body>
 </html>

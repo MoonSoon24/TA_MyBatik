@@ -282,7 +282,10 @@
                         <div class="flex items-center gap-x-6">
                             <div class="flex items-center gap-x-3">
                                 <label for="status" class="block text-sm font-bold text-gray-900">Status:</label>
-                                <select x-model="selectedOrder.status" id="status" name="status" class="block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <select x-model="selectedOrder.status" 
+                                        id="status" 
+                                        name="status" 
+                                        @change="updateNotificationMessageOnStatusChange()"  class="block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                     <option>Pending</option>
                                     <option>Hold</option>
                                     <option>Cancelled</option>
@@ -399,36 +402,38 @@
         </div>
     </div>
 
-    <div x-show="createPromoModalOpen" @keydown.escape.window="createPromoModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
-        <div @click.away="createPromoModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+    <div x-show="createPromoModalOpen" 
+        @keydown.escape.window="createPromoModalOpen = false" 
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
+        x-cloak>
+        <div @click.away="createPromoModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
             <h3 class="text-2xl font-bold mb-6">Create New Promo Code</h3>
-            <form id="create-promo-form" action="{{ route('admin.promos.store') }}" method="POST" @submit.prevent="handleFormSubmit($event, 'Promo created successfully!', 'Failed to create promo.')">
+            <form id="create-promo-form" action="{{ route('admin.promo.store') }}" method="POST" @submit.prevent="handleFormSubmit($event, 'Promo created successfully!', 'Failed to create promo.')">
                 @csrf
                 <div class="space-y-4">
                     <div>
                         <label for="code" class="block text-sm font-medium text-gray-700">Promo Code</label>
-                        <input type="text" name="code" id="code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
+                        <input type="text" name="code" id="code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500" required>
                     </div>
                     <div>
                         <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
-                        <select name="type" id="type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                        <select name="type" id="type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="percentage">Percentage</option>
                             <option value="fixed">Fixed Amount</option>
                         </select>
                     </div>
                     <div>
                         <label for="value" class="block text-sm font-medium text-gray-700">Value</label>
-                        <input type="number" name="value" id="value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required step="any">
+                        <input type="number" name="value" id="value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500" required step="any">
                     </div>
-
                     <div class="flex items-end gap-x-4">
                         <div class="flex-1">
                             <label for="max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label>
-                            <input type="number" name="max_uses" id="max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                            <input type="number" name="max_uses" id="max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                         <div class="flex-1">
                             <label for="max_uses_scope" class="block text-sm font-medium text-gray-700">Usage Scope</label>
-                            <select name="max_uses_scope" id="max_uses_scope" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                            <select name="max_uses_scope" id="max_uses_scope" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="global">Global</option>
                                 <option value="personal">Per User</option>
                             </select>
@@ -436,7 +441,46 @@
                     </div>
                     <div>
                         <label for="expires_at" class="block text-sm font-medium text-gray-700">Expires At (optional)</label>
-                        <input type="date" name="expires_at" id="expires_at" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                        <input type="date" name="expires_at" id="expires_at" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+
+                    <div class="border-t pt-4 mt-4">
+                        <h4 class="text-md font-semibold text-gray-800 mb-2">Constraint (optional)</h4>
+                        <div id="create-constraints-container" class="space-y-3">
+                            <template x-for="(constraint, index) in createPromoConstraints" :key="index">
+                                <div class="flex items-start gap-2 p-2 border rounded-md bg-gray-50">
+                                    <div class="flex-shrink-0 w-1/3">
+                                        <select :name="'constraints[' + index + '][type]'" x-model="constraint.type" @change="constraint.value = constraintOptions[constraint.type][0]" class="w-full mt-1 block border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="fabric_type">Fabric Type</option>
+                                            <option value="payment_method">Payment Method</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <input type="hidden" :name="'constraints[' + index + '][value]'" :value="constraint.value">
+                                        <div x-show="constraint.type === 'fabric_type'" class="flex flex-wrap gap-x-4 gap-y-2 items-center text-sm">
+                                            <template x-for="option in constraintOptions.fabric_type" :key="option">
+                                                <label class="flex items-center cursor-pointer">
+                                                    <input type="radio" :name="'create_fabric_constraint_' + index" :value="option" x-model="constraint.value" class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                                    <span class="ml-2 text-gray-700" x-text="option"></span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                        <div x-show="constraint.type === 'payment_method'" class="flex flex-wrap gap-x-4 gap-y-2 items-center text-sm">
+                                            <template x-for="option in constraintOptions.payment_method" :key="option">
+                                                <label class="flex items-center cursor-pointer">
+                                                    <input type="radio" :name="'create_payment_constraint_' + index" :value="option" x-model="constraint.value" class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                                    <span class="ml-2 text-gray-700" x-text="option"></span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="createPromoConstraints.splice(index, 1)" class="flex-shrink-0 text-red-500 hover:text-red-700 font-bold text-xl self-center">&times;</button>
+                                </div>
+                            </template>
+                        </div>
+                        <button x-show="createPromoConstraints.length < 2" type="button" @click="createPromoConstraints.push({ type: 'fabric_type', value: constraintOptions.fabric_type[0] })" class="mt-3 text-sm text-blue-600 hover:text-blue-800 font-semibold">
+                            + Add Constraint
+                        </button>
                     </div>
                 </div>
                 <div class="mt-8 flex justify-end gap-4">
@@ -446,9 +490,12 @@
             </form>
         </div>
     </div>
-    
-    <div x-show="editPromoModalOpen" @keydown.escape.window="editPromoModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
-        <div @click.away="editPromoModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+
+    <div x-show="editPromoModalOpen" 
+        @keydown.escape.window="editPromoModalOpen = false" 
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
+        x-cloak>
+        <div @click.away="editPromoModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
             <h3 class="text-2xl font-bold mb-6">Edit Promo Code</h3>
             <template x-if="editingPromo">
                 <form :action="`/admin/promos/${editingPromo.id}`" method="POST" @submit.prevent="handleFormSubmit($event, 'Promo updated successfully!', 'Failed to update promo.')">
@@ -457,28 +504,27 @@
                     <div class="space-y-4">
                         <div>
                             <label for="edit_code" class="block text-sm font-medium text-gray-700">Promo Code</label>
-                            <input type="text" name="code" id="edit_code" x-model="editingPromo.code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
+                            <input type="text" name="code" id="edit_code" x-model="editingPromo.code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500" required>
                         </div>
                         <div>
                             <label for="edit_type" class="block text-sm font-medium text-gray-700">Type</label>
-                            <select name="type" id="edit_type" x-model="editingPromo.type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                            <select name="type" id="edit_type" x-model="editingPromo.type" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="percentage">Percentage</option>
                                 <option value="fixed">Fixed Amount</option>
                             </select>
                         </div>
                         <div>
                             <label for="edit_value" class="block text-sm font-medium text-gray-700">Value</label>
-                            <input type="number" name="value" id="edit_value" x-model="editingPromo.value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required step="any">
+                            <input type="number" name="value" id="edit_value" x-model="editingPromo.value" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500" required step="any">
                         </div>
-
                         <div class="flex items-end gap-x-4">
                             <div class="flex-1">
                                 <label for="edit_max_uses" class="block text-sm font-medium text-gray-700">Max Uses (optional)</label>
-                                <input type="number" name="max_uses" id="edit_max_uses" x-model="editingPromo.max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                <input type="number" name="max_uses" id="edit_max_uses" x-model="editingPromo.max_uses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                             <div class="flex-1">
                                 <label for="edit_max_uses_scope" class="block text-sm font-medium text-gray-700">Usage Scope</label>
-                                <select name="max_uses_scope" id="edit_max_uses_scope" x-model="editingPromo.max_uses_scope" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                <select name="max_uses_scope" id="edit_max_uses_scope" x-model="editingPromo.max_uses_scope" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
                                     <option value="global">Global</option>
                                     <option value="personal">Per User</option>
                                 </select>
@@ -486,7 +532,46 @@
                         </div>
                         <div>
                             <label for="edit_expires_at" class="block text-sm font-medium text-gray-700">Expires At (optional)</label>
-                            <input type="date" name="expires_at" id="edit_expires_at" :value="editingPromo.expires_at ? editingPromo.expires_at.split(' ')[0] : ''" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                            <input type="date" name="expires_at" id="edit_expires_at" :value="editingPromo.expires_at ? editingPromo.expires_at.split(' ')[0] : ''" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div class="border-t pt-4 mt-4">
+                            <h4 class="text-md font-semibold text-gray-800 mb-2">Constraint (optional)</h4>
+                            <div class="space-y-3">
+                                <template x-for="(constraint, index) in editingPromo.constraints" :key="index">
+                                    <div class="flex items-start gap-2 p-2 border rounded-md bg-gray-50">
+                                        <div class="flex-shrink-0 w-1/3">
+                                            <select :name="'constraints[' + index + '][type]'" x-model="constraint.type" @change="constraint.value = constraintOptions[constraint.type][0]" class="w-full mt-1 block border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                                <option value="fabric_type">Fabric Type</option>
+                                                <option value="payment_method">Payment Method</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex-grow">
+                                            <input type="hidden" :name="'constraints[' + index + '][value]'" :value="constraint.value">
+                                            <div x-show="constraint.type === 'fabric_type'" class="flex flex-wrap gap-x-4 gap-y-2 items-center text-sm">
+                                                <template x-for="option in constraintOptions.fabric_type" :key="option">
+                                                    <label class="flex items-center cursor-pointer">
+                                                        <input type="radio" :name="'edit_fabric_constraint_' + index" :value="option" x-model="constraint.value" class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                                        <span class="ml-2 text-gray-700" x-text="option"></span>
+                                                    </label>
+                                                </template>
+                                            </div>
+                                            <div x-show="constraint.type === 'payment_method'" class="flex flex-wrap gap-x-4 gap-y-2 items-center text-sm">
+                                                <template x-for="option in constraintOptions.payment_method" :key="option">
+                                                    <label class="flex items-center cursor-pointer">
+                                                        <input type="radio" :name="'edit_payment_constraint_' + index" :value="option" x-model="constraint.value" class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                                        <span class="ml-2 text-gray-700" x-text="option"></span>
+                                                    </label>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="editingPromo.constraints.splice(index, 1)" class="flex-shrink-0 text-red-500 hover:text-red-700 font-bold text-xl self-center">&times;</button>
+                                    </div>
+                                </template>
+                            </div>
+                            <button x-show="!editingPromo.constraints || editingPromo.constraints.length < 2" type="button" @click="if (!Array.isArray(editingPromo.constraints)) { editingPromo.constraints = [] }; editingPromo.constraints.push({ type: 'fabric_type', value: constraintOptions.fabric_type[0] })" class="mt-3 text-sm text-blue-600 hover:text-blue-800 font-semibold">
+                                + Add Constraint
+                            </button>
                         </div>
                     </div>
                     <div class="mt-8 flex justify-end gap-4">
@@ -628,8 +713,14 @@
 
             createPromoModalOpen: false,
 
+            createPromoModalOpen: false,
+            createPromoConstraints: [],
             editPromoModalOpen: false,
             editingPromo: null,
+            constraintOptions: {
+                fabric_type: ['kain mori', 'kain sutera'],
+                payment_method: ['bank_transfer', 'qris']
+            },
 
             editUserModalOpen: false,
             editingUser: null,
@@ -713,6 +804,14 @@
                 }
 
                 return { title, message };
+            },
+
+            updateNotificationMessageOnStatusChange() {
+                if (this.selectedOrder && this.sendNotification) {
+                    const content = this.getNotificationContent(this.selectedOrder.status);
+                    this.notificationTitle = content.title;
+                    this.notificationMessage = content.message;
+                }
             },
 
             openCreateNotificationModal() {
@@ -836,9 +935,18 @@
                 this.editingUser = JSON.parse(JSON.stringify(user));
                 this.editUserModalOpen = true;
             },
+
+            openCreatePromoModal() {
+                this.createPromoConstraints = [];
+                document.getElementById('create-promo-form').reset();
+                this.createPromoModalOpen = true;
+            },
             
             openEditModal(promo) {
                 this.editingPromo = JSON.parse(JSON.stringify(promo));
+                if (!this.editingPromo.constraints) {
+                    this.editingPromo.constraints = [];
+                }
                 this.editPromoModalOpen = true;
             },
 

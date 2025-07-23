@@ -89,7 +89,7 @@
                         </div>
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                            <input type="email" id="email" name="email" value="{{ auth()->user()->email }}" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition" required>
+                            <input type="email" id="email" name="email" value="{{ auth()->user()->email ?? '' }}" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition" required>
                         </div>
                         <div>
                             <label for="street-address" class="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
@@ -168,7 +168,7 @@
 
                         <div class="flex justify-between font-bold text-lg mb-6">
                             <span>Total</span>
-                            <span id="total-price">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span>
+                            <span id="total-price">Rp. {{ number_format($finalPrice ?? 300000, 0, ',', '.') }}</span>
                         </div>
 
                         <div class="mb-4">
@@ -180,7 +180,7 @@
                             </div>
                             <div id="promo-applied-container" class="flex justify-between items-center bg-green-100 text-green-800 p-3 rounded-lg" style="display: none;">
                                 <p>Promo applied: <span id="applied-promo-code" class="font-bold"></span></p>
-                                <a href="{{ route('promo.remove') }}" class="font-semibold text-sm hover:underline">Remove</a>
+                                <button type="button" id="remove-promo-btn" class="font-semibold text-sm hover:underline">Remove</button>
                             </div>
                             <p id="promo-message" class="mt-2 text-sm"></p>
                         </div>
@@ -233,7 +233,7 @@
             </div>
             <div class="flex justify-between items-center border-t pt-6">
                <p class="text-red-500 font-semibold text-sm">For safety reason, this is the only time you will<br>see this information</p>
-               <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="bank-total-price">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span></p>
+               <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="bank-total-price">Rp. {{ number_format($finalPrice ?? 300000, 0, ',', '.') }}</span></p>
             </div>
         </div>
     </div>
@@ -250,242 +250,276 @@
                 </div>
             </div>
              <div class="flex justify-end items-center border-t pt-6">
-                 <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="qris-total-price">Rp. {{ number_format($finalPrice, 0, ',', '.') }}</span></p>
+                  <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="qris-total-price">Rp. {{ number_format($finalPrice ?? 300000, 0, ',', '.') }}</span></p>
             </div>
         </div>
     </div>
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const addNoteBtn = document.getElementById('add-note-btn');
-            const noteModal = document.getElementById('note-modal');
-            const bankTransferModal = document.getElementById('bank-transfer-modal');
-            const qrisModal = document.getElementById('qris-modal');
-            const closeBankModalBtn = document.getElementById('close-bank-modal-btn');
-            const closeQrisModalBtn = document.getElementById('close-qris-modal-btn');
-            const checkoutForm = document.getElementById('checkout-form');
-            
-            const fabricOptions = document.querySelectorAll('input[name="fabric_type"]');
-            const fabricLabels = document.querySelectorAll('.fabric-option');
-            const jumlahInput = document.getElementById('jumlah');
+    document.addEventListener('DOMContentLoaded', () => {
+        const checkoutForm = document.getElementById('checkout-form');
+        const fabricOptions = document.querySelectorAll('input[name="fabric_type"]');
+        const fabricLabels = document.querySelectorAll('.fabric-option');
+        const jumlahInput = document.getElementById('jumlah');
+        
+        const fabricCostLineEl = document.getElementById('fabric-cost-line');
+        const fabricCostEl = document.getElementById('fabric-cost');
+        const discountLineEl = document.getElementById('discount-line');
+        const promoCodeTextEl = document.getElementById('promo-code-text');
+        const discountAmountTextEl = document.getElementById('discount-amount-text');
+        const totalPriceEl = document.getElementById('total-price');
+        const bankTotalPriceEl = document.getElementById('bank-total-price');
+        const qrisTotalPriceEl = document.getElementById('qris-total-price');
+        
+        const promoMessageEl = document.getElementById('promo-message');
+        const promoFormContainer = document.getElementById('promo-form-container');
+        const promoAppliedContainer = document.getElementById('promo-applied-container');
+        const appliedPromoCodeEl = document.getElementById('applied-promo-code');
+        const applyPromoBtn = document.getElementById('apply-promo-btn');
+        const removePromoBtn = document.getElementById('remove-promo-btn');
 
-            const basePriceWithoutDiscount = 300000;
+        const addNoteBtn = document.getElementById('add-note-btn');
+        const noteModal = document.getElementById('note-modal');
+        const bankTransferModal = document.getElementById('bank-transfer-modal');
+        const qrisModal = document.getElementById('qris-modal');
+        const closeBankModalBtn = document.getElementById('close-bank-modal-btn');
+        const closeQrisModalBtn = document.getElementById('close-qris-modal-btn');
 
-            let promoState = {
-                code: "{{ session('promo.code') ?? '' }}",
-                type: "{{ session('promo.type') ?? '' }}",
-                value: {{ session('promo.value') ?? 0 }}
-            };
+        const basePrice = 300000;
+        let promoState = {
+            code: null,
+            type: null, 
+            value: 0, 
+            discount_amount: 0 
+        };
 
-            const fabricCostLineEl = document.getElementById('fabric-cost-line');
-            const fabricCostEl = document.getElementById('fabric-cost');
-            const discountLineEl = document.getElementById('discount-line');
-            const promoCodeTextEl = document.getElementById('promo-code-text');
-            const discountAmountTextEl = document.getElementById('discount-amount-text');
-            const totalPriceEl = document.getElementById('total-price');
-            const bankTotalPriceEl = document.getElementById('bank-total-price');
-            const qrisTotalPriceEl = document.getElementById('qris-total-price');
-            const promoMessageEl = document.getElementById('promo-message');
-            const promoFormContainer = document.getElementById('promo-form-container');
-            const promoAppliedContainer = document.getElementById('promo-applied-container');
-            const appliedPromoCodeEl = document.getElementById('applied-promo-code');
+        const formatCurrency = (amount) => 'Rp. ' + new Intl.NumberFormat('id-ID').format(amount);
 
-            function calculateAndUpdatePrice() {
-                const selectedFabric = document.querySelector('input[name="fabric_type"]:checked').value;
-                let additionalCost = 0;
-                const quantity = parseInt(jumlahInput.value) || 1;
+        function calculateAndUpdatePrice() {
+            const selectedFabric = document.querySelector('input[name="fabric_type"]:checked').value;
+            let additionalCost = 0;
+            const quantity = parseInt(jumlahInput.value) || 1;
 
-                if (selectedFabric === 'kain mori') {
-                    additionalCost = 100000;
-                } else if (selectedFabric === 'kain sutera') {
-                    additionalCost = 300000;
-                }
-
-                const totalBeforeDiscount = (basePriceWithoutDiscount + additionalCost) * quantity;
-                let dynamicDiscountAmount = 0;
-
-                if (promoState.code) {
-                    if (promoState.type === 'percentage') {
-                        dynamicDiscountAmount = totalBeforeDiscount * (promoState.value / 100);
-                    } else {
-                        dynamicDiscountAmount = promoState.value;
-                    }
-                    dynamicDiscountAmount = Math.min(dynamicDiscountAmount, totalBeforeDiscount);
-                }
-
-                const finalTotal = totalBeforeDiscount - dynamicDiscountAmount;
-
-                const formatCurrency = (amount) => 'Rp. ' + new Intl.NumberFormat('id-ID').format(amount);
-
-                fabricCostEl.textContent = formatCurrency(additionalCost * quantity);
-                fabricCostLineEl.style.display = additionalCost > 0 ? 'flex' : 'none';
-                
-                if (dynamicDiscountAmount > 0) {
-                    promoCodeTextEl.textContent = promoState.code;
-                    discountAmountTextEl.textContent = '- ' + formatCurrency(dynamicDiscountAmount);
-                    discountLineEl.style.display = 'flex';
-                } else {
-                    discountLineEl.style.display = 'none';
-                }
-
-                totalPriceEl.textContent = formatCurrency(finalTotal);
-                bankTotalPriceEl.textContent = formatCurrency(finalTotal);
-                qrisTotalPriceEl.textContent = formatCurrency(finalTotal);
-            }
-            
-            function updateSelectedStyle() {
-                const selectedRadio = document.querySelector('input[name="fabric_type"]:checked');
-                fabricLabels.forEach(label => label.classList.remove('selected'));
-                if (selectedRadio) {
-                    selectedRadio.parentElement.classList.add('selected');
-                }
+            if (selectedFabric === 'kain mori') {
+                additionalCost = 100000;
+            } else if (selectedFabric === 'kain sutera') {
+                additionalCost = 300000;
             }
 
-            fabricOptions.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    updateSelectedStyle();
-                    calculateAndUpdatePrice();
-                });
-            });
-            
-            jumlahInput.addEventListener('input', calculateAndUpdatePrice);
+            const totalBeforeDiscount = (basePrice + additionalCost) * quantity;
+            let currentDiscount = 0;
 
-            const initialFabricValue = "{{ old('fabric_type', session('order_details.fabric_type')) ?? 'kain katun' }}";
-            document.querySelector(`input[name="fabric_type"][value="${initialFabricValue}"]`).checked = true;
-            
-            function openModal(modal) {
-                const modalContent = modal.querySelector('.modal-content');
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                modalContent.classList.remove('opacity-0', '-translate-y-10');
-                document.body.classList.add('modal-active');
+            if (promoState.code) {
+                if (promoState.type === 'percentage') {
+                    currentDiscount = totalBeforeDiscount * (promoState.value / 100);
+                } else if (promoState.type === 'fixed') {
+                    currentDiscount = promoState.value;
+                }
+                promoState.discount_amount = Math.min(currentDiscount, totalBeforeDiscount);
             }
 
-            function closeModal(modal) {
-                const modalContent = modal.querySelector('.modal-content');
-                modalContent.classList.add('opacity-0', '-translate-y-10');
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                document.body.classList.remove('modal-active');
+            const finalTotal = totalBeforeDiscount - promoState.discount_amount;
+
+            fabricCostEl.textContent = formatCurrency(additionalCost * quantity);
+            fabricCostLineEl.style.display = additionalCost > 0 ? 'flex' : 'none';
+            
+            if (promoState.code && promoState.discount_amount > 0) {
+                promoCodeTextEl.textContent = promoState.code;
+                discountAmountTextEl.textContent = '- ' + formatCurrency(promoState.discount_amount);
+                discountLineEl.style.display = 'flex';
+            } else {
+                discountLineEl.style.display = 'none';
             }
 
-            addNoteBtn.addEventListener('click', () => openModal(noteModal));
-            document.getElementById('close-note-modal-btn').addEventListener('click', () => closeModal(noteModal));
-            document.getElementById('save-note-btn').addEventListener('click', () => {
-                document.getElementById('additional-note').value = document.getElementById('note-textarea').value;
-                closeModal(noteModal);
-            });
-            noteModal.addEventListener('click', (event) => {
-                if (event.target === noteModal) closeModal(noteModal);
-            });
+            totalPriceEl.textContent = formatCurrency(finalTotal);
+            bankTotalPriceEl.textContent = formatCurrency(finalTotal);
+            qrisTotalPriceEl.textContent = formatCurrency(finalTotal);
+        }
+        
+        function updateSelectedStyle() {
+            const selectedRadio = document.querySelector('input[name="fabric_type"]:checked');
+            fabricLabels.forEach(label => label.classList.remove('selected'));
+            if (selectedRadio) {
+                selectedRadio.parentElement.classList.add('selected');
+            }
+        }
 
-            const applyPromoBtn = document.getElementById('apply-promo-btn');
-            if (applyPromoBtn) {
-                applyPromoBtn.addEventListener('click', async () => {
-                    const promoCodeInput = document.getElementById('promo-code-input');
-                    const code = promoCodeInput.value.trim();
-                    if (!code) {
-                        promoMessageEl.textContent = 'Please enter a promo code.';
-                        promoMessageEl.className = 'mt-2 text-sm text-red-600';
-                        return;
-                    }
+        function openModal(modal) {
+            const modalContent = modal.querySelector('.modal-content');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('opacity-0', '-translate-y-10');
+            document.body.classList.add('modal-active');
+        }
 
-                    applyPromoBtn.innerHTML = '<div class="loader"></div>';
-                    applyPromoBtn.disabled = true;
-                    promoMessageEl.textContent = '';
+        function closeModal(modal) {
+            const modalContent = modal.querySelector('.modal-content');
+            modalContent.classList.add('opacity-0', '-translate-y-10');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        }
+        
+        async function handleApplyPromo() {
+            const promoCodeInput = document.getElementById('promo-code-input');
+            const code = promoCodeInput.value.trim();
+            if (!code) {
+                promoMessageEl.textContent = 'Please enter a promo code.';
+                promoMessageEl.className = 'mt-2 text-sm text-red-600';
+                return;
+            }
 
-                    try {
-                        const response = await fetch('{{ route("promo.apply") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({ promo_code: code })
-                        });
+            applyPromoBtn.innerHTML = '<div class="loader"></div>';
+            applyPromoBtn.disabled = true;
+            promoMessageEl.textContent = '';
 
-                        const data = await response.json();
+            const selectedFabric = document.querySelector('input[name="fabric_type"]:checked').value;
+            const selectedPayment = document.querySelector('input[name="payment_method"]:checked').value;
+            const quantity = document.getElementById('jumlah').value;
 
-                        if (data.success) {
-                            promoState = data.promo;
-                            promoMessageEl.textContent = data.message;
-                            promoMessageEl.className = 'mt-2 text-sm text-green-600';
-                            promoFormContainer.style.display = 'none';
-                            appliedPromoCodeEl.textContent = promoState.code;
-                            promoAppliedContainer.style.display = 'flex';
-                            calculateAndUpdatePrice();
-                        } else {
-                            promoMessageEl.textContent = data.message || 'Invalid promo code.';
-                            promoMessageEl.className = 'mt-2 text-sm text-red-600';
+            try {
+                const response = await fetch("{{ route('promo.apply') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        promo_code: code,
+                        order_details: {
+                            fabric_type: selectedFabric,
+                            payment_method: selectedPayment,
+                            jumlah: quantity
                         }
-                    } catch (error) {
-                        promoMessageEl.textContent = 'An error occurred. Please try again.';
-                        promoMessageEl.className = 'mt-2 text-sm text-red-600';
-                    } finally {
-                        applyPromoBtn.innerHTML = 'Apply';
-                        applyPromoBtn.disabled = false;
-                    }
+                    })
                 });
-            }
-            
-            function initializeUI() {
-                updateSelectedStyle();
-                if(promoState.code) {
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    promoState.code = data.promo.code;
+                    promoState.type = data.promo.type;
+                    promoState.value = data.promo.value;
+                    
+                    promoMessageEl.textContent = data.message;
+                    promoMessageEl.className = 'mt-2 text-sm text-green-600';
+                    
                     promoFormContainer.style.display = 'none';
                     appliedPromoCodeEl.textContent = promoState.code;
                     promoAppliedContainer.style.display = 'flex';
+                    
+                    calculateAndUpdatePrice();
+                } else {
+                    promoMessageEl.textContent = data.message || 'Invalid promo code.';
+                    promoMessageEl.className = 'mt-2 text-sm text-red-600';
                 }
+            } catch (error) {
+                console.error('Error applying promo:', error);
+                promoMessageEl.textContent = 'An error occurred. Please try again.';
+                promoMessageEl.className = 'mt-2 text-sm text-red-600';
+            } finally {
+                applyPromoBtn.innerHTML = 'Apply';
+                applyPromoBtn.disabled = false;
+            }
+        }
+        
+        function handleRemovePromo() {
+            promoState.code = null;
+            promoState.type = null;
+            promoState.value = 0;
+            promoState.discount_amount = 0;
+
+            promoAppliedContainer.style.display = 'none';
+            promoFormContainer.style.display = 'block';
+            document.getElementById('promo-code-input').value = '';
+            promoMessageEl.textContent = '';
+
+            calculateAndUpdatePrice();
+        }
+
+        fabricOptions.forEach(radio => {
+            radio.addEventListener('change', () => {
+                updateSelectedStyle();
                 calculateAndUpdatePrice();
-            }
-            initializeUI();
-
-            checkoutForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-                if (paymentMethod === 'bank_transfer') {
-                    openModal(bankTransferModal);
-                    startPaymentTimer(bankTransferModal);
-                } else if (paymentMethod === 'qris') {
-                    openModal(qrisModal);
-                    startPaymentTimer(qrisModal);
-                }
-            });
-
-            function startPaymentTimer(modal) {
-                let countdown = 5;
-                const closeBtn = modal.querySelector('button[id^="close-"]');
-                closeBtn.disabled = true;
-                closeBtn.innerHTML = countdown;
-                const timerInterval = setInterval(() => {
-                    countdown--;
-                    if (countdown > 0) {
-                        closeBtn.innerHTML = countdown;
-                    } else {
-                        clearInterval(timerInterval);
-                        closeBtn.innerHTML = '&times;';
-                        closeBtn.disabled = false;
-                    }
-                }, 1000);
-            }
-
-            function finalizeOrder() {
-                checkoutForm.submit();
-            }
-
-            closeBankModalBtn.addEventListener('click', () => {
-                if (!closeBankModalBtn.disabled) {
-                    closeModal(bankTransferModal);
-                    finalizeOrder();
-                }
-            });
-            
-            closeQrisModalBtn.addEventListener('click', () => {
-                if (!closeQrisModalBtn.disabled) {
-                    closeModal(qrisModal);
-                    finalizeOrder();
-                }
             });
         });
-    </script>
+        
+        jumlahInput.addEventListener('input', calculateAndUpdatePrice);
+        applyPromoBtn.addEventListener('click', handleApplyPromo);
+        removePromoBtn.addEventListener('click', handleRemovePromo);
+
+        addNoteBtn.addEventListener('click', () => openModal(noteModal));
+        document.getElementById('close-note-modal-btn').addEventListener('click', () => closeModal(noteModal));
+        document.getElementById('save-note-btn').addEventListener('click', () => {
+            document.getElementById('additional-note').value = document.getElementById('note-textarea').value;
+            closeModal(noteModal);
+        });
+        noteModal.addEventListener('click', (event) => {
+            if (event.target === noteModal) closeModal(noteModal);
+        });
+
+        checkoutForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            if (paymentMethod === 'bank_transfer') {
+                openModal(bankTransferModal);
+                startPaymentTimer(bankTransferModal);
+            } else if (paymentMethod === 'qris') {
+                openModal(qrisModal);
+                startPaymentTimer(qrisModal);
+            }
+        });
+
+        function startPaymentTimer(modal) {
+            let countdown = 5;
+            const closeBtn = modal.querySelector('button[id^="close-"]');
+            closeBtn.disabled = true;
+            closeBtn.innerHTML = countdown;
+            const timerInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    closeBtn.innerHTML = countdown;
+                } else {
+                    clearInterval(timerInterval);
+                    closeBtn.innerHTML = '&times;';
+                    closeBtn.disabled = false;
+                }
+            }, 1000);
+        }
+
+        function finalizeOrder() {
+            checkoutForm.submit();
+        }
+
+        closeBankModalBtn.addEventListener('click', () => {
+            if (!closeBankModalBtn.disabled) {
+                closeModal(bankTransferModal);
+                finalizeOrder();
+            }
+        });
+        
+        closeQrisModalBtn.addEventListener('click', () => {
+            if (!closeQrisModalBtn.disabled) {
+                closeModal(qrisModal);
+                finalizeOrder();
+            }
+        });
+
+        function initializeUI() {
+            const initialFabricValue = "{{ old('fabric_type', session('order_details.fabric_type')) ?? 'kain katun' }}";
+            const initialRadio = document.querySelector(`input[name="fabric_type"][value="${initialFabricValue}"]`);
+            if (initialRadio) {
+                initialRadio.checked = true;
+            } else {
+                document.querySelector('input[name="fabric_type"][value="kain katun"]').checked = true;
+            }
+            updateSelectedStyle();
+            calculateAndUpdatePrice();
+        }
+        
+        initializeUI();
+    });
+</script>
 
 </body>
 </html>

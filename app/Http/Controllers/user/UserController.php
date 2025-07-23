@@ -16,15 +16,13 @@ class UserController extends Controller
     public function index()
     {
         $reviews = Review::with('user')
-                        ->latest()
+                        ->inRandomOrder()
                         ->limit(3)
                         ->get();
         $topGalleryPosts = Design::withCount(['likes', 'comments'])
                         ->orderBy('likes_count', 'desc')
                         ->limit(3)
                         ->get();
-
-        $reviews = Review::with('user')->latest()->take(3)->get();
 
         return view('home', ['reviews' => $reviews, 'topGalleryPosts' => $topGalleryPosts]);
     }
@@ -40,7 +38,6 @@ class UserController extends Controller
             $user = Auth::user();
             $successMessages = [];
 
-            // update name
             if ($request->filled('name') && $request->name !== $user->name) {
                 $request->validate([
                     'name' => ['required', 'string', 'max:255'],
@@ -49,7 +46,6 @@ class UserController extends Controller
                 $successMessages[] = 'Name updated successfully!';
             }
 
-            // update email
             if ($request->filled('email') && $request->email !== $user->email) {
                 $request->validate([
                     'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
@@ -62,7 +58,6 @@ class UserController extends Controller
                 $successMessages[] = 'Email updated successfully! Dont forget to verify your email.';
             }
 
-            // update Password
             if ($request->filled('new_password')) {
                 $request->validate([
                     'current_password' => ['required', 'current_password'],

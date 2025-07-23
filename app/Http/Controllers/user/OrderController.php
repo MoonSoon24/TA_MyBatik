@@ -34,37 +34,81 @@ class OrderController extends Controller
         return redirect()->back()->with('success', 'Payment proof uploaded successfully!');
     }
 
+    public function showReceipt(Order $order)
+    {
+        if (auth()->id() !== $order->id_user) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('user.receipt', compact('order'));
+    }
+
     public function applyPromo(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'promo_code' => 'required|string',
+            'order_details' => 'required|array',
+            'order_details.fabric_type' => ['required', Rule::in(['kain katun', 'kain mori', 'kain sutera'])],
+            'order_details.jumlah' => 'required|integer|min:1',
+            'order_details.payment_method' => ['required', Rule::in(['bank_transfer', 'qris'])],
         ]);
 
-        $promoCode = $request->input('promo_code');
-        $promo = Promo::where('code', $promoCode)->first();
+        $promo = Promo::where('code', $validatedData['promo_code'])->first();
 
         if (!$promo) {
-            return response()->json(['success' => false, 'message' => 'Invalid promo code.']);
+            return response()->json(['success' => false, 'message' => 'Invalid promo code.'], 404);
         }
 
         if ($promo->expires_at && $promo->expires_at < now()) {
-            return response()->json(['success' => false, 'message' => 'This promo code has expired.']);
+            return response()->json(['success' => false, 'message' => 'This promo code has expired.'], 400);
         }
 
         if ($promo->max_uses) {
-            if ($promo->max_uses_scope === 'global') {
-                if ($promo->current_uses >= $promo->max_uses) {
-                    return response()->json(['success' => false, 'message' => 'This promo code has reached its usage limit.']);
-                }
-            } elseif ($promo->max_uses_scope === 'personal') {
-                $userUsageCount = Order::where('id_user', Auth::id())
-                                       ->where('promo_code', $promo->code)
-                                       ->count();
+            if ($promo->max_uses_scope === 'global' && $promo->current_uses >= $promo->max_uses) {
+                return response()->json(['success' => false, 'message' => 'This promo code has reached its usage limit.'], 400);
+            }
+            if ($promo->max_uses_scope === 'personal') {
+                $userUsageCount = Order::where('id_user', Auth::id())->where('promo_code', $promo->code)->count();
                 if ($userUsageCount >= $promo->max_uses) {
-                    return response()->json(['success' => false, 'message' => 'You have already used this promo code the maximum number of times.']);
+                    return response()->json(['success' => false, 'message' => 'You have already used this promo code the maximum number of times.'], 400);
                 }
             }
         }
+
+        if ($promo->constraints) {
+            foreach ($promo->constraints as $constraint) {
+                $type = $constraint['type'];
+                $value = $constraint['value'];
+                $orderValue = $request->input('order_details.' . $type);
+
+                if ($orderValue !== $value) {
+                    $friendlyType = str_replace('_', ' ', $type);
+                    return response()->json([
+                        'success' => false,
+                        'message' => "This promo is not valid for the selected {$friendlyType}."
+                    ], 400);
+                }
+            }
+        }
+
+        $basePrice = 300000;
+        $fabricCost = 0;
+        if ($validatedData['order_details']['fabric_type'] === 'kain mori') {
+            $fabricCost = 100000;
+        } elseif ($validatedData['order_details']['fabric_type'] === 'kain sutera') {
+            $fabricCost = 300000;
+        }
+
+        $totalBeforeDiscount = ($basePrice + $fabricCost) * $validatedData['order_details']['jumlah'];
+        
+        $discountAmount = 0;
+        if ($promo->type === 'fixed') {
+            $discountAmount = $promo->value;
+        } elseif ($promo->type === 'percentage') {
+            $discountAmount = ($totalBeforeDiscount * $promo->value) / 100;
+        }
+        
+        $discountAmount = min($totalBeforeDiscount, $discountAmount);
 
         Session::put('promo', [
             'code' => $promo->code,
@@ -75,7 +119,8 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Promo code applied successfully!',
-            'promo' => session('promo')
+            'promo' => Session::get('promo'),
+            'discount_amount' => $discountAmount
         ]);
     }
 
@@ -270,15 +315,6 @@ class OrderController extends Controller
 
         return redirect()->route('receipt', ['order' => $order->id_pesanan])
                          ->with('success', 'Your order has been placed successfully!');
-    }
-    
-    public function showReceipt(Order $order)
-    {
-        if (auth()->id() !== $order->id_user) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        return view('user.receipt', compact('order'));
     }
     
     private function getPromoDetails(float $basePrice): array

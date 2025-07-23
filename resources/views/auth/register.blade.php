@@ -32,7 +32,7 @@
 
     <header class="bg-white shadow-sm">
         <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
-            <a href="/home" class="font-dancing text-4xl font-bold">my Batik</a>
+            <a href="/" class="font-dancing text-4xl font-bold">my Batik</a>
         </div>
     </header>
 
@@ -44,44 +44,54 @@
                 <p class="text-gray-500 mt-2">Join us to start Your</p>
             </div>
 
-            @if ($errors->any())
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">Oops!</strong>
-                    <span class="block sm:inline">There were some problems with your input.</span>
-                    <ul class="mt-3 list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <form action="/register" method="POST" class="space-y-6">
                 @csrf
+
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
                     <div class="mt-1">
-                        <input id="name" name="name" type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <input id="name" name="name" type="text" required value="{{ old('name') }}"
+                            class="w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition @error('name') border-red-500 @else border-gray-300 @enderror">
+                        
+                        @error('name')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
+
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
                     <div class="mt-1">
-                        <input id="email" name="email" type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <input id="email" name="email" type="email" required value="{{ old('email') }}"
+                            class="w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition @error('email') border-red-500 @else border-gray-300 @enderror">
+                        
+                        @error('email')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
+
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <div class="mt-1">
-                        <input id="password" name="password" type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <input id="password" name="password" type="password" required
+                            class="w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition @error('password') border-red-500 @else border-gray-300 @enderror">
+                        
+                        @error('password')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
+
                 <div>
                     <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password</label>
                     <div class="mt-1">
-                        <input id="password_confirmation" name="password_confirmation" type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                    </div>
+                        <input id="password_confirmation" name="password_confirmation" type="password" required
+                            class="w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        
+                        </div>
                 </div>
+
                 <div>
                     <button type="submit" class="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all duration-300 text-lg">
                         Create
