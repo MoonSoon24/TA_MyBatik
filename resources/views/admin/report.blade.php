@@ -34,6 +34,33 @@
             visibility: visible;
             opacity: 1;
         }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+        }
+        .pagination li a, .pagination li span {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e2e8f0;
+            color: #4a5568;
+            background-color: white;
+            transition: background-color 0.2s;
+        }
+        .pagination li a:hover {
+            background-color: #f7fafc;
+        }
+        .pagination li.active span {
+            background-color: #4299e1;
+            color: white;
+            border-color: #4299e1;
+        }
+        .pagination li.disabled span {
+            color: #a0aec0;
+            background-color: #f7fafc;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
@@ -207,7 +234,7 @@
                                         </tr>
                                         @endforelse
                                     </tbody>
-                                    </table>
+                                </table>
                             </div>
                         </div>
                     </section>
@@ -215,13 +242,19 @@
                     <section id="customers-report" x-show="activeReport === 'customers'" x-cloak>
                         <div class="flex justify-between items-center mb-6">
                             <h1 class="text-3xl font-bold text-gray-800">Top Customers Report</h1>
-                            <div x-show="topCustomersFilterMonths.length > 0">
-                                <select x-model="selectedTopCustomersMonth" @change="filterTopCustomersReport()" class="w-48 p-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <option value="all">All Months</option>
-                                    <template x-for="month in topCustomersFilterMonths" :key="month">
-                                        <option :value="month" x-text="formatMonthForDisplay(month)"></option>
-                                    </template>
-                                </select>
+                            <div>
+                                <form action="{{ route('admin.reports.index') }}#customers-report" method="GET">
+                                    <input type="hidden" name="sort_by" value="{{ request('sort_by', 'total_spent') }}">
+                                    <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'desc') }}">
+                                    <select name="month" onchange="this.form.submit()" class="w-48 p-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                        <option value="all">All Months</option>
+                                        @foreach($topCustomersFilterMonths as $month)
+                                            <option value="{{ $month->month_value }}" {{ request('month') == $month->month_value ? 'selected' : '' }}>
+                                                {{ $month->month_display }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </form>
                             </div>
                         </div>
                         <div class="overflow-x-auto">
@@ -230,67 +263,73 @@
                                     <thead>
                                         <tr>
                                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                <div @click="sortBy('name', 'customer')" class="flex items-center gap-1 cursor-pointer hover:text-gray-800">
+                                                @php $nextDir = (request('sort_by') == 'name' && request('sort_dir') == 'asc') ? 'desc' : 'asc'; @endphp
+                                                <a href="{{ route('admin.reports.index', ['sort_by' => 'name', 'sort_dir' => $nextDir, 'month' => request('month', 'all')]) }}#customers-report" class="flex items-center gap-1 cursor-pointer hover:text-gray-800">
                                                     <span>Customer Name</span>
                                                     <div class="w-4 h-4">
-                                                        <svg x-show="customerSortColumn === 'name' && customerSortDirection === 'desc'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                                        <svg x-show="customerSortColumn === 'name' && customerSortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                                                        <svg x-show="customerSortColumn !== 'name'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+                                                        @if(request('sort_by') == 'name' && request('sort_dir') == 'desc') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> @endif
+                                                        @if(request('sort_by') == 'name' && request('sort_dir') == 'asc') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg> @endif
+                                                        @if(request('sort_by') != 'name') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg> @endif
                                                     </div>
-                                                </div>
+                                                </a>
                                             </th>
                                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
                                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                 <div @click="sortBy('orders_count', 'customer')" class="flex items-center justify-center gap-1 cursor-pointer hover:text-gray-800">
+                                                @php $nextDir = (request('sort_by') == 'orders_count' && request('sort_dir') == 'asc') ? 'desc' : 'asc'; @endphp
+                                                <a href="{{ route('admin.reports.index', ['sort_by' => 'orders_count', 'sort_dir' => $nextDir, 'month' => request('month', 'all')]) }}#customers-report" class="flex items-center justify-center gap-1 cursor-pointer hover:text-gray-800">
                                                     <span>Total Orders</span>
                                                     <div class="w-4 h-4">
-                                                        <svg x-show="customerSortColumn === 'orders_count' && customerSortDirection === 'desc'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                                        <svg x-show="customerSortColumn === 'orders_count' && customerSortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                                                        <svg x-show="customerSortColumn !== 'orders_count'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+                                                        @if(request('sort_by') == 'orders_count' && request('sort_dir') == 'desc') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> @endif
+                                                        @if(request('sort_by') == 'orders_count' && request('sort_dir') == 'asc') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg> @endif
+                                                        @if(request('sort_by') != 'orders_count') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg> @endif
                                                     </div>
-                                                </div>
+                                                </a>
                                             </th>
                                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                <div @click="sortBy('orders_sum_jumlah', 'customer')" class="flex items-center justify-center gap-1 cursor-pointer hover:text-gray-800">
+                                                @php $nextDir = (request('sort_by') == 'orders_sum_jumlah' && request('sort_dir') == 'asc') ? 'desc' : 'asc'; @endphp
+                                                <a href="{{ route('admin.reports.index', ['sort_by' => 'orders_sum_jumlah', 'sort_dir' => $nextDir, 'month' => request('month', 'all')]) }}#customers-report" class="flex items-center justify-center gap-1 cursor-pointer hover:text-gray-800">
                                                     <span>Total Items</span>
                                                     <div class="w-4 h-4">
-                                                        <svg x-show="customerSortColumn === 'orders_sum_jumlah' && customerSortDirection === 'desc'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                                        <svg x-show="customerSortColumn === 'orders_sum_jumlah' && customerSortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                                                        <svg x-show="customerSortColumn !== 'orders_sum_jumlah'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+                                                        @if(request('sort_by') == 'orders_sum_jumlah' && request('sort_dir') == 'desc') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> @endif
+                                                        @if(request('sort_by') == 'orders_sum_jumlah' && request('sort_dir') == 'asc') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg> @endif
+                                                        @if(request('sort_by') != 'orders_sum_jumlah') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg> @endif
                                                     </div>
-                                                </div>
+                                                </a>
                                             </th>
                                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                 <div @click="sortBy('total_spent', 'customer')" class="flex items-center justify-end gap-1 cursor-pointer hover:text-gray-800">
+                                                @php $nextDir = (request('sort_by', 'total_spent') == 'total_spent' && request('sort_dir') == 'asc') ? 'desc' : 'asc'; @endphp
+                                                <a href="{{ route('admin.reports.index', ['sort_by' => 'total_spent', 'sort_dir' => $nextDir, 'month' => request('month', 'all')]) }}#customers-report" class="flex items-center justify-end gap-1 cursor-pointer hover:text-gray-800">
                                                     <span>Total Spent</span>
                                                     <div class="w-4 h-4">
-                                                        <svg x-show="customerSortColumn === 'total_spent' && customerSortDirection === 'desc'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                                        <svg x-show="customerSortColumn === 'total_spent' && customerSortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                                                        <svg x-show="customerSortColumn !== 'total_spent'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+                                                        @if(request('sort_by', 'total_spent') == 'total_spent' && request('sort_dir', 'desc') == 'desc') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> @endif
+                                                        @if(request('sort_by') == 'total_spent' && request('sort_dir') == 'asc') <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg> @endif
+                                                        @if(request('sort_by') != 'total_spent' && request('sort_by') != null) <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg> @endif
                                                     </div>
-                                                </div>
+                                                </a>
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <template x-if="filteredTopCustomers.length === 0">
-                                            <tr>
-                                                <td colspan="5" class="text-center px-5 py-5 border-b border-gray-200 bg-white text-sm">No customer data found for the selected period.</td>
-                                            </tr>
-                                        </template>
-                                        <template x-for="customer in filteredTopCustomers" :key="customer.id">
-                                            <tr class="hover:bg-gray-50 cursor-pointer" @click="getCustomerDetails(customer.id, customer.name)">
-                                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap" x-text="customer.name"></p></td>
-                                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap" x-text="customer.email"></p></td>
-                                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-center text-sm"><p class="text-gray-900 whitespace-no-wrap" x-text="customer.orders_count"></p></td>
-                                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-center text-sm"><p class="text-gray-900 whitespace-no-wrap" x-text="`${customer.orders_sum_jumlah || 0} items`"></p></td>
-                                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-right text-sm">
-                                                    <p class="text-gray-900 whitespace-no-wrap font-semibold" x-text="`Rp ${new Intl.NumberFormat('id-ID').format(customer.total_spent)}`"></p>
-                                                </td>
-                                            </tr>
-                                        </template>
+                                        @forelse ($topCustomers as $customer)
+                                        <tr class="hover:bg-gray-50 cursor-pointer" @click="getCustomerDetails({{ $customer->id }}, '{{ addslashes($customer->name) }}')">
+                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">{{ $customer->name }}</p></td>
+                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">{{ $customer->email }}</p></td>
+                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-center text-sm"><p class="text-gray-900 whitespace-no-wrap">{{ $customer->orders_count }}</p></td>
+                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-center text-sm"><p class="text-gray-900 whitespace-no-wrap">{{ $customer->orders_sum_jumlah ?? 0 }} items</p></td>
+                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-right text-sm">
+                                                <p class="text-gray-900 whitespace-no-wrap font-semibold">Rp {{ number_format($customer->total_spent, 0, ',', '.') }}</p>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center px-5 py-5 border-b border-gray-200 bg-white text-sm">No customer data found for the selected period.</td>
+                                        </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="mt-4">
+                                {{ $topCustomers->withQueryString()->fragment('customers-report')->links('pagination::tailwind') }}
                             </div>
                         </div>
                     </section>
@@ -440,7 +479,6 @@
             </div>
 
             <div id="promoReportJsonData" data-promos='{!! $promoReportJsonData ?? '{}' !!}' x-cloak></div>
-            <div id="topCustomersJsonData" data-customers='{!! $topCustomersJsonData ?? '{}' !!}' x-cloak></div>
 
         </main>
     </div>
@@ -456,13 +494,11 @@
                         this.mainPromoFilterMonths = Object.keys(promoData).filter(k => k !== 'all').sort().reverse();
                         this.filterMainPromoReport();
                     }
-
-                    const customerDataEl = document.getElementById('topCustomersJsonData');
-                    if (customerDataEl) {
-                        const customerData = JSON.parse(customerDataEl.getAttribute('data-customers'));
-                        this.topCustomersData = customerData;
-                        this.topCustomersFilterMonths = Object.keys(customerData).filter(k => k !== 'all').sort().reverse();
-                        this.filterTopCustomersReport();
+                    if (window.location.hash) {
+                        const hash = window.location.hash.substring(1);
+                        if (['sales', 'promo', 'users', 'customers'].includes(hash.replace('-report', ''))) {
+                            this.activeReport = hash.replace('-report', '');
+                        }
                     }
                 },
                 activeReport: 'sales',
@@ -576,12 +612,6 @@
                     this.filteredPromoData = this.promoReportData[this.selectedMainPromoMonth] || [];
                     this.applySort('promo');
                 },
-
-                filterTopCustomersReport() {
-                    this.filteredTopCustomers = this.topCustomersData[this.selectedTopCustomersMonth] || [];
-                    this.applySort('customer');
-                },
-
                 sortBy(column, type) {
                     if (type === 'promo') {
                         if (this.promoSortColumn === column) {
@@ -590,54 +620,29 @@
                             this.promoSortColumn = column;
                             this.promoSortDirection = 'desc';
                         }
-                    } else if (type === 'customer') {
-                        if (this.customerSortColumn === column) {
-                            this.customerSortDirection = this.customerSortDirection === 'asc' ? 'desc' : 'asc';
-                        } else {
-                            this.customerSortColumn = column;
-                            this.customerSortDirection = 'desc';
-                        }
+                        this.applySort(type);
                     }
-                    this.applySort(type);
                 },
-
                 applySort(type) {
                     let data, column, direction;
-
                     if (type === 'promo') {
                         data = this.filteredPromoData;
                         column = this.promoSortColumn;
                         direction = this.promoSortDirection;
-                    } else if (type === 'customer') {
-                        data = this.filteredTopCustomers;
-                        column = this.customerSortColumn;
-                        direction = this.customerSortDirection;
                     } else {
                         return;
                     }
-
                     data.sort((a, b) => {
                         let valA = a[column];
                         let valB = b[column];
-
                         if (typeof valA === 'string' && isNaN(valA)) {
                             valA = valA.toLowerCase();
                             valB = valB.toLowerCase();
-                            if (direction === 'asc') {
-                                return valA.localeCompare(valB);
-                            } else {
-                                return valB.localeCompare(valA);
-                            }
+                            return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
                         }
-
                         const numA = parseFloat(valA);
                         const numB = parseFloat(valB);
-
-                        if (direction === 'asc') {
-                            return numA - numB;
-                        } else {
-                            return numB - numA;
-                        }
+                        return direction === 'asc' ? numA - numB : numB - numA;
                     });
                 },
 

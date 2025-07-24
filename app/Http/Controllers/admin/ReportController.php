@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    public function index()
+    public function index(request $request)
     {
         $salesData = Order::select(
             DB::raw('YEAR(created_at) as year'),
@@ -74,24 +74,45 @@ class ReportController extends Controller
         ->orderBy('month', 'desc')
         ->get();
 
-        $topCustomersData = [];
-        
-        $allTimeTopCustomers = DB::table('users')
-            ->join('orders', 'users.id', '=', 'orders.id_user')
+        $sortBy = $request->get('sort_by', 'total_spent');
+        $sortDir = $request->get('sort_dir', 'desc');
+        $selectedMonth = $request->get('month', 'all');
+
+        $customersQuery = DB::table('users')
+            ->leftJoin('orders', function ($join) {
+                $join->on('users.id', '=', 'orders.id_user')
+                     ->whereIn('orders.status', ['In Progress', 'Ready', 'Completed']);
+            })
             ->select(
                 'users.id', 
                 'users.name', 
                 'users.email', 
                 DB::raw('COUNT(orders.id_pesanan) as orders_count'), 
-                DB::raw('SUM(orders.jumlah) as orders_sum_jumlah'),
-                DB::raw('SUM(orders.total) as total_spent'),
+                DB::raw('COALESCE(SUM(orders.jumlah), 0) as orders_sum_jumlah'),
+                DB::raw('COALESCE(SUM(orders.total), 0) as total_spent')
+            );
+
+        if ($selectedMonth !== 'all') {
+            $customersQuery->where(function ($query) use ($selectedMonth) {
+                $query->where(DB::raw("DATE_FORMAT(orders.tanggal_pesan, '%Y-%m')"), $selectedMonth)
+                      ->orWhereNull('orders.id_pesanan');
+            });
+        }
+
+        $customersQuery->groupBy('users.id', 'users.name', 'users.email')
+                       ->orderBy($sortBy, $sortDir);
+
+        $topCustomers = $customersQuery->paginate(10)->withQueryString();
+
+        $topCustomersFilterMonths = DB::table('orders')
+            ->select(
+                DB::raw("DATE_FORMAT(tanggal_pesan, '%Y-%m') as month_value"), 
+                DB::raw("DATE_FORMAT(tanggal_pesan, '%M %Y') as month_display")
             )
-            ->whereIn('orders.status', ['In Progress','Ready', 'Completed'])
-            ->groupBy('users.id', 'users.name', 'users.email')
-            ->orderBy('orders_count', 'desc')
-            ->take(20)
+            ->whereIn('status', ['In Progress','Ready', 'Completed'])
+            ->distinct()
+            ->orderBy('month_value', 'desc')
             ->get();
-        $topCustomersData['all'] = $allTimeTopCustomers;
 
         $monthlyTopCustomers = DB::table('users')
             ->join('orders', 'users.id', '=', 'orders.id_user')
@@ -132,7 +153,8 @@ class ReportController extends Controller
             'salesData', 
             'promoReportJsonData',
             'userData', 
-            'topCustomersJsonData'
+            'topCustomers',
+            'topCustomersFilterMonths'
         ));
     }
 
