@@ -32,7 +32,7 @@
 
     <header class="bg-white shadow-sm">
         <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
-            <a href="/" class="font-dancing text-4xl font-bold">my Batik</a>
+            <a href="/" class="font-dancing text-4xl font-bold">myBatik</a>
         </div>
     </header>
 
