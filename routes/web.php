@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\PromoController as AdminPromoController;
 |--------------------------------------------------------------------------
 */
 
+// all
 Route::get('/', [UserController::class, 'index'])->name('home');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 Route::get('/profile', [UserController::class, 'showProfile'])->name('profile');

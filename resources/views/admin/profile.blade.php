@@ -37,7 +37,7 @@
         <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
 
             <div class="flex items-center gap-x-12">
-                <div class="font-dancing text-4xl font-bold">my Batik</div>
+                <a href="/admin" class="font-dancing text-3xl md:text-4xl font-bold text-gray-900">myBatik</a>
                 <nav class="hidden md:flex space-x-8">
                     <a href="/admin" class="font-semibold text-gray-700 hover:text-black transition">Home</a>
                 </nav>

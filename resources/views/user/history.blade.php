@@ -222,8 +222,11 @@
         const searchInput = document.getElementById('search-input');
         const sortSelect = document.getElementById('sort-select');
         const ordersContainer = document.getElementById('orders-container');
-        const orderCards = Array.from(document.querySelectorAll('.order-card'));
         const noResultsMessage = document.getElementById('no-results-message');
+        
+        const orderCards = Array.from(document.querySelectorAll('.order-card'));
+        
+        if (orderCards.length === 0) return;
 
         @if (session('success'))
             window.dispatchEvent(new CustomEvent('alert', { 
@@ -233,7 +236,7 @@
 
         @if ($errors->any())
             window.dispatchEvent(new CustomEvent('alert', {
-                 detail: { type: 'error', message: "{{ $errors->first() }}" }
+                detail: { type: 'error', message: "{{ $errors->first() }}" }
             }));
         @endif
 
@@ -244,19 +247,6 @@
                 const content = card.dataset.searchContent || '';
                 return content.includes(searchTerm);
             });
-
-            orderCards.forEach(card => {
-                const content = card.dataset.searchContent || '';
-                const isVisible = content.includes(searchTerm);
-                card.classList.toggle('hidden', !isVisible);
-            });
-
-            const hasVisibleCards = visibleCards.length > 0;
-            const noOrdersMessage = document.getElementById('no-orders-message');
-
-            if(noResultsMessage) {
-                noResultsMessage.classList.toggle('hidden', hasVisibleCards || searchTerm === '');
-            }
 
             const sortValue = sortSelect.value;
             visibleCards.sort((a, b) => {
@@ -272,11 +262,12 @@
                 }
             });
             
-            ordersContainer.innerHTML = ''; 
-            ordersContainer.append(...visibleCards);
-
-            if(noResultsMessage) {
-                ordersContainer.append(noResultsMessage);
+            ordersContainer.innerHTML = '';
+            if (visibleCards.length > 0) {
+                ordersContainer.append(...visibleCards);
+                noResultsMessage.classList.add('hidden');
+            } else {
+                noResultsMessage.classList.remove('hidden');
             }
         }
 

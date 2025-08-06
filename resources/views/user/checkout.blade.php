@@ -231,9 +231,9 @@
                 <div class="flex justify-between"><span class="text-gray-500">Account Number:</span><span class="font-semibold">0123456789</span></div>
                 <div class="flex justify-between"><span class="text-gray-500">Account Name:</span><span class="font-semibold">Designer Batik</span></div>
             </div>
-            <div class="flex justify-between items-center border-t pt-6">
-               <p class="text-red-500 font-semibold text-sm">For safety reason, this is the only time you will<br>see this information</p>
-               <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="bank-total-price">Rp. {{ number_format($finalPrice ?? 300000, 0, ',', '.') }}</span></p>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-center sm:text-left border-t pt-6">
+                <p class="text-red-500 font-semibold text-sm">For safety reason, this is the only time you will see this information</p>
+                <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="bank-total-price">Rp. {{ number_format($finalPrice ?? 300000, 0, ',', '.') }}</span></p>
             </div>
         </div>
     </div>
@@ -249,7 +249,7 @@
                     <span class="text-gray-500">QRIS Code</span>
                 </div>
             </div>
-             <div class="flex justify-end items-center border-t pt-6">
+             <div class="flex justify-center sm:justify-end items-center border-t pt-6">
                   <p class="text-xl font-bold">Total Payment: <span class="text-cyan-600" id="qris-total-price">Rp. {{ number_format($finalPrice ?? 300000, 0, ',', '.') }}</span></p>
             </div>
         </div>

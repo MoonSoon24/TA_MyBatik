@@ -56,7 +56,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800 pb-28" style="padding-bottom: 0px;">
+<body class="bg-gray-100 font-sans text-gray-800 pb-28">
 
     <x-header />
     <main class="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-10 mt-8 mb-8">
@@ -72,7 +72,8 @@
         <form action="{{ route('order.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                <div class="flex flex-col justify-between">
+                
+                <div class="flex flex-col">
                     <div>
                         <h4 class="text-xl font-bold mb-4">Choose Your Size</h4>
                         <div id="size-options" class="space-y-3">
@@ -102,9 +103,6 @@
                             </label>
                         </div>
                     </div>
-                    <div class="mt-8">
-                        <a href="/create" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition">Back to designing</a>
-                    </div>
                 </div>
 
                 <div>
@@ -118,11 +116,15 @@
                     
                     <div id="shirt-size-table" class="overflow-x-auto">
                         <div class="mb-6">
+                            
+
+[Image of a shirt measurement guide]
+
                             <img 
                                 id="shirt-guide-image" 
                                 src="images/shirt_guide.png" 
                                 alt="Shirt Measurement Guide" 
-                                class="w-full max-w-sm mx-auto rounded-lg shadow-sm h-96 object-contain"
+                                class="w-full max-w-sm mx-auto rounded-lg shadow-sm h-80 md:h-96 object-contain"
                             >
                         </div>
                         <table class="w-full border-collapse size-guide-table">
@@ -155,11 +157,12 @@
 
                     <div id="dress-size-table" class="overflow-x-auto" style="display: none;">
                         <div class="mb-6">
+                            
                             <img 
                                 id="dress-guide-image" 
                                 src="images/dress_guide.png" 
                                 alt="Dress Measurement Guide" 
-                                class="w-full max-w-sm mx-auto rounded-lg shadow-sm h-96 object-contain"
+                                class="w-full max-w-sm mx-auto rounded-lg shadow-sm h-80 md:h-96 object-contain"
                             >
                         </div>
                         <table class="w-full border-collapse size-guide-table">
@@ -199,11 +202,12 @@
                         <label for="design_file" class="block text-lg font-medium text-gray-700 mb-2">Upload Your Design (PNG)</label>
                         <input type="file" name="design_file" id="design_file" accept=".png, image/png" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
                     </div>
-
-                    <div class="mt-8 text-right">
-                        <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition shadow-md hover:shadow-lg">Continue Checkout</button>
-                    </div>
                 </div>
+            </div>
+
+            <div class="mt-10 flex flex-col-reverse gap-4 sm:flex-row sm:justify-between">
+                <a href="/create" class="w-full sm:w-auto text-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition">Back to designing</a>
+                <button type="submit" class="w-full sm:w-auto bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition shadow-md hover:shadow-lg">Continue Checkout</button>
             </div>
         </form>
     </main>

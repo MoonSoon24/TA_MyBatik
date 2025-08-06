@@ -33,16 +33,15 @@
 </head>
 <body class="bg-gray-100 font-sans text-gray-800" x-data="adminTableData()" x-init="init()">
 
-    <header class="bg-white shadow-sm sticky top-0 z-40">
+   <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
             <div class="flex items-center gap-x-12">
-                <div class="font-dancing text-4xl font-bold">my Batik</div>
+                <a href="/admin" class="font-dancing text-3xl md:text-4xl font-bold text-gray-900">myBatik</a>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="/admin" class="font-semibold text-gray-700 hover:text-black transition">Home</a>
-                    <a href="{{ route('admin.reports.index') }}" class="font-semibold text-gray-700 hover:text-black transition">Reports</a>
+                    <a href="{{ route('admin.home') }}" class="font-semibold text-gray-700 hover:text-black transition">Home</a>
+                    <a href="{{ route('admin.reports.index') }}" class="font-bold text-black transition">Reports</a>
                 </nav>
             </div>
-            
             <div class="flex items-center space-x-3">
                 <div x-data="{ dropdownOpen: false }" class="relative">
                     <button @click="dropdownOpen = !dropdownOpen" class="flex items-center space-x-3">
@@ -53,10 +52,8 @@
                     </button>
                     <div x-show="dropdownOpen" @click.away="dropdownOpen = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50" x-cloak>
                         <a href="{{ route('admin.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                        <form method="POST" action="{{ route('logout') }}" id="logout-form">
-                            @csrf
-                            <a href="#" id="logout-link" class="block px-4 py-2 text-sm font-semibold text-red-600 hover:text-red-800 transition">Logout</a>
-                        </form>
+                        <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Reports</a>
+                        <form method="POST" action="{{ route('logout') }}">@csrf<a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="block px-4 py-2 text-sm font-semibold text-red-600 hover:text-red-800 transition">Logout</a></form>
                     </div>
                 </div>
             </div>
@@ -64,12 +61,12 @@
     </header>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-        <main class="bg-white rounded-2xl shadow-sm p-6 md:p-8">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                <div class="flex items-center gap-4">
+        <main class="bg-white rounded-2xl shadow-sm p-4 md:p-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div class="flex flex-wrap items-center gap-4">
                     <div class="relative">
-                        <button @click="tableDropdownOpen = !tableDropdownOpen" class="flex items-center space-x-3 bg-gray-100 px-6 py-3 rounded-xl mb-4 sm:mb-0">
-                            <h1 class="text-3xl font-bold text-gray-800 capitalize" x-text="activeTable"></h1>
+                        <button @click="tableDropdownOpen = !tableDropdownOpen" class="flex items-center space-x-3 bg-gray-100 px-4 py-2 md:px-6 md:py-3 rounded-xl">
+                            <h1 class="text-xl md:text-3xl font-bold text-gray-800 capitalize" x-text="activeTable"></h1>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </button>
                         <div x-show="tableDropdownOpen" @click.away="tableDropdownOpen = false" x-cloak class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20">
@@ -80,10 +77,10 @@
                         </div>
                     </div>
                     <div x-show="activeTable === 'promos'" x-cloak>
-                        <button @click.prevent="createPromoModalOpen = true" class="bg-green-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-green-700 transition">Create Promo</button>
+                        <button @click.prevent="createPromoModalOpen = true" class="bg-green-600 text-white font-semibold py-2 px-4 md:py-3 md:px-6 rounded-xl hover:bg-green-700 transition">Create Promo</button>
                     </div>
                     <div x-show="activeTable === 'notifications'" x-cloak>
-                        <button @click.prevent="createNotificationModalOpen = true" class="bg-green-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-green-700 transition">Send Notification</button>
+                        <button @click.prevent="createNotificationModalOpen = true" class="bg-green-600 text-white font-semibold py-2 px-4 md:py-3 md:px-6 rounded-xl hover:bg-green-700 transition">Send Notification</button>
                     </div>
                 </div>
                 
@@ -97,23 +94,23 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <template x-for="user in filteredUsers" :key="user.id">
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="user.id"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="user.name"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="user.email"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="user.id"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="user.name"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="user.email"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm">
                                     <span x-text="user.email_verified_at ? 'Verified' : 'Not Verified'" :class="{ 'text-green-600 font-semibold': user.email_verified_at, 'text-yellow-600 font-semibold': !user.email_verified_at }"></span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
                                         <button @click="openEditUserModal(user)" class="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-md hover:bg-blue-700 transition-colors">Edit</button>
 
@@ -142,9 +139,9 @@
                         <tr>
                             <th scope="col" class="px-2 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
                             <th scope="col" class="px-2 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">User ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Order Date</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Order Date</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -152,9 +149,9 @@
                             <tr class="hover:bg-gray-50 cursor-pointer" @click="showOrderModal(order)">
                                 <td class="px-2 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center" x-text="order.id_pesanan"></td>
                                 <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-600 text-center" x-text="order.id_user"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(order.total)"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold" :class="{ 'text-yellow-600': order.status === 'Pending', 'text-blue-600': order.status === 'In Progress', 'text-green-600': order.status === 'Ready', 'text-red-600': order.status === 'Cancelled', 'text-green-700': order.status === 'Completed' }" x-text="order.status"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="new Date(order.tanggal_pesan).toLocaleDateString('id-ID')"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(order.total)"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-semibold" :class="{ 'text-yellow-600': order.status === 'Pending', 'text-blue-600': order.status === 'In Progress', 'text-green-600': order.status === 'Ready', 'text-red-600': order.status === 'Cancelled', 'text-green-700': order.status === 'Completed' }" x-text="order.status"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="new Date(order.tanggal_pesan).toLocaleDateString('id-ID')"></td>
                             </tr>
                         </template>
                     </tbody>
@@ -165,23 +162,23 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Code</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Value</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Uses</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Expires At</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Code</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Value</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Uses</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Expires At</th>
+                            <th scope="col" class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <template x-for="promo in filteredPromos" :key="promo.id">
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="promo.code"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize" x-text="promo.type"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="promo.type === 'percentage' ? promo.value + '%' : 'Rp ' + new Intl.NumberFormat('id-ID').format(promo.value)"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="`${promo.current_uses || 0} / ${promo.max_uses || '∞'}`"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="promo.expires_at ? new Date(promo.expires_at).toLocaleDateString('id-ID') : 'Never'"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="promo.code"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize" x-text="promo.type"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="promo.type === 'percentage' ? promo.value + '%' : 'Rp ' + new Intl.NumberFormat('id-ID').format(promo.value)"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="`${promo.current_uses || 0} / ${promo.max_uses || '∞'}`"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="promo.expires_at ? new Date(promo.expires_at).toLocaleDateString('id-ID') : 'Never'"></td>
+                                <td class="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
                                         <button @click="openEditModal(promo)" class="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-md hover:bg-blue-700 transition-colors">Edit</button>
                                         
@@ -202,21 +199,21 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-white">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">title</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Message</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Sent At</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[150px]">User</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[150px]">Title</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[300px]">Message</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Sent At</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <template x-for="notification in filteredNotifications" :key="notification.id">
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="notification.user.name"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="notification.title"></td>
-                                <td class="px-6 py-4 whitespace-normal text-sm text-gray-600" x-text="notification.message"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" x-text="new Date(notification.created_at).toLocaleString('id-ID')"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="notification.user.name"></td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600" x-text="notification.title"></td>
+                                <td class="px-4 py-4 whitespace-normal text-sm text-gray-600" x-text="notification.message"></td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600" x-text="new Date(notification.created_at).toLocaleString('id-ID')"></td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
                                         <button @click="openEditNotificationModal(notification)" class="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-md hover:bg-blue-700 transition-colors">Edit</button>
                                         <form :id="`delete-notification-form-${notification.id}`" :action="`/admin/notifications/${notification.id}`" method="POST" class="inline-block">
@@ -241,9 +238,9 @@
             <template x-if="selectedOrder">
                 <div>
                     <div id="order-details-content">
-                        <div class="px-6 py-4 border-b sticky top-0 bg-white z-10"><h3 class="text-2xl leading-6 font-bold text-gray-900">Order Details</h3></div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8">
+                        <div class="px-4 sm:px-6 py-4 border-b sticky top-0 bg-white z-10"><h3 class="text-xl md:text-2xl leading-6 font-bold text-gray-900">Order Details</h3></div>
+                        <div class="p-4 sm:p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
                                 <div class="flex flex-col">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                                         <div class="space-y-3 text-sm">
@@ -278,14 +275,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="px-6 py-4 flex justify-between items-center border-t bg-gray-50 sticky bottom-0 z-10">
-                        <div class="flex items-center gap-x-6">
+                    <div class="p-4 sm:px-6 sm:py-4 flex flex-col-reverse gap-y-4 sm:flex-row sm:justify-between sm:items-center border-t bg-gray-50 sticky bottom-0 z-10">
+                        <div class="flex flex-col gap-y-3 sm:flex-row sm:items-center sm:gap-x-6 w-full sm:w-auto">
                             <div class="flex items-center gap-x-3">
                                 <label for="status" class="block text-sm font-bold text-gray-900">Status:</label>
-                                <select x-model="selectedOrder.status" 
-                                        id="status" 
-                                        name="status" 
-                                        @change="updateNotificationMessageOnStatusChange()"  class="block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <select x-model="selectedOrder.status" id="status" name="status" @change="updateNotificationMessageOnStatusChange()"  class="block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                     <option>Pending</option>
                                     <option>Hold</option>
                                     <option>Cancelled</option>
@@ -302,19 +296,19 @@
                             </div>
                         </div>
 
-                        <div class="flex gap-x-3">
+                        <div class="flex flex-wrap justify-end gap-2 w-full sm:w-auto">
                             <button 
                                 x-show="selectedOrder.bukti_pembayaran"
                                 type="button" 
                                 @click="$dispatch('open-proof-modal', { imageUrl: '/storage/' + selectedOrder.bukti_pembayaran })"
-                                class="px-6 py-2 bg-indigo-500 text-white rounded-lg font-semibold hover:bg-indigo-600 transition-colors">
+                                class="px-4 py-2 bg-indigo-500 text-white rounded-lg font-semibold hover:bg-indigo-600 transition-colors text-sm">
                                 View Payment
                             </button>
-                            <button type="button" @click="exportOrder()" :disabled="isExporting" class="px-6 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors disabled:bg-green-300 disabled:cursor-not-allowed">
+                            <button type="button" @click="exportOrder()" :disabled="isExporting" class="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors disabled:bg-green-300 disabled:cursor-not-allowed text-sm">
                                 <span x-show="!isExporting">Export</span><span x-show="isExporting">Exporting...</span>
                             </button>
-                            <button type="button" @click="open = false" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancel</button>
-                            <button type="button" @click="handleSaveClick()" class="px-8 py-2 bg-cyan-500 text-white rounded-lg font-semibold hover:bg-cyan-600 transition-colors">Save</button>
+                            <button type="button" @click="open = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-sm">Cancel</button>
+                            <button type="button" @click="handleSaveClick()" class="px-6 py-2 bg-cyan-500 text-white rounded-lg font-semibold hover:bg-cyan-600 transition-colors text-sm">Save</button>
                         </div>
                     </div>
                 </div>
@@ -365,8 +359,8 @@
         <button @click="show = false" title="Close" class="absolute top-4 right-4 w-10 h-10 text-white bg-gray-900/50 rounded-full hover:bg-white/20 text-2xl flex items-center justify-center leading-none">&times;</button>
     </div>
 
-    <div x-show="deleteModalOpen" @keydown.escape.window="closeDeleteModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
-         <div @click.away="closeDeleteModal()" class="bg-white p-8 rounded-lg shadow-xl text-center">
+    <div x-show="deleteModalOpen" @keydown.escape.window="closeDeleteModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" x-cloak>
+         <div @click.away="closeDeleteModal()" class="bg-white p-6 md:p-8 rounded-lg shadow-xl text-center max-w-sm w-full">
             <h3 class="text-xl font-bold mb-4" x-text="`Confirm ${deleteType.charAt(0).toUpperCase() + deleteType.slice(1)} Deletion`"></h3>
             <p class="mb-6">Are you sure you want to delete this <span x-text="deleteType"></span>? <br> This action cannot be undone.</p>
             <div class="flex justify-center gap-4">
@@ -376,8 +370,8 @@
         </div>
     </div>
 
-    <div x-show="editUserModalOpen" @keydown.escape.window="editUserModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
-        <div @click.away="editUserModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+    <div x-show="editUserModalOpen" @keydown.escape.window="editUserModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" x-cloak>
+        <div @click.away="editUserModalOpen = false" class="bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-md">
             <h3 class="text-2xl font-bold mb-6">Edit User</h3>
             <template x-if="editingUser">
                 <form :action="`/admin/users/${editingUser.id}`" method="POST" @submit.prevent="handleFormSubmit($event, 'User updated successfully!', 'Failed to update user.')">
@@ -584,7 +578,7 @@
     </div>
 
     <div x-show="notificationModalOpen" @keydown.escape.window="notificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4" x-cloak>
-        <div @click.away="notificationModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
+        <div @click.away="notificationModalOpen = false" class="bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-lg">
             <h3 class="text-2xl font-bold mb-6">Compose Notification</h3>
             <div class="space-y-4">
                 <div>
@@ -604,64 +598,64 @@
     </div>
     
     <div x-show="createNotificationModalOpen" @keydown.escape.window="closeCreateNotificationModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" x-cloak>
-    <div @click.away="closeCreateNotificationModal()" class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
-        <h3 class="text-2xl font-bold mb-6">Send New Notification</h3>
-        
-        <form id="create-notification-form" action="{{ route('admin.notifications.store') }}" method="POST" @submit.prevent="handleNotificationSubmit($event)">
-            @csrf
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Recipient(s)</label>
-                    <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-36 overflow-y-auto text-sm">
-                        <div @click="toggleUserSelection('all')" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes('all')}">
-                            <span class="font-semibold">-- ALL USERS --</span>
-                            <svg x-show="selectedUserIds.includes('all')" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                        </div>
-                        <template x-for="user in usersData.filter(u => u.role !== 'admin')" :key="user.id">
-                            <div @click="toggleUserSelection(user.id)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes(user.id)}">
-                                <span x-text="user.name + ' (' + user.email + ')'"></span>
-                                <svg x-show="selectedUserIds.includes(user.id)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                            </div>
-                        </template>
-                    </div>
-                </div>
+		<div @click.away="closeCreateNotificationModal()" class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-lg">
+			<h3 class="text-2xl font-bold mb-6">Send New Notification</h3>
+			
+			<form id="create-notification-form" action="{{ route('admin.notifications.store') }}" method="POST" @submit.prevent="handleNotificationSubmit($event)">
+				@csrf
+				<div class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium text-gray-700">Recipient(s)</label>
+						<div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-36 overflow-y-auto text-sm">
+							<div @click="toggleUserSelection('all')" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes('all')}">
+								<span class="font-semibold">-- ALL USERS --</span>
+								<svg x-show="selectedUserIds.includes('all')" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+							</div>
+							<template x-for="user in usersData.filter(u => u.role !== 'admin')" :key="user.id">
+								<div @click="toggleUserSelection(user.id)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between" :class="{'bg-blue-100 hover:bg-blue-200': selectedUserIds.includes(user.id)}">
+									<span x-text="user.name + ' (' + user.email + ')'"></span>
+									<svg x-show="selectedUserIds.includes(user.id)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+								</div>
+							</template>
+						</div>
+					</div>
 
-                <div x-show="selectedUserIds.length > 0 && !selectedUserIds.includes('all')" x-transition>
-                    <label class="block text-sm font-medium text-gray-700">Attach Order (Optional)</label>
-                    <div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-36 overflow-y-auto text-sm">
-                        <template x-if="isFetchingOrders"><p class="text-center text-gray-500 p-4">Loading orders...</p></template>
-                        <template x-if="!isFetchingOrders && !selectedUserOrders.length"><p class="text-center text-gray-500 p-4">No orders found for the selected user(s).</p></template>
-                        
-                        <template x-for="order in selectedUserOrders" :key="order.id_pesanan">
-                            <div @click="toggleOrderSelection(order.id_pesanan)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex justify-between items-center" :class="{'bg-green-100 hover:bg-green-200': selectedOrderIds.includes(order.id_pesanan)}">
-                                <span>Order #<span x-text="order.id_pesanan"></span> - <span x-text="order.status"></span> - <span x-text="order.user.name"></span></span>
-                                <svg x-show="selectedOrderIds.includes(order.id_pesanan)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                            </div>
-                        </template>
-                    </div>
-                </div>
+					<div x-show="selectedUserIds.length > 0 && !selectedUserIds.includes('all')" x-transition>
+						<label class="block text-sm font-medium text-gray-700">Attach Order (Optional)</label>
+						<div class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm h-36 overflow-y-auto text-sm">
+							<template x-if="isFetchingOrders"><p class="text-center text-gray-500 p-4">Loading orders...</p></template>
+							<template x-if="!isFetchingOrders && !selectedUserOrders.length"><p class="text-center text-gray-500 p-4">No orders found for the selected user(s).</p></template>
+							
+							<template x-for="order in selectedUserOrders" :key="order.id_pesanan">
+								<div @click="toggleOrderSelection(order.id_pesanan)" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex justify-between items-center" :class="{'bg-green-100 hover:bg-green-200': selectedOrderIds.includes(order.id_pesanan)}">
+									<span>Order #<span x-text="order.id_pesanan"></span> - <span x-text="order.status"></span> - <span x-text="order.user.name"></span></span>
+									<svg x-show="selectedOrderIds.includes(order.id_pesanan)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+								</div>
+							</template>
+						</div>
+					</div>
 
-                <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                    <input type="text" name="title" id="title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500" required>
-                </div>
-                
-                <div>
-                    <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
-                    <textarea name="message" id="message" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500" required></textarea>
-                </div>
-            </div>
+					<div>
+						<label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+						<input type="text" name="title" id="title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500" required>
+					</div>
+					
+					<div>
+						<label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+						<textarea name="message" id="message" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500" required></textarea>
+					</div>
+				</div>
 
-            <div class="mt-8 flex justify-end gap-4">
-                <button type="button" @click="closeCreateNotificationModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">Send</button>
-            </div>
-        </form>
-    </div>
-</div>
+				<div class="mt-8 flex justify-end gap-4">
+					<button type="button" @click="closeCreateNotificationModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+					<button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">Send</button>
+				</div>
+			</form>
+		</div>
+	</div>
     
-    <div x-show="editNotificationModalOpen" @keydown.escape.window="editNotificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
-        <div @click.away="editNotificationModalOpen = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+    <div x-show="editNotificationModalOpen" @keydown.escape.window="editNotificationModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" x-cloak>
+        <div @click.away="editNotificationModalOpen = false" class="bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-md">
             <h3 class="text-2xl font-bold mb-6">Edit Notification</h3>
             <template x-if="editingNotification">
                 <form :action="`/admin/notifications/${editingNotification.id}`" method="POST" @submit.prevent="handleFormSubmit($event, 'Notification updated successfully!', 'Failed to update notification.')">
@@ -710,8 +704,6 @@
             deleteModalOpen: false,
             deleteId: null,
             deleteType: '',
-
-            createPromoModalOpen: false,
 
             createPromoModalOpen: false,
             createPromoConstraints: [],
@@ -988,12 +980,12 @@
             },
 
             handleSaveClick() {
-            if (!this.sendNotification) {
-                this.confirmUpdateAndNotify();
-            } else {
-                this.notificationModalOpen = true;
-            }
-        },
+				if (!this.sendNotification) {
+					this.confirmUpdateAndNotify();
+				} else {
+					this.notificationModalOpen = true;
+				}
+			},
 
             async confirmUpdateAndNotify() {
                 if (!this.selectedOrder) return;

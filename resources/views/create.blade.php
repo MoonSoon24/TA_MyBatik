@@ -41,11 +41,11 @@
         .motif-item:hover { transform: scale(1.05); }
         .canvas-wrapper {
             position: relative;
-            width: 500px;
-            height: 500px;
+            width: 100%; 
+            max-width: 500px; 
+            aspect-ratio: 1 / 1; 
             margin: auto;
             overflow: hidden;
-            flex-shrink: 0;
             border: 3px solid transparent;
             border-radius: 0.5rem;
             cursor: pointer;
@@ -158,8 +158,8 @@
     
     <main class="w-full max-w-screen-2xl mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-8 flex flex-col lg:flex-row gap-8 mt-8">
 
-        <div class="flex-grow bg-gray-50 rounded-xl p-6 flex flex-col">
-            <div class="flex items-center gap-4 mb-6">
+        <div class="flex-grow bg-gray-50 rounded-xl p-6 flex flex-col min-w-0">
+            <div class="flex items-center gap-4 mb-6 flex-wrap">
                 <div class="flex items-center bg-gray-200 rounded-full p-1 w-max">
                     <button id="shirtBtn" class="px-6 py-2 rounded-full text-lg font-semibold active-garment-btn">Shirt</button>
                     <button id="dressBtn" class="px-6 py-2 rounded-full text-lg font-semibold inactive-garment-btn">Dress</button>
@@ -172,7 +172,7 @@
 
             <div class="flex flex-col md:flex-row gap-8 justify-center items-start">
                 
-                <div class="flex flex-col items-center">
+                <div class="flex flex-col items-center w-full">
                     <h3 class="text-center font-bold text-xl mb-2">Front</h3>
                     <div id="canvas-container-front" class="canvas-wrapper">
                         <div id="shirt-container-front" class="masked-container">
@@ -194,7 +194,7 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col items-center">
+                <div class="flex flex-col items-center w-full">
                     <h3 class="text-center font-bold text-xl mb-2">Back</h3>
                     <div id="canvas-container-back" class="canvas-wrapper">
                         <div id="shirt-container-back" class="masked-container">
@@ -303,6 +303,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+    // ... (all const declarations remain the same) ...
     const shirtBtn = document.getElementById('shirtBtn');
     const dressBtn = document.getElementById('dressBtn');
     const longSleeveBtn = document.getElementById('longSleeveBtn');
@@ -325,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelResetBtn = document.getElementById('cancel-reset-btn');
     const undoBtn = document.getElementById('undoBtn');
     const redoBtn = document.getElementById('redoBtn');
-
     const uploadMotifBtn = document.getElementById('uploadMotifBtn');
     const customMotifInput = document.getElementById('customMotifInput');
     const customMotifsContainer = document.getElementById('custom-motifs-container');
@@ -355,6 +355,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // --- NEW: Helper function to get coordinates from mouse or touch events ---
+    function getPointerCoordinates(e) {
+        if (e.touches && e.touches.length) {
+            return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        if (e.changedTouches && e.changedTouches.length) {
+            return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+    }
+
     function setActiveCanvas(container) {
         if (activeCanvasContainer) activeCanvasContainer.classList.remove('active-canvas');
         activeCanvasContainer = container;
@@ -383,7 +394,11 @@ document.addEventListener('DOMContentLoaded', () => {
         frontCanvas.style.backgroundColor = state.color;
         backCanvas.style.backgroundColor = state.color;
         
-        document.querySelectorAll('.motif-image').forEach(element => element.addEventListener('mousedown', onMotifMouseDown));
+        // --- MODIFIED: Add touch support when restoring elements ---
+        document.querySelectorAll('.motif-image').forEach(element => {
+            element.addEventListener('mousedown', onElementPointerDown);
+            element.addEventListener('touchstart', onElementPointerDown);
+        });
         
         clothColorInput.value = rgbToHex(state.color);
         deselectElement();
@@ -426,7 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'texture') {
             element = document.createElement('div');
             element.className = 'motif-image texture-element';
-            element.style.cssText = 'width: 150px; height: 150px; left: 100px; top: 100px; transform: rotate(0deg);';
+            // MODIFIED: Added z-index: 1 for textures
+            element.style.cssText = 'width: 30%; height: 30%; left: 20%; top: 20%; transform: rotate(0deg); z-index: 1;';
             element.style.backgroundImage = `url(${imageUrl})`;
             element.style.backgroundColor = clothColorInput.value;
         } 
@@ -435,23 +451,31 @@ document.addEventListener('DOMContentLoaded', () => {
             element.src = imageUrl;
             element.crossOrigin = "anonymous";
             element.className = 'motif-image';
-            element.style.cssText = 'width: 150px; height: auto; left: 100px; top: 100px; transform: rotate(0deg);';
+            // MODIFIED: Added z-index: 2 for motifs
+            element.style.cssText = 'width: 30%; height: auto; left: 20%; top: 20%; transform: rotate(0deg); z-index: 2;';
         }
 
         activeMotifCanvas.appendChild(element);
-        element.addEventListener('mousedown', onMotifMouseDown);
+        // --- MODIFIED: Add touch support for new elements ---
+        element.addEventListener('mousedown', onElementPointerDown);
+        element.addEventListener('touchstart', onElementPointerDown);
         saveState();
     }
 
-    function onMotifMouseDown(e) {
-        const element = e.target;
+    // --- MODIFIED: Renamed to handle both mouse and touch ---
+    function onElementPointerDown(e) {
+        // For touch, the target might be the handle inside the control box. We want the selected element.
+        const element = e.target.classList.contains('motif-image') ? e.target : selectedElement;
+        if (!element) return;
         selectElement(element);
         startDrag(e);
     }
     
     function selectElement(element) {
-        if (!element) return;
+        if (!element || !element.closest) return;
         const elementCanvasContainer = element.closest('.canvas-wrapper');
+        if (!elementCanvasContainer) return;
+        
         if (elementCanvasContainer !== activeCanvasContainer) {
             setActiveCanvas(elementCanvasContainer);
         }
@@ -470,63 +494,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateControlBox() {
         if (!selectedElement || !activeCanvasContainer) return;
-        const view = activeCanvasContainer.id.includes('front') ? 'front' : 'back';
-        const motifCanvasId = `motif-canvas-${activeGarment}-${view}`;
-        const activeMotifCanvas = document.getElementById(motifCanvasId);
-
-        if (!activeMotifCanvas) {
-             console.error("Fatal Error: Could not find active motif canvas for control box with ID:", motifCanvasId);
-            return;
-        }
 
         const rect = selectedElement.getBoundingClientRect();
-        const containerRect = activeMotifCanvas.getBoundingClientRect();
-        const height = selectedElement.tagName === 'IMG' ? rect.height : parseFloat(selectedElement.style.height);
+        const containerRect = activeCanvasContainer.getBoundingClientRect();
 
         controlBox.style.left = `${rect.left - containerRect.left}px`;
         controlBox.style.top = `${rect.top - containerRect.top}px`;
         controlBox.style.width = `${rect.width}px`;
-        controlBox.style.height = `${height}px`;
+        controlBox.style.height = `${rect.height}px`;
         controlBox.style.transform = selectedElement.style.transform;
     }
 
+    // --- MODIFIED: Unified drag start for mouse and touch ---
     function startDrag(e) {
-        e.preventDefault();
+        e.preventDefault(); // Important to prevent page scrolling on touch devices
         currentAction = 'drag';
-        startX = e.clientX;
-        startY = e.clientY;
+        const coords = getPointerCoordinates(e);
+        startX = coords.x;
+        startY = coords.y;
         startLeft = selectedElement.offsetLeft;
         startTop = selectedElement.offsetTop;
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+        
+        document.addEventListener('mousemove', handlePointerMove);
+        document.addEventListener('touchmove', handlePointerMove, { passive: false }); // Allow preventDefault
+        document.addEventListener('mouseup', handlePointerUp);
+        document.addEventListener('touchend', handlePointerUp);
     }
 
+    // --- MODIFIED: Add touch support for control handles ---
     controlBox.querySelectorAll('.resize').forEach(handle => {
-        handle.addEventListener('mousedown', (e) => {
-            e.preventDefault(); e.stopPropagation();
+        const startResize = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             currentAction = 'resize';
-            startX = e.clientX;
-            startY = e.clientY;
+            const coords = getPointerCoordinates(e);
+            startX = coords.x;
+            startY = coords.y;
             startWidth = selectedElement.offsetWidth;
             startHeight = selectedElement.offsetHeight;
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        });
+            document.addEventListener('mousemove', handlePointerMove);
+            document.addEventListener('touchmove', handlePointerMove, { passive: false });
+            document.addEventListener('mouseup', handlePointerUp);
+            document.addEventListener('touchend', handlePointerUp);
+        };
+        handle.addEventListener('mousedown', startResize);
+        handle.addEventListener('touchstart', startResize);
     });
 
     controlBox.querySelector('.rotate').addEventListener('mousedown', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        currentAction = 'rotate';
-        const rect = selectedElement.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const startVector = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-        const rotateMatch = /rotate\(([^deg)]+)deg\)/.exec(selectedElement.style.transform);
-        const currentRotation = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
-        startAngle = startVector - (currentRotation * Math.PI / 180);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+         const startRotate = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            currentAction = 'rotate';
+            const rect = selectedElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const coords = getPointerCoordinates(e);
+            const startVector = Math.atan2(coords.y - centerY, coords.x - centerX);
+            const rotateMatch = /rotate\(([^deg)]+)deg\)/.exec(selectedElement.style.transform);
+            const currentRotation = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
+            startAngle = startVector - (currentRotation * Math.PI / 180);
+
+            document.addEventListener('mousemove', handlePointerMove);
+            document.addEventListener('touchmove', handlePointerMove, { passive: false });
+            document.addEventListener('mouseup', handlePointerUp);
+            document.addEventListener('touchend', handlePointerUp);
+        };
+        startRotate(e);
     });
+     controlBox.querySelector('.rotate').addEventListener('touchstart', (e) => {
+         const startRotate = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            currentAction = 'rotate';
+            const rect = selectedElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const coords = getPointerCoordinates(e);
+            const startVector = Math.atan2(coords.y - centerY, coords.x - centerX);
+            const rotateMatch = /rotate\(([^deg)]+)deg\)/.exec(selectedElement.style.transform);
+            const currentRotation = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
+            startAngle = startVector - (currentRotation * Math.PI / 180);
+
+            document.addEventListener('mousemove', handlePointerMove);
+            document.addEventListener('touchmove', handlePointerMove, { passive: false });
+            document.addEventListener('mouseup', handlePointerUp);
+            document.addEventListener('touchend', handlePointerUp);
+        };
+        startRotate(e);
+    });
+
 
     deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -537,10 +596,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function handleMouseMove(e) {
+    // --- MODIFIED: Renamed to handle both mouse and touch movement ---
+    function handlePointerMove(e) {
         if (!currentAction || !selectedElement) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
+        
+        const coords = getPointerCoordinates(e);
+        const dx = coords.x - startX;
+        const dy = coords.y - startY;
+        
         if (currentAction === 'drag') {
             selectedElement.style.left = `${startLeft + dx}px`;
             selectedElement.style.top = `${startTop + dy}px`;
@@ -549,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedElement.style.width = `${newWidth}px`;
             if (selectedElement.tagName === 'DIV') {
                 const aspectRatio = startHeight / startWidth;
-                selectedElement.style.height = `${newWidth * aspectRatio}px`;
+                if(startWidth > 0) selectedElement.style.height = `${newWidth * aspectRatio}px`;
             } else {
                 selectedElement.style.height = 'auto';
             }
@@ -557,18 +620,52 @@ document.addEventListener('DOMContentLoaded', () => {
             const rect = selectedElement.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            const newVector = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+            const newVector = Math.atan2(coords.y - centerY, coords.x - centerX);
             const newAngle = (newVector - startAngle) * (180 / Math.PI);
             selectedElement.style.transform = `rotate(${newAngle}deg)`;
         }
         updateControlBox();
     }
 
-    function handleMouseUp() {
-        if (currentAction) saveState();
+    // --- MODIFIED: Renamed and updated to remove all listeners ---
+    function handlePointerUp() {
+        if (!currentAction || !selectedElement) {
+            currentAction = null;
+            document.removeEventListener('mousemove', handlePointerMove);
+            document.removeEventListener('touchmove', handlePointerMove);
+            document.removeEventListener('mouseup', handlePointerUp);
+            document.removeEventListener('touchend', handlePointerUp);
+            return;
+        }
+
+        const parentCanvas = selectedElement.parentElement;
+        if (parentCanvas && parentCanvas.classList.contains('motif-canvas')) {
+            const parentWidth = parentCanvas.offsetWidth;
+            const parentHeight = parentCanvas.offsetHeight;
+
+            if (parentWidth > 0 && parentHeight > 0) {
+                const finalLeft = (selectedElement.offsetLeft / parentWidth) * 100;
+                const finalTop = (selectedElement.offsetTop / parentHeight) * 100;
+                selectedElement.style.left = `${finalLeft}%`;
+                selectedElement.style.top = `${finalTop}%`;
+
+                const finalWidth = (selectedElement.offsetWidth / parentWidth) * 100;
+                selectedElement.style.width = `${finalWidth}%`;
+
+                if (selectedElement.tagName === 'DIV') {
+                    const finalHeight = (selectedElement.offsetHeight / parentHeight) * 100;
+                    selectedElement.style.height = `${finalHeight}%`;
+                }
+            }
+        }
+        
+        saveState();
+        
         currentAction = null;
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('mousemove', handlePointerMove);
+        document.removeEventListener('touchmove', handlePointerMove);
+        document.removeEventListener('mouseup', handlePointerUp);
+        document.removeEventListener('touchend', handlePointerUp);
     }
 
     function updateGarmentView() {
@@ -650,6 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
         thumb.addEventListener('click', () => addElementToCanvas(imageUrl, type));
     }
 
+    // --- Initial Event Listeners ---
     canvasContainerFront.addEventListener('click', () => setActiveCanvas(canvasContainerFront));
     canvasContainerBack.addEventListener('click', () => setActiveCanvas(canvasContainerBack));
     undoBtn.addEventListener('click', undo);
@@ -719,15 +817,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const processView = (container, viewPaths) => {
                 return new Promise((resolve, reject) => {
+                    const outputWidth = 500;
+                    const outputHeight = 500;
+                    const scale = container.offsetWidth > 0 ? outputWidth / container.offsetWidth : 1;
+                    
                     const outputCanvas = document.createElement('canvas');
                     const ctx = outputCanvas.getContext('2d');
-                    const width = 500;
-                    const height = 500;
-                    outputCanvas.width = width;
-                    outputCanvas.height = height;
+                    outputCanvas.width = outputWidth;
+                    outputCanvas.height = outputHeight;
 
                     ctx.fillStyle = clothColorInput.value;
-                    ctx.fillRect(0, 0, width, height);
+                    ctx.fillRect(0, 0, outputWidth, outputHeight);
 
                     const elements = container.querySelectorAll('.motif-image');
                     const imagePromises = [];
@@ -743,13 +843,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     Promise.all(imagePromises).then(loadedElements => {
+                        // Sort elements by z-index to draw them in the correct order
+                        loadedElements.sort((a, b) => {
+                            const zIndexA = parseInt(a.el.style.zIndex) || 0;
+                            const zIndexB = parseInt(b.el.style.zIndex) || 0;
+                            return zIndexA - zIndexB;
+                        });
+
                         loadedElements.forEach(({ el, img }) => {
                             const matrix = new DOMMatrix(window.getComputedStyle(el).transform);
-                            const w = el.offsetWidth;
-                            const h = el.offsetHeight;
+                            const w = el.offsetWidth * scale;
+                            const h = el.offsetHeight * scale;
+                            const left = el.offsetLeft * scale;
+                            const top = el.offsetTop * scale;
 
                             ctx.save();
-                            ctx.translate(el.offsetLeft + w / 2, el.offsetTop + h / 2);
+                            ctx.translate(left + w / 2, top + h / 2);
                             ctx.transform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
                             ctx.translate(-w / 2, -h / 2);
 
@@ -768,9 +877,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         Promise.all([loadImage(viewPaths.mask), loadImage(viewPaths.outline)])
                             .then(([mask, outline]) => {
                                 ctx.globalCompositeOperation = 'destination-in';
-                                ctx.drawImage(mask, 0, 0, width, height);
+                                ctx.drawImage(mask, 0, 0, outputWidth, outputHeight);
                                 ctx.globalCompositeOperation = 'source-over';
-                                ctx.drawImage(outline, 0, 0, width, height);
+                                ctx.drawImage(outline, 0, 0, outputWidth, outputHeight);
                                 resolve(outputCanvas);
                             }).catch(reject);
 

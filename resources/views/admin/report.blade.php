@@ -68,7 +68,7 @@
     <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="container mx-auto flex justify-between items-center p-4 md:p-6">
             <div class="flex items-center gap-x-12">
-                <div class="font-dancing text-4xl font-bold">my Batik</div>
+                <a href="/admin" class="font-dancing text-3xl md:text-4xl font-bold text-gray-900">myBatik</a>
                 <nav class="hidden md:flex space-x-8">
                     <a href="{{ route('admin.home') }}" class="font-semibold text-gray-700 hover:text-black transition">Home</a>
                     <a href="{{ route('admin.reports.index') }}" class="font-bold text-black transition">Reports</a>
@@ -143,10 +143,10 @@
                     </section>
                     
                     <section id="promo-report" x-show="activeReport === 'promo'" x-cloak>
-                        <div class="flex justify-between items-center mb-6">
+                        <div class="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
                             <h1 class="text-3xl font-bold text-gray-800">Promo Code Usage Report</h1>
-                            <div x-show="mainPromoFilterMonths.length > 0">
-                                <select x-model="selectedMainPromoMonth" @change="filterMainPromoReport()" class="w-48 p-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <div x-show="mainPromoFilterMonths.length > 0" class="w-full sm:w-auto">
+                                <select x-model="selectedMainPromoMonth" @change="filterMainPromoReport()" class="w-full sm:w-48 p-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                                     <option value="all">All Months</option>
                                     <template x-for="month in mainPromoFilterMonths" :key="month">
                                         <option :value="month" x-text="formatMonthForDisplay(month)"></option>
@@ -206,7 +206,7 @@
                             </div>
                         </div>
                     </section>
-                      
+                        
                     <section id="users-report" x-show="activeReport === 'users'" x-cloak>
                         <h1 class="text-3xl font-bold text-gray-800 mb-6">New User Registrations</h1>
                         <div class="overflow-x-auto">
@@ -240,13 +240,13 @@
                     </section>
 
                     <section id="customers-report" x-show="activeReport === 'customers'" x-cloak>
-                        <div class="flex justify-between items-center mb-6">
+                        <div class="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
                             <h1 class="text-3xl font-bold text-gray-800">Top Customers Report</h1>
-                            <div>
+                            <div class="w-full sm:w-auto">
                                 <form action="{{ route('admin.reports.index') }}#customers-report" method="GET">
                                     <input type="hidden" name="sort_by" value="{{ request('sort_by', 'total_spent') }}">
                                     <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'desc') }}">
-                                    <select name="month" onchange="this.form.submit()" class="w-48 p-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                    <select name="month" onchange="this.form.submit()" class="w-full sm:w-48 p-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                                         <option value="all">All Months</option>
                                         @foreach($topCustomersFilterMonths as $month)
                                             <option value="{{ $month->month_value }}" {{ request('month') == $month->month_value ? 'selected' : '' }}>

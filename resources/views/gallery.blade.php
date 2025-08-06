@@ -37,16 +37,18 @@
 <body class="bg-gray-100 font-sans text-gray-800">
 
     <x-header />
-    <!-- main section -->
+    
     <main class="container mx-auto px-4 py-8" x-data="galleryPage()">
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">Community Gallery</h1>
         @if($designs->isEmpty())
-             <div class="text-center py-16"><p class="text-xl text-gray-500">No designs have been shared yet. Be the first!</p></div>
+            <div class="text-center py-16"><p class="text-xl text-gray-500">No designs have been shared yet. Be the first!</p></div>
         @else
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-4">
-                
+            {{-- CHANGE: Adjusted grid gaps for better responsive spacing --}}
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-4">
                 @foreach($designs as $design)
-                <div id="design-card-{{ $design->id }}" @click="openDetailModal({{ json_encode($design) }})" class="group relative aspect-square cursor-pointer bg-white">
-                    <img src="{{ asset('storage/' . $design->image_path) }}" alt="{{ $design->title }}" class="w-full h-full object-contain rounded-md">
+                <div id="design-card-{{ $design->id }}" @click="openDetailModal({{ json_encode($design) }})" class="group relative aspect-square cursor-pointer bg-gray-200 rounded-md overflow-hidden">
+                    {{-- CHANGE: Switched to object-cover for a cleaner look, added placeholder --}}
+                    <img src="{{ asset('storage/' . $design->image_path) }}" alt="{{ $design->title }}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x400/eeeeee/222222?text=Batik';">
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                         <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center space-x-6 text-white">
                             <div class="flex items-center space-x-2">
@@ -65,19 +67,23 @@
             <div class="mt-12">{{ $designs->links() }}</div>
         @endif
 
-        <div x-show="showDetailModal" @keydown.escape.window="showDetailModal = false" x-cloak class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-            <div @click.away="showDetailModal = false" class="bg-white w-full max-w-5xl h-full max-h-[90vh] flex rounded-lg overflow-hidden">
+        {{-- Detail Modal --}}
+        <div x-show="showDetailModal" @keydown.escape.window="showDetailModal = false" x-cloak class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-2 sm:p-4">
+            {{-- CHANGE: Modal now uses flex-col on mobile and flex-row on desktop --}}
+            <div @click.away="showDetailModal = false" class="bg-white w-full max-w-5xl h-full max-h-[95vh] flex flex-col md:flex-row rounded-lg overflow-hidden">
 
-                <div class="w-1/2 bg-white flex items-center justify-center">
+                {{-- Image Section --}}
+                <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-2 h-1/3 md:h-full">
                     <img :src="'/storage/' + currentDesign.image_path" :alt="currentDesign.title" class="max-w-full max-h-full object-contain">
                 </div>
 
-                <div class="w-1/2 flex flex-col">
+                {{-- Details and Comments Section --}}
+                <div class="w-full md:w-1/2 flex flex-col h-2/3 md:h-full">
                     <div class="p-4 border-b">
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="font-bold text-xl" x-show="!editingTitle" x-text="currentDesign.title"></h3>
-                                <div x-show="editingTitle">
+                                <div x-show="editingTitle" x-cloak>
                                     <input type="text" x-model="newTitle" class="border rounded px-2 py-1 w-full">
                                     <div class="mt-2">
                                         <button @click="updateTitle" class="text-sm bg-blue-500 text-white py-1 px-2 rounded">Save</button>
@@ -88,38 +94,28 @@
                             </div>
                             <div x-show="isOwner" class="flex gap-2" x-cloak>
                                 <button @click="startEditing" x-show="!editingTitle" title="Edit Title">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                        <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
                                 </button>
+                                {{-- CHANGE: This button now opens the confirmation modal --}}
                                 <button @click="deleteDesign" title="Delete Design">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-red-600" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-red-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="flex-grow p-4 overflow-y-auto comments-container" id="modal-comments-list">
+                        {{-- Comments will be injected here by AlpineJS --}}
                     </div>
                     <div class="p-4 border-t bg-gray-50">
                         <div class="flex items-center space-x-4 mb-3">
                             <form @submit.prevent="submitLike" class="like-form-modal">
                                 <button type="submit" class="flex items-center space-x-1.5 hover:text-red-500 transition-colors" :class="{'text-red-500': currentUserHasLiked, 'text-gray-500': !currentUserHasLiked}">
-                                    <svg class="w-7 h-7"
-                                        :fill="currentUserHasLiked ? 'red' : 'white'"
-                                        :stroke="currentUserHasLiked ? 'red' : 'black'"
-                                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path>
-                                    </svg>
+                                    <svg class="w-7 h-7" :fill="currentUserHasLiked ? 'currentColor' : 'none'" :stroke="currentUserHasLiked ? 'none' : 'currentColor'" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
                                     <span class="font-semibold text-lg" x-text="currentDesign.likes_count"></span>
                                 </button>
                             </form>
                             <button @click="downloadImage" class="flex items-center space-x-1.5 text-gray-500 hover:text-blue-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                                 <span class="font-semibold text-lg">Download</span>
                             </button>
                         </div>
@@ -136,20 +132,35 @@
                     </div>
                 </div>
             </div>
-            <button @click="showDetailModal = false" class="absolute top-4 right-4 text-white hover:text-gray-300 text-4xl">&times;</button>
+            <button @click="showDetailModal = false" class="absolute top-2 right-2 md:top-4 md:right-4 text-white hover:text-gray-300 text-4xl">&times;</button>
+        </div>
+
+        {{-- ADDED: Delete Confirmation Modal --}}
+        <div x-show="showDeleteConfirm" x-cloak class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+            <div @click.away="showDeleteConfirm = false" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+                <h3 class="text-xl font-bold mb-4">Are you sure?</h3>
+                <p class="text-gray-600 mb-6">This action cannot be undone. The design will be permanently deleted.</p>
+                <div class="flex justify-center gap-4">
+                    <button @click="showDeleteConfirm = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                    <button @click="executeDelete" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">Delete</button>
+                </div>
+            </div>
         </div>
     </main>
 
     @auth
     <div x-data="{}" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
-        <button @click="$dispatch('open-modal', 'upload-design')" class="bg-black text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-opacity-50 transition-all duration-300 text-lg flex items-center gap-2">
+        {{-- CHANGE: Responsive button size --}}
+        <button @click="$dispatch('open-modal', 'upload-design')" class="bg-black text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-full shadow-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-opacity-50 transition-all duration-300 text-base sm:text-lg flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
             Upload Design
         </button>
     </div>
     @endauth
+    
+    {{-- Upload Modal --}}
     <div x-data="{ show: false }" @open-modal.window="if ($event.detail === 'upload-design') show = true" x-show="show" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
-        <div @click.away="show = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md modal-body">
+        <div @click.away="show = false" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md modal-body overflow-y-auto">
             <h3 class="text-2xl font-bold mb-6 text-center">Share Your Design</h3>
             <form action="{{ route('designs.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -193,7 +204,7 @@
 
         @if ($errors->any())
             window.dispatchEvent(new CustomEvent('alert', {
-                 detail: { type: 'error', message: "{{ $errors->first() }}" }
+                    detail: { type: 'error', message: "{{ $errors->first() }}" }
             }));
         @endif
     });
@@ -201,6 +212,7 @@
     function galleryPage() {
         return {
             showDetailModal: false,
+            showDeleteConfirm: false, // ADDED for delete confirmation
             currentDesign: {},
             csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             authUserId: {{ auth()->id() ?? 'null' }},
@@ -254,7 +266,6 @@
                 .then(data => {
                     this.currentUserHasLiked = data.liked;
                     this.currentDesign.likes_count = data.likes_count;
-
                     if (data.liked) {
                         if (!this.currentDesign.likes.some(like => like.user_id == this.authUserId)) {
                             this.currentDesign.likes.push({ user_id: this.authUserId });
@@ -262,7 +273,6 @@
                     } else {
                         this.currentDesign.likes = this.currentDesign.likes.filter(like => like.user_id != this.authUserId);
                     }
-
                     const gridCardLikeCount = document.querySelector(`#design-card-${this.currentDesign.id} .like-count`);
                     if (gridCardLikeCount) {
                         gridCardLikeCount.innerText = data.likes_count;
@@ -315,25 +325,37 @@
                 })
                 .catch(err => console.error('Update failed:', err));
             },
+            
+            // CHANGE: This now opens the confirmation modal instead of deleting directly
             deleteDesign() {
-                if (!confirm('Are you sure you want to delete this design? This action cannot be undone.')) {
-                    return;
-                }
-                
+                this.showDeleteConfirm = true;
+            },
+            
+            // ADDED: This function contains the actual delete logic
+            executeDelete() {
                 fetch(`/designs/${this.currentDesign.id}`, {
                     method: 'DELETE',
                     headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' },
                 })
                 .then(res => {
-                    window.location.reload();
                     if (!res.ok) return Promise.reject(res);
                     return res.json();
                 })
                 .then(data => {
                     document.getElementById(`design-card-${this.currentDesign.id}`).remove();
+                    this.showDeleteConfirm = false;
                     this.showDetailModal = false;
+                    window.dispatchEvent(new CustomEvent('alert', { 
+                        detail: { type: 'success', message: 'Design deleted successfully.' }
+                    }));
                 })
-                .catch(err => console.error('Delete failed:', err));
+                .catch(err => {
+                    console.error('Delete failed:', err)
+                    this.showDeleteConfirm = false;
+                    window.dispatchEvent(new CustomEvent('alert', { 
+                        detail: { type: 'error', message: 'Failed to delete design.' }
+                    }));
+                });
             },
 
             submitComment(event) {
